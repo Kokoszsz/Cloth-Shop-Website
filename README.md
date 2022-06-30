@@ -11,7 +11,7 @@
 All models are finished
 
 ###  grb_game ###
-Game created on unity engine on a very low stage of development.
+Game created in unity engine on a very low stage of development.
 Works has been abandoned due to the departure of an grapfic designer.
 Goal of this project was to learn basics of building games in unity.
 
