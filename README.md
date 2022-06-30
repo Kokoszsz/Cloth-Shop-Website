@@ -12,7 +12,7 @@ All models are finished
 
 ###  grb_game ###
 Game created in unity engine on a very low stage of development.
-Works has been abandoned due to the departure of an grapfic designer.
+Works has been abandoned due to the departure of a grapfic designer.
 Goal of this project was to learn basics of building games in unity.
 
 In order to launch game extract files on a desktop and open _"grb test.exe"_
