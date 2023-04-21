@@ -1,0 +1,67 @@
+
+body {
+	background-image: url('../static/picture_shop.jpg');
+	background-size: cover;
+	background-position: center center;
+	background-attachment: fixed;
+}
+
+body::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 200%;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: -1;
+}
+
+.main {
+  color: #bd8c8c; 
+  font-weight: 900;
+}
+
+.main-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 12vh;
+}
+
+.normal-text {
+    color: white;
+}
+
+.headers {
+    color: white;
+}
+
+.panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 0;
+  background-color: white;
+  z-index: 99;
+  overflow: hidden;
+  transition: height 0.5s ease-in-out;
+}
+
+.panel.show {
+  height: 200px; /* change this to the height you want the panel to be */
+}
+
+.panel-content {
+  padding: 20px;
+}
+
+
+
+
+
+  
+
+

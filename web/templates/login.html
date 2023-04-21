@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <head>
+        <title >Kokosz Cloth Shop Cloth</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='menu.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fontello.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='login.css') }}"/>
+       
+    </head>
+
+    <body>
+        <div class="main-box"></div>
+          
+        </div>
+        {% include 'menu.html' %}
+
+        <div class="container">
+            <form action="#" method="post">
+                <h1>Login</h1>
+                <p>
+                    <label for="login">Username:</label>
+                    <input type="text" id="login" name="login" required>
+                </p>
+                <p>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </p>
+                <p>
+                    <input type="submit" value="Submit">
+                </p>
+            </form>
+        </div>
+        
+    </body>

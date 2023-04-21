@@ -1,0 +1,60 @@
+body{
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+}
+
+
+.menu {
+  background-color: #bd8c8c;
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+}
+
+.menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.menu li {
+  margin: 0 1em;
+}
+
+.menu li:last-child {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.menu li a {
+  display: block;
+  color: black;
+  padding: 0.875em 1.25em;
+  text-decoration: none;
+}
+
+.menu li a:hover {
+  background-color: #ddd;
+}
+
+.user {
+  width: 25%;
+  position: absolute;
+  right: 2.5%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.welcome-username {
+  font-size: 1.25rem;
+}
+
+.icon {
+  text-align: left;
+}

@@ -1,0 +1,138 @@
+
+
+
+.name {
+	background-color: black;
+	height: 4vh;
+	width: 100%;
+}
+
+.main-box {
+ 	 width: 100%;
+	background-color: black;
+	height: 12vh;
+}
+
+.content {
+	display: flex;
+    flex-wrap: wrap;
+}
+
+.filter {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	width: 25%;
+	height: 77vh;
+	background-color: white;
+	padding: 10px;
+	border: 1px solid black;
+	box-shadow: 0px 0px 5px black;
+  }
+  
+  h3 {
+	color: black;
+	margin-top: 50px;
+	text-align: center;
+  }
+
+ 
+  
+  .checkboxes {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	margin-top: 10px;
+  }
+  
+  .inputs {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 10px;
+  }
+  
+  label {
+	color: black;
+	margin-right: 10px;
+	margin-left: 10px;
+  }
+  
+  input[type="number"] {
+	width: 60px;
+	height: 20px;
+	padding: 5px;
+	border-radius: 5px;
+	border: 1px solid black;
+	background-color: white;
+	color: black;
+  }
+  
+  input[type="checkbox"] {
+	margin-right: 5px;
+  }
+  
+  input[type="checkbox"]:checked + label {
+	color: black;
+	font-weight: bold;
+  }
+  
+  input:focus {
+	outline: none;
+	box-shadow: 0px 0px 5px pink;
+  }
+
+  .filter-button {
+	background-color: #bd8c8c;
+	border: none;
+	color: white;
+	padding: 8px 16px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 14px;
+	margin-top: 10px;
+	cursor: pointer;
+	margin: 10px auto;
+  	display: block;
+  }
+  
+  .filter-button:hover {
+	background-color: #a67c7c;
+  }
+  
+
+.product-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-gap: 40px;
+	padding: 40px;
+    overflow-y: scroll;
+	flex: 1;
+	height: 65vh;
+  }
+  
+  .product-item {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+  }
+  
+  .product-item img {
+	max-width: 100%;
+  }
+  
+  .product-item h2 {
+	margin-top: 10px;
+	margin-bottom: 0;
+  }
+  
+  .price {
+	margin-top: 5px;
+	font-weight: bold;
+  }
+  
+
+
