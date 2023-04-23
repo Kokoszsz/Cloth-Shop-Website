@@ -1,5 +1,7 @@
 from flask import Flask, render_template, redirect, request, url_for, session
 from flask_mysqldb  import MySQL
+from flask import jsonify
+
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -11,36 +13,72 @@ mydb = mysql.connector.connect(
   host="localhost",
   user="root",
   password="rzkyn203h534i90$@#!%#$",
-  database = "sql_hr"
+  database = "cloth_shop"
 )
 
 mycursor = mydb.cursor()
-mycursor.execute('''SELECT * FROM offices''')
-data = mycursor.fetchall()
+mycursor.execute('''SELECT * FROM cloths''')
+cloth_data = mycursor.fetchall()
 mycursor.close()
-print(str(data))
 
 
+products = []
+for cloth in cloth_data:
+    cloth_dict = {
+        'name': cloth[1],
+        'cost_to_show': cloth[2],
+        'cost': float(cloth[2]),
+        'cloth_cathegory': cloth[3],
+        'gender' : cloth[4],
+        'image': cloth[5]
+    }
+    products.append(cloth_dict)
 
+
+def filter_products(products, min_value, max_value, genders, kinds):
+    filtered_products = []
+    for product in products:
+        if product['cost'] > min_value and product['cost'] < max_value or max_value == 0 and min_value == 0:
+            if product['cloth_cathegory'] in kinds or kinds == []:
+                if product['gender'] in genders or genders == []:
+                    filtered_products.append(product)
+    return filtered_products
 
 @app.route('/')
 def home():
     return render_template('home.html')
 
 
-@app.route('/cloth',  methods=['POST', 'GET'])
+@app.route('/cloth')
 def cloth():
-    min_value = 0
-    max_value = 1000000
-    products = [{'name': 'Product 1', 'cost': 10, 'image': 'picture_shop.jpg', 'cloth_cathegory': 'jeans' }, {'name': 'Product 2', 'cost': 20, 'image': 'picture_shop.jpg', 'cloth_cathegory': 't_shirt' }, {'name': 'Product 2', 'cost': 20, 'image': 'picture_shop.jpg', 'cloth_cathegory': 't_shirt' }, {'name': 'Product 2', 'cost': 20, 'image': 'picture_shop.jpg', 'cloth_cathegory': 't_shirt' }, {'name': 'Product 2', 'cost': 20, 'image': 'picture_shop.jpg', 'cloth_cathegory': 't_shirt' }, {'name': 'Product 2', 'cost': 20, 'image': 'picture_shop.jpg', 'cloth_cathegory': 't_shirt' }, {'name': 'Product 2', 'cost': 20, 'image': 'picture_shop.jpg', 'cloth_cathegory': 't_shirt' }, {'name': 'Product 2', 'cost': 20, 'image': 'picture_shop.jpg', 'cloth_cathegory': 't_shirt' }]
-    if request.method == 'POST':
-        if request.form['filter_button'] == 'Filter':
-            min_value = int(request.form['minvalue'])
-            max_value = int(request.form['maxvalue'])
-            if min_value < max_value:
-                return render_template('cloth.html', products = products, min_value = min_value, max_value = max_value)
+    return render_template('cloth.html', products = products)
 
-    return render_template('cloth.html', products = products, min_value = 0, max_value = 1000000)
+@app.route('/filtered-products', methods=['POST'])
+def get_filtered_products():
+    min_value = int(request.form['minvalue'])
+    max_value = int(request.form['maxvalue'])
+
+    if min_value >= max_value:
+        min_value = 0
+        max_value = 0
+
+    genders = []
+    kinds = []
+
+    if 'male' in request.form:
+        genders.append('male')
+    if 'female' in request.form:
+        genders.append('female')    
+    if 't_shirt' in request.form:
+        kinds.append('t_shirt')
+    if 'jeans' in request.form:
+        kinds.append('jeans')
+    if 'shirt' in request.form:
+        kinds.append('shirt')
+
+    filtered_products = filter_products(products, min_value, max_value, genders, kinds)
+
+    return jsonify({'products': filtered_products})
 
 
 @app.route('/account')

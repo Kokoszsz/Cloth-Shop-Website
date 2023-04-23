@@ -24,8 +24,11 @@
 
                     <h3>Filter by:</h3>
                     <div class="checkboxes">
-                        <label><input type="checkbox" name="checkbox1" value="1"> Checkbox 1</label><br>
-                        <label><input type="checkbox" name="checkbox2" value="2"> Checkbox 2</label><br>
+                        <label><input type="checkbox" name="male" value="male"> Man</label><br>
+                        <label><input type="checkbox" name="female" value="female"> Woman</label><br>
+                        <label><input type="checkbox" name="t_shirt" value="t_shirt"> T-shirt</label><br>
+                        <label><input type="checkbox" name="jeans" value="jeans"> Jeans</label><br>
+                        <label><input type="checkbox" name="shirt" value="shirt"> Shirt</label><br>
                     </div>
                     <div class="inputs">
                         <label>Min value:</label>
@@ -40,15 +43,13 @@
             </div>
               
 
-            <div class="product-grid">
+            <div class="product-grid" id="product-grid">
                 {% for product in products %}
-                    {% if product.cost > min_value and product.cost < max_value %}
-                        <div class="product-item">
-                            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
-                            <h2>{{ product.name }}</h2>
-                            <p class="price">${{ product.cost }}</p>
-                        </div>
-                    {% endif %} 
+                    <div class="product-item">
+                        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+                        <h2>{{ product.name }}</h2>
+                        <p class="price">${{ product.cost_to_show }}</p>
+                    </div>
                 {% endfor %}
             </div>
               
@@ -63,7 +64,7 @@
     
     </body>
 
-
+    <script type="text/javascript" src="{{ url_for('static', filename='refresh_product.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='only_numbers.js') }}"></script>
       
 

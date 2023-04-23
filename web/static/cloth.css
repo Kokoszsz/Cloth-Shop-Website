@@ -10,7 +10,7 @@
 .main-box {
  	 width: 100%;
 	background-color: black;
-	height: 12vh;
+	height: 8vh;
 }
 
 .content {
@@ -24,7 +24,7 @@
 	justify-content: flex-start;
 	align-items: center;
 	width: 25%;
-	height: 77vh;
+	height: 81vh;
 	background-color: white;
 	padding: 10px;
 	border: 1px solid black;
@@ -43,8 +43,9 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
-	align-items: center;
+	align-items: left;
 	margin-top: 10px;
+	margin-left: 30%;
   }
   
   .inputs {
@@ -111,7 +112,7 @@
 	padding: 40px;
     overflow-y: scroll;
 	flex: 1;
-	height: 65vh;
+	height: 70vh;
   }
   
   .product-item {
