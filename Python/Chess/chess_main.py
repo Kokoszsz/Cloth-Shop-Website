@@ -114,7 +114,6 @@ def draw_board(figures, grid):
 
 
 def draw_movable_positions(movable_positions, grid, board):
-
     for pos in movable_positions:
         if board[pos[0]][pos[1]] in 'hmtqkpHMTQKP':
             grid[pos[0]][pos[1]] = RED
@@ -162,7 +161,7 @@ def check_if_king_will_be_under_attack(position, figure_picked, board, player_tu
 
             if figure.pos_x == position[1] and figure.pos_y == position[0]: ##allows picked_figure to kill figure that is threatning a king
                 if figure_picked.symbol != 'k' or figure_picked.symbol != 'K': ## king canot kill a figure if he would be check again
-                    return True
+                    return False
             
             figure_positions = figure.check_if_can_move(local_board)
             for figure_position in figure_positions:
@@ -205,7 +204,6 @@ def check_if_no_more_moves(figures, player, board):
         if figure.color == player:
             positions = figure.check_if_can_move(board)
             positions = movable_positions_without_check(positions, figure, board, player, figures)
-            print(positions)
             if positions != []:
                 return False
     return True
@@ -256,8 +254,6 @@ def main():
                         movable_positions = figure_picked.check_if_can_move(board)
 
                         movable_positions = movable_positions_without_check(movable_positions, figure_picked, board, player_turn, figures)
-
-
 
                         draw_movable_positions(movable_positions, grid, board)
                         draw_picked_figure(figure_picked, grid)
