@@ -5,6 +5,7 @@
         <title >Kokosz Cloth Shop Cloth</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='menu.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fontello.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='account.css') }}"/>
         <style>
             body {
                 overflow-y: scroll;
@@ -23,6 +24,30 @@
         <div class="name">
             {% include 'menu.html' %}
         </div>
+
+        <div class="account">
+            <h1>Account Information</h1>
+            <form action="#" method="post">
+              <label for="username">Username:</label>
+              <input type="text" id="username" name="username" value="{{ user_info.name }}">
+                {% if 'user' in error %}
+                    <p style="color:red">{{ error }}</p>
+                {% else %}
+                    <br><br>
+                {% endif %}
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" value="{{ user_info.email }}">
+                {% if 'e-mail' in error %}
+                    <p style="color:red">{{ error }}</p>
+                {% else %}
+                    <br><br>
+                {% endif %}
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" value="{{ user_info.password }}"><br><br>
+              <input type="submit" value="Save Changes">
+            </form>
+          </div>
+          
 
 
     </body>

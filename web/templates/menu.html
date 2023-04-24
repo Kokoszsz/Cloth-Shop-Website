@@ -20,7 +20,7 @@
                 {% endif %}
             </div>
             {% if "user" in session %}
-                <li class="welcome-username">Welcome, {{ session.user }}!</li>
+                <li class="welcome-username">Welcome, {{ session.user['name'] }}!</li>
             {% else %}
             {% endif %}
 

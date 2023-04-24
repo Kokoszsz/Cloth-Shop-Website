@@ -48,7 +48,7 @@
                     <div class="product-item">
                         <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
                         <h2>{{ product.name }}</h2>
-                        <p class="price">${{ product.cost_to_show }}</p>
+                        <p class="price">{{ product.cost_to_show }} $</p>
                     </div>
                 {% endfor %}
             </div>

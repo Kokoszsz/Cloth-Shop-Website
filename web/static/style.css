@@ -12,7 +12,7 @@ body::before {
 	top: 0;
 	left: 0;
 	width: 100%;
-	height: 200%;
+	height: 150%;
 	background-color: rgba(0, 0, 0, 0.6);
 	z-index: -1;
 }
@@ -32,11 +32,23 @@ body::before {
 
 .normal-text {
     color: white;
+    font-size: large;
+    padding-left: 60px;
+    padding-right: 60px;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.main-headers {
+  color: white;
+  font-size: 3em;
+  text-align: center;
 }
 
 .headers {
     color: white;
-}
+    font-size: 2em;
+    text-align: center;
+  }
 
 .panel {
   position: fixed;
@@ -51,7 +63,7 @@ body::before {
 }
 
 .panel.show {
-  height: 200px; /* change this to the height you want the panel to be */
+  height: 200px;
 }
 
 .panel-content {

@@ -1,13 +1,13 @@
 from flask import Flask, render_template, redirect, request, url_for, session
 from flask_mysqldb  import MySQL
 from flask import jsonify
+import mysql.connector
 
 
 
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = 'm23T#mr4weio4t4gsd$%@'
 
-import mysql.connector
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -19,8 +19,19 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 mycursor.execute('''SELECT * FROM cloths''')
 cloth_data = mycursor.fetchall()
+mycursor.execute('''SELECT * FROM users''')
+users_data = mycursor.fetchall()
 mycursor.close()
 
+users = []
+for user in users_data:
+    cloth_dict = {
+        'id': user[0],
+        'name': user[1],
+        'password': user[2],
+        'email': user[3]
+    }
+    users.append(cloth_dict)
 
 products = []
 for cloth in cloth_data:
@@ -43,6 +54,16 @@ def filter_products(products, min_value, max_value, genders, kinds):
                 if product['gender'] in genders or genders == []:
                     filtered_products.append(product)
     return filtered_products
+
+def check_login(username, password):
+    for user in users:
+        if user['name'] == username:  
+            if user['password'] == password: 
+                return 'good', user
+            else:
+                return 'Wrong Password', None
+    else:
+        return 'Wrong Username', None
 
 @app.route('/')
 def home():
@@ -81,28 +102,65 @@ def get_filtered_products():
     return jsonify({'products': filtered_products})
 
 
-@app.route('/account')
-def some_link():
-    
+@app.route('/account', methods = ['POST', 'GET'])
+def account():
+    error = ''
 
     if 'user' not in session:
         return redirect(url_for('login'))
+    else:
+        if request.method == 'POST':
 
-    return render_template('account.html')
+            id = session['user']['id']
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+
+
+
+            if all(user['name'] != username or user['id'] == id for user in users):
+                if all(user['email'] != email or user['id'] == id for user in users):
+                    cursor = mydb.cursor()
+
+                    sql = "UPDATE users SET Name = %s, Password = %s, `e-mail` = %s WHERE idUsers = %s"
+
+                    val = (username, password, email, id)
+                    cursor.execute(sql, val)
+
+                    mydb.commit()
+
+                    cursor.close()
+                    session['user'] = {
+                        'email': email, 
+                        'id': id, 
+                        'name': username, 
+                        'password': password
+                    }
+                else:
+                    error = 'Already sucha an e-mail'
+            else:
+                error = 'Already such a user'
+
+
+        user_info = session['user']
+        return render_template('account.html', user_info = user_info, error = error)
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
-
+    potential_error = ''
     if request.method == 'POST':
         username = request.form['login']
         password = request.form['password']
-        #if check_login(username, password):
-        session['user'] = username
+    
+        potential_error, user_info = check_login(username, password)
+        
+        if potential_error == 'good':
+            error = ''
+            session['user'] = user_info
+            return redirect(url_for('account'))
 
-        return render_template('account.html')
 
-
-    return render_template('login.html')
+    return render_template('login.html', error = potential_error)
 
 @app.route('/logout')
 def logout():
@@ -114,7 +172,7 @@ def logout():
 
 ## if you are logged in and you try to go back to login page you will get redirected to home page
 @app.before_request
-def check_login():
+def check_if_logged():
     if 'user' in session and request.endpoint in ['login']:
         return redirect(url_for('home'))
 

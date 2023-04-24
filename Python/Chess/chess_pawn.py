@@ -1,6 +1,7 @@
 import pygame
 import os
 
+dir_path = os.path.dirname(os.path.abspath(__file__))
 
 class Figure():
     def __init__(self, pos_x, pos_y, color, symbol) -> None:
@@ -12,7 +13,7 @@ class Figure():
 class Pawn(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join('games/chess/gfx', f'pawn_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/pawn_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
@@ -48,7 +49,7 @@ class Pawn(Figure):
 class Horse(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join('games/chess/gfx', f'horse_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/horse_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
@@ -112,7 +113,7 @@ class Horse(Figure):
 class Monk(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join('games/chess/gfx', f'monk_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/monk_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
@@ -194,7 +195,7 @@ class Monk(Figure):
 class Tower(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join('games/chess/gfx', f'tower_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/tower_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
@@ -271,7 +272,7 @@ class Tower(Figure):
 class Queen(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join('games/chess/gfx', f'queen_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/queen_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
@@ -397,7 +398,7 @@ class Queen(Figure):
 class King(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join('games/chess/gfx', f'king_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/king_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
