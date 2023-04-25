@@ -46,10 +46,10 @@ class Pawn(Figure):
         return where_can_move
         
 
-class Horse(Figure):
+class Knight(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/horse_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/knight_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
@@ -110,10 +110,10 @@ class Horse(Figure):
 
         return where_can_move
 
-class Monk(Figure):
+class Bishop(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/monk_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/bishop_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 
@@ -192,10 +192,10 @@ class Monk(Figure):
 
         return where_can_move
 
-class Tower(Figure):
+class Rook(Figure):
     def __init__(self, pos_x, pos_y, color, symbol):
         super().__init__(pos_x, pos_y, color, symbol)
-        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/tower_{self.color}.png'))
+        self.image = pygame.image.load(os.path.join(dir_path, f'gfx/rook_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
 

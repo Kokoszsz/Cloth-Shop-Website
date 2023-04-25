@@ -1,5 +1,4 @@
 import pygame
-import time
 import random
 pygame.font.init()
 
@@ -9,7 +8,6 @@ pygame.display.set_caption('Pathfinding')
 
 WHITE = (255,255,255)
 BLACK = (0,0,0)
-
 RED = (255, 0, 0)
 BLUE = (0, 128, 255)
 GREEN = (0, 128, 0)
@@ -268,11 +266,6 @@ def find_a_way(start_pos, end_pos, grid):
 
         pygame.display.update()
 
-
-        
-            
-            
-
 def show_proper_way(proper_way, grid):
     end_element = proper_way[len(proper_way)-1]
     while True:
@@ -380,15 +373,7 @@ def main():
                         start_pos, grid = start_movement(event, start_pos, grid)
 
                     
-                        
-
-
-
-            
-
     pygame.quit()
-
-
 
 if __name__ == '__main__':
     main()
