@@ -58,3 +58,13 @@ body{
 .icon {
   text-align: left;
 }
+
+.icon svg {
+  position: relative;
+  top: 3px;
+  color: black;
+}
+
+
+
+

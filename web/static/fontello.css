@@ -23,7 +23,6 @@
   font-family: "fontello";
   font-style: normal;
   font-weight: normal;
-  speak: never;
 
   display: inline-block;
   text-decoration: inherit;
@@ -59,4 +58,5 @@
 .icon-youtube-play:before { content: '\f16a'; } /* '' */
 .icon-instagram:before { content: '\f16d'; } /* '' */
 .icon-facebook-squared:before { content: '\f308'; } /* '' */
+.icon-basket:before { content: '\e800'; } /* '' */
 

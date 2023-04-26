@@ -29,7 +29,8 @@ for user in users_data:
         'id': user[0],
         'name': user[1],
         'password': user[2],
-        'email': user[3]
+        'email': user[3],
+        'basket': user[4].split(',')
     }
     users.append(cloth_dict)
 
@@ -72,6 +73,7 @@ def home():
 
 @app.route('/cloth')
 def cloth():
+    
     return render_template('cloth.html', products = products)
 
 @app.route('/filtered-products', methods=['POST'])
@@ -100,6 +102,7 @@ def get_filtered_products():
     filtered_products = filter_products(products, min_value, max_value, genders, kinds)
 
     return jsonify({'products': filtered_products})
+
 
 
 @app.route('/account', methods = ['POST', 'GET'])
@@ -155,7 +158,6 @@ def login():
         potential_error, user_info = check_login(username, password)
         
         if potential_error == 'good':
-            error = ''
             session['user'] = user_info
             return redirect(url_for('account'))
 
