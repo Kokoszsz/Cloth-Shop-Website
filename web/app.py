@@ -1,6 +1,5 @@
-from flask import Flask, render_template, redirect, request, url_for, session
+from flask import Flask, render_template, redirect, request, session, url_for, jsonify
 from flask_mysqldb  import MySQL
-from flask import jsonify
 import mysql.connector
 
 
@@ -17,34 +16,38 @@ mydb = mysql.connector.connect(
 )
 
 mycursor = mydb.cursor()
-mycursor.execute('''SELECT * FROM cloths''')
-cloth_data = mycursor.fetchall()
+mycursor.execute('''SELECT * FROM products''')
+product_data = mycursor.fetchall()
 mycursor.execute('''SELECT * FROM users''')
 users_data = mycursor.fetchall()
 mycursor.close()
 
 users = []
 for user in users_data:
-    cloth_dict = {
+    user_dict = {
         'id': user[0],
         'name': user[1],
         'password': user[2],
         'email': user[3],
-        'basket': user[4].split(',')
+        'basket': []
     }
-    users.append(cloth_dict)
+    users.append(user_dict)
+
 
 products = []
-for cloth in cloth_data:
-    cloth_dict = {
-        'name': cloth[1],
-        'cost_to_show': cloth[2],
-        'cost': float(cloth[2]),
-        'cloth_cathegory': cloth[3],
-        'gender' : cloth[4],
-        'image': cloth[5]
+for product in product_data:
+    product_dict = {
+        'id': product[0],
+        'name': product[1],
+        'cost_to_show': product[2],
+        'cost': float(product[2]),
+        'cloth_cathegory': product[3],
+        'gender' : product[4],
+        'image': product[5]
     }
-    products.append(cloth_dict)
+    products.append(product_dict)
+
+basket_for_not_logged_in = []
 
 
 def filter_products(products, min_value, max_value, genders, kinds):
@@ -104,6 +107,19 @@ def get_filtered_products():
     return jsonify({'products': filtered_products})
 
 
+@app.route("/my-route", methods=["POST"])
+def my_route():
+
+    product_ID = int(request.json["product_ID"])
+
+    if 'user' not in session:
+        basket_for_not_logged_in.append(product_ID)
+        #print(basket_for_not_logged_in)
+    else:
+        session['user']['basket'].append(product_ID)
+        session.modified = True
+        #print(session['user']['basket'])
+    return "Success"
 
 @app.route('/account', methods = ['POST', 'GET'])
 def account():
@@ -118,6 +134,8 @@ def account():
             username = request.form['username']
             email = request.form['email']
             password = request.form['password']
+            basket = session['user']['basket']
+
 
 
 
@@ -137,7 +155,8 @@ def account():
                         'email': email, 
                         'id': id, 
                         'name': username, 
-                        'password': password
+                        'password': password,
+                        'basket': basket
                     }
                 else:
                     error = 'Already sucha an e-mail'
@@ -156,13 +175,32 @@ def login():
         password = request.form['password']
     
         potential_error, user_info = check_login(username, password)
-        
+
+        user_info['basket'] = basket_for_not_logged_in
+
         if potential_error == 'good':
             session['user'] = user_info
             return redirect(url_for('account'))
 
 
     return render_template('login.html', error = potential_error)
+
+
+
+
+@app.route('/basket')
+def basket():
+
+    if 'user' in session:
+        filtered_products = [product for product in products if product['id'] in session['user']['basket']]
+        #print(filtered_products)
+        return render_template('basket.html', products = filtered_products)
+    else:
+        filtered_products = [product for product in products if product['id'] in basket_for_not_logged_in]
+        #print(filtered_products)
+        return render_template('basket.html', products = filtered_products)
+
+
 
 @app.route('/logout')
 def logout():
@@ -171,6 +209,7 @@ def logout():
         return redirect(url_for('home'))
     else:
         pass
+
 
 ## if you are logged in and you try to go back to login page you will get redirected to home page
 @app.before_request

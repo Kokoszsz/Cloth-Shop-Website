@@ -56,12 +56,18 @@
 
 
 
- 
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <p>Product added to basket successfully!</p>
+                <a href="#" onclick="closeModal()">OK</a>
+            </div>
+        </div>
     
     </body>
 
     <script type="text/javascript" src="{{ url_for('static', filename='refresh_product.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='only_numbers.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='add_to_basket.js') }}"></script>
       
 
 
