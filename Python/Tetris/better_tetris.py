@@ -30,7 +30,7 @@ rows, collumns = HEIGHT//(CELL_SIZE+1), WIDTH//((CELL_SIZE+1)*2)
 
 SPEED = 200
 
-OBJECTS = ['stick', 'brick', 'leftAngle', 'rightAngle', 'leftHammer', 'rightHammer', 'middle' ]
+OBJECTS = ['straight', 'square', 'reverse_zigzag', 'zigzag', 'jocker', 'reverse_jocker', 'tee' ]
 
 ALL_OBJECTS = []
 
@@ -46,7 +46,7 @@ class Object:
     """A class representing all objects in the game.
     
     Attributes:
-    - type: A string representing the type of object (e.g. "stick", "brick", "leftAngle", etc.)
+    - type: A string representing the type of object (e.g. "straight", "square", "reverse_zigzag", etc.)
     - position_x: An integer representing the x position of the object in the game.
     - position_y: An integer representing the y position of the object in the game.
     - color: A tuple representing the RGB color of the object.
@@ -64,13 +64,13 @@ class Object:
 
         # Define dictionary to store object properties
         properties = {
-            'stick': {'color': AQUA, 'shape': Shape(one=[1,0], two=[2,0], three=[-1,0]), 'pos_x': -CELL_SIZE - 1},
-            'brick': {'color': ORANGE, 'shape': Shape(one=[1,0], two=[1,-1], three=[0,-1]), 'pos_x': -CELL_SIZE - 1},
-            'leftAngle': {'color': PURPLE, 'shape': Shape(one=[0,-1], two=[-1,0], three=[-1,1]), 'pos_x': 0},
-            'rightAngle': {'color': GOLD, 'shape': Shape(one=[0,-1], two=[1,0], three=[1,1]), 'pos_x': -CELL_SIZE - 1},
-            'leftHammer': {'color': SADDLE_BROWN, 'shape': Shape(one=[0,1], two=[-1,1], three=[0,-1]), 'pos_x': 0},
-            'rightHammer': {'color': SPRING_GREEN, 'shape': Shape(one=[0,1], two=[1,1], three=[0,-1]), 'pos_x': -CELL_SIZE - 1},
-            'middle': {'color': BLUE, 'shape': Shape(one=[1,0], two=[0,-1], three=[-1,0]), 'pos_x': 0}
+            'straight': {'color': AQUA, 'shape': Shape(one=[1,0], two=[2,0], three=[-1,0]), 'pos_x': -CELL_SIZE - 1},
+            'square': {'color': ORANGE, 'shape': Shape(one=[1,0], two=[1,-1], three=[0,-1]), 'pos_x': -CELL_SIZE - 1},
+            'reverse_zigzag': {'color': PURPLE, 'shape': Shape(one=[0,-1], two=[-1,0], three=[-1,1]), 'pos_x': 0},
+            'zigzag': {'color': GOLD, 'shape': Shape(one=[0,-1], two=[1,0], three=[1,1]), 'pos_x': -CELL_SIZE - 1},
+            'jocker': {'color': SADDLE_BROWN, 'shape': Shape(one=[0,1], two=[-1,1], three=[0,-1]), 'pos_x': 0},
+            'reverse_jocker': {'color': SPRING_GREEN, 'shape': Shape(one=[0,1], two=[1,1], three=[0,-1]), 'pos_x': -CELL_SIZE - 1},
+            'tee': {'color': BLUE, 'shape': Shape(one=[1,0], two=[0,-1], three=[-1,0]), 'pos_x': 0}
         }
 
         # Look up object properties from dictionary
@@ -107,7 +107,7 @@ class Object:
 
 
     def rotate(self):  ## function that rotates an object
-        if self.type != 'brick':
+        if self.type != 'square':
             save_pos = copy.deepcopy(self.body)
             for cell in self.body[1:4]:
 
@@ -190,11 +190,6 @@ class Object:
 
                         cell.x = self.body[0].x - (cell.y - self.body[0].y)
                         cell.y = self.body[0].y
-
-
-
-        
-
 
 
 

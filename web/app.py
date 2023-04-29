@@ -8,6 +8,7 @@ app = Flask(__name__, static_url_path='/static')
 app.secret_key = 'm23T#mr4weio4t4gsd$%@'
 
 
+
 mydb = mysql.connector.connect(
   host="localhost",
   user="root",
@@ -29,7 +30,6 @@ for user in users_data:
         'name': user[1],
         'password': user[2],
         'email': user[3],
-        'basket': []
     }
     users.append(user_dict)
 
@@ -47,7 +47,7 @@ for product in product_data:
     }
     products.append(product_dict)
 
-basket_for_not_logged_in = []
+
 
 
 def filter_products(products, min_value, max_value, genders, kinds):
@@ -71,12 +71,12 @@ def check_login(username, password):
 
 @app.route('/')
 def home():
+    session['basket'] = []
     return render_template('home.html')
 
 
 @app.route('/cloth')
 def cloth():
-    
     return render_template('cloth.html', products = products)
 
 @app.route('/filtered-products', methods=['POST'])
@@ -106,19 +106,13 @@ def get_filtered_products():
 
     return jsonify({'products': filtered_products})
 
-
 @app.route("/my-route", methods=["POST"])
 def my_route():
 
     product_ID = int(request.json["product_ID"])
 
-    if 'user' not in session:
-        basket_for_not_logged_in.append(product_ID)
-        #print(basket_for_not_logged_in)
-    else:
-        session['user']['basket'].append(product_ID)
-        session.modified = True
-        #print(session['user']['basket'])
+    session['basket'].append(product_ID)
+    session.modified = True
     return "Success"
 
 @app.route('/account', methods = ['POST', 'GET'])
@@ -134,7 +128,7 @@ def account():
             username = request.form['username']
             email = request.form['email']
             password = request.form['password']
-            basket = session['user']['basket']
+
 
 
 
@@ -156,7 +150,6 @@ def account():
                         'id': id, 
                         'name': username, 
                         'password': password,
-                        'basket': basket
                     }
                 else:
                     error = 'Already sucha an e-mail'
@@ -176,7 +169,6 @@ def login():
     
         potential_error, user_info = check_login(username, password)
 
-        user_info['basket'] = basket_for_not_logged_in
 
         if potential_error == 'good':
             session['user'] = user_info
@@ -191,14 +183,23 @@ def login():
 @app.route('/basket')
 def basket():
 
-    if 'user' in session:
-        filtered_products = [product for product in products if product['id'] in session['user']['basket']]
-        #print(filtered_products)
-        return render_template('basket.html', products = filtered_products)
-    else:
-        filtered_products = [product for product in products if product['id'] in basket_for_not_logged_in]
-        #print(filtered_products)
-        return render_template('basket.html', products = filtered_products)
+    filtered_products = [product for product in products if product['id'] in session['basket']]
+    total_cost = sum(product['cost'] for product in filtered_products)
+    #print(filtered_products)
+    return render_template('basket.html', products = filtered_products, total_cost = total_cost)
+
+@app.route('/basket/<int:product_id>', methods=['DELETE'])
+def delete_product(product_id):
+    if 'basket' in session:
+        basket = session['basket']
+        print(basket)
+        if product_id in basket:
+            basket.remove(product_id)
+            session.modified = True
+            filtered_products = [product for product in products if product['id'] in session['basket']]
+            total_cost = sum([product['cost'] for product in filtered_products])
+            return jsonify({'success': True, 'totalCost': total_cost})
+    return jsonify({'success': False, 'message': 'Product not found in the basket'})
 
 
 
