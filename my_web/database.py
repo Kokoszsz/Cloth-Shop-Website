@@ -7,11 +7,9 @@ mydb = mysql.connector.connect(
       database = "cloth_shop"
     )
 
-def get_users_and_products():
+def get_users():
 
     mycursor = mydb.cursor()
-    mycursor.execute('''SELECT * FROM products''')
-    product_data = mycursor.fetchall()
     mycursor.execute('''SELECT * FROM users''')
     users_data = mycursor.fetchall()
     mycursor.close()
@@ -26,6 +24,14 @@ def get_users_and_products():
         }
         users.append(user_dict)
 
+    return users
+
+def get_products():
+
+    mycursor = mydb.cursor()
+    mycursor.execute('''SELECT * FROM products''')
+    product_data = mycursor.fetchall()
+    mycursor.close()
 
     products = []
     for product in product_data:
@@ -40,4 +46,4 @@ def get_users_and_products():
         }
         products.append(product_dict)
 
-    return users, products
+    return products

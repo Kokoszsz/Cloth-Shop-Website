@@ -1,14 +1,13 @@
-from flask import render_template, redirect, request, session, url_for, jsonify
-from flask_mysqldb  import MySQL
-from database import get_users_and_products, mydb
+from flask import render_template, redirect, url_for, jsonify, request, session, Flask
+from database import get_users, get_products, mydb
 from utils import filter_products, check_login 
-from __init__ import app
 
 
 
+app = Flask(__name__)
 app.secret_key = 'm23T#mr4weio4t4gsd$%@'
-
-users, products = get_users_and_products()
+users = get_users()
+products = get_products()
 
 
 @app.route('/')
@@ -174,6 +173,5 @@ def add_header(response):
 
 
 if __name__ == '__main__':
-    #db.create_all()
     app.run(host = '0.0.0.0', debug=True)
 
