@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, jsonify, request, session, Flask
 from database import get_users, get_products, mydb
-from utils import filter_products, check_login 
+from utils import filter_products, check_login, check_if_error
 
 
 
@@ -8,6 +8,7 @@ app = Flask(__name__)
 app.secret_key = 'm23T#mr4weio4t4gsd$%@'
 users = get_users()
 products = get_products()
+
 
 
 @app.route('/')
@@ -72,31 +73,25 @@ def account():
 
 
 
+            error = check_if_error(users, username, id, email, password)
 
+            if error == '':
+                cursor = mydb.cursor()
 
-            if all(user['name'] != username or user['id'] == id for user in users):
-                if all(user['email'] != email or user['id'] == id for user in users):
-                    cursor = mydb.cursor()
+                sql = "UPDATE users SET Name = %s, Password = %s, `e-mail` = %s WHERE idUsers = %s"
 
-                    sql = "UPDATE users SET Name = %s, Password = %s, `e-mail` = %s WHERE idUsers = %s"
+                val = (username, password, email, id)
+                cursor.execute(sql, val)
 
-                    val = (username, password, email, id)
-                    cursor.execute(sql, val)
+                mydb.commit()
 
-                    mydb.commit()
-
-                    cursor.close()
-                    session['user'] = {
-                        'email': email, 
-                        'id': id, 
-                        'name': username, 
-                        'password': password,
-                    }
-                else:
-                    error = 'Already sucha an e-mail'
-            else:
-                error = 'Already such a user'
-
+                cursor.close()
+                session['user'] = {
+                    'email': email, 
+                    'id': id, 
+                    'name': username, 
+                    'password': password,
+                }
 
         user_info = session['user']
         return render_template('account.html', user_info = user_info, error = error)
@@ -105,9 +100,13 @@ def account():
 def login():
     potential_error = ''
     if request.method == 'POST':
+
+        if request.form["action"] == "Create account":
+            return redirect(url_for('create_account'))
+        
         username = request.form['login']
         password = request.form['password']
-    
+
         potential_error, user_info = check_login(username, password, users)
 
 
@@ -117,6 +116,49 @@ def login():
 
 
     return render_template('login.html', error = potential_error)
+
+
+@app.route('/create_account', methods = ['POST', 'GET'])
+def create_account():
+
+    error = ''
+
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        id = users[-1]['id'] + 1 ## this should be changed
+        error = check_if_error(users, username, id, email, password)
+
+        print(error)
+
+        if error == '':
+            cursor = mydb.cursor()
+
+            sql = "INSERT INTO users (idUsers, Name, Password, `e-mail`) VALUES (%s, %s, %s, %s)"
+
+            val = (id, username, password, email)
+            cursor.execute(sql, val)
+            mydb.commit()
+            cursor.close()
+
+            this_user = {
+                'email': email, 
+                'id': id, 
+                'name': username, 
+                'password': password,
+            }
+
+            users.append(this_user)
+
+            session['user'] = this_user
+
+            return redirect(url_for('account'))
+        
+        else:
+            return render_template('create_account.html', error = error)
+
+    return render_template('create_account.html', error = error)
 
 
 
@@ -158,7 +200,8 @@ def logout():
 def check_if_logged():
     if 'user' in session and request.endpoint in ['login']:
         return redirect(url_for('home'))
-
+    if 'user' in session and request.endpoint in ['create_account']:
+        return redirect(url_for('home'))
 
 ## User will be unable to go back to a previously visited page and remaining logged in after logging out
 @app.after_request

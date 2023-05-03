@@ -38,7 +38,7 @@ def test_get_products():
     for user in products:
         assert all(key in user for key in expected_keys)
 
-def test_login_success(client):
+def test_login(client):
     valid_username = 'test'
     valid_password = '123'
     user_info = {'name': valid_username, 'email': 'test123@gmail.com', 'id': 1, 'password': valid_password}

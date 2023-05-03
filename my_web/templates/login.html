@@ -20,14 +20,15 @@
                 <h1>Login</h1>
                 <p>
                     <label for="login">Username:</label>
-                    <input type="text" id="login" name="login" required>
+                    <input type="text" id="login" name="login" value="">
                 </p>
                 <p>
                     <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" name="password" value="">
                 </p>
                 <p>
-                    <input type="submit" value="Submit">
+                    <input type="submit" name="action" value="Create account">
+                    <input type="submit" class="submit" name="action" value="Submit">
                 </p>
                 {% if error != '' %}
                     <p style="color:red">{{ error }}</p>
