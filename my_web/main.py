@@ -89,7 +89,7 @@ def account():
                 session['user'] = {
                     'email': email, 
                     'id': id, 
-                    'name': username, 
+                    'username': username, 
                     'password': password,
                 }
 
@@ -101,7 +101,7 @@ def login():
     potential_error = ''
     if request.method == 'POST':
 
-        if request.form["action"] == "Create account":
+        if request.form['action'] == "Create account":
             return redirect(url_for('create_account'))
         
         username = request.form['login']
@@ -145,7 +145,7 @@ def create_account():
             this_user = {
                 'email': email, 
                 'id': id, 
-                'name': username, 
+                'username': username, 
                 'password': password,
             }
 
