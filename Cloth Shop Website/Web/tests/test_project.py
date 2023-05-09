@@ -1,4 +1,5 @@
-from database import get_users, get_products, mydb
+from database import get_users, get_products
+
 
 def test_connection(client):
     response = client.get('/')
@@ -8,6 +9,11 @@ def test_connection(client):
 def test_title_home_page(client):
     response = client.get('/')
     assert b'<title>Kokosz Cloth Shop</title>' in response.data
+
+def test_navigation_bar(client):
+    response = client.get('/')
+    assert b'<div class="menu">' in response.data
+
 
 
 def test_get_users():
