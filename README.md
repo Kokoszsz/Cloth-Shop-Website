@@ -4,8 +4,7 @@
 ###  Cloth Shop ###
 
 The Cloth Shop project is a web application that was developed using Flask, a Python-based web framework.
-For more information go to project folder [Cloth Shop Website](./Cloth Shop Website)
-
+For more information go to project folder [Cloth Shop Website](./Cloth%20Shop%20Website)
 
 ### Python programs ###
 
