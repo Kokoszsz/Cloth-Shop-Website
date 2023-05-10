@@ -14,7 +14,7 @@ dir_path = 'images'
 
 #wordSearch = input('What you want to search:') 
 Word_Search = 'cat'
-Number_of_pictures = 10
+Number_of_pictures = 2
 
 
 os.makedirs(dir_path, exist_ok=True)

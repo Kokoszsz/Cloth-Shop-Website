@@ -4,18 +4,19 @@
 ###  Cloth Shop ###
 
 The Cloth Shop project is a web application that was developed using Flask, a Python-based web framework.
-For more information go to project README file [README.md](./Cloth Shop Website)
+For more information go to project folder [Cloth Shop Website](./Cloth Shop Website)
 
 
-### Python projects ###
+### Python programs ###
 
 A few short scripts written in Python
-1. Chess game
-2. Minesweaper game
+1. Chess
+2. Minesweaper
 3. Pathfinding program
-4. Snake game
-5. Tetris game 
-For more information go to project README file [README.md](./Python)
+4. Snake
+5. Tetris 
+6. Download images 
+For more information go to project folder [Python](./Python)
 
 ###  Blender arts ###
 3D models created in Blender 

@@ -18,11 +18,11 @@ MY_FONT = pygame.font.SysFont("monospace", 12)
 
 FPS = 60
 
-SPEED = 2 #higher the number, program is slower
+SPEED = 4 #higher the number, program is slower
 
 ALL_COLORS = [] 
 
-PIXEL_SIZE = 10
+PIXEL_SIZE = 15
 
 HIEIGHT_OF_PALLET = 200
 
@@ -35,7 +35,7 @@ pallet_size = 50
 BLACK_PROPABILITY = 35   #%
 
 
-COLORS = [BLACK, WHITE, PURPLE]
+COLORS = [BLACK, WHITE]
 
 
 class ColorBlock:
@@ -275,37 +275,6 @@ def show_proper_way(proper_way, grid):
                 end_element = element
         if end_element.parent == 0:
             return grid
-
-        
-
-def start_movement(event, start_pos, grid):
-    if event.key == pygame.K_d:
-        if start_pos[0] + 1 < WIDTH//PIXEL_SIZE:
-            if grid[start_pos[1]][start_pos[0] + 1] != BLACK:
-                grid[start_pos[1]][start_pos[0]] = WHITE
-                grid[start_pos[1]][start_pos[0] + 1] = ORANGE
-                start_pos = start_pos[0] + 1,start_pos[1]
-    elif event.key == pygame.K_a:
-        if grid[start_pos[1]][start_pos[0]-1] != BLACK and start_pos[0] - 1 > 0:
-            grid[start_pos[1]][start_pos[0]] = WHITE
-            grid[start_pos[1]][start_pos[0]-1] = ORANGE
-            start_pos = start_pos[0] - 1,start_pos[1]
-    elif event.key == pygame.K_s:
-        if start_pos[1] + 1 < HEIGHT//PIXEL_SIZE - HIEIGHT_OF_PALLET//PIXEL_SIZE:
-            if grid[start_pos[1] + 1][start_pos[0]] != BLACK:
-                grid[start_pos[1]][start_pos[0]] = WHITE
-                grid[start_pos[1] + 1][start_pos[0]] = ORANGE
-                start_pos = start_pos[0] ,start_pos[1] + 1
-    elif event.key == pygame.K_w:
-        if grid[start_pos[1] - 1][start_pos[0]] != BLACK and start_pos[1] > 0:
-            grid[start_pos[1]][start_pos[0]] = WHITE
-            grid[start_pos[1] - 1][start_pos[0]] = ORANGE
-            start_pos = start_pos[0] ,start_pos[1] - 1
-
-    return start_pos, grid
-        
-
-
     
 def main():
 
@@ -369,8 +338,6 @@ def main():
                             show_proper_way(proper_way, grid)
                             grid[end_pos[1]][end_pos[0]] = BLUE
                             grid[start_pos[1]][start_pos[0]] = ORANGE
-                    else:
-                        start_pos, grid = start_movement(event, start_pos, grid)
 
                     
     pygame.quit()
