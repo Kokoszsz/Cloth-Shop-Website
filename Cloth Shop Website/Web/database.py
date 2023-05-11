@@ -1,49 +1,56 @@
-import mysql.connector
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import User, Product, Base
 
-mydb = mysql.connector.connect(
-      host="localhost",
-      user="root",
-      password="rzkyn203h534i90$@#!%#$",
-      database = "cloth_shop"
-    )
 
-def get_users():
 
-    mycursor = mydb.cursor()
-    mycursor.execute('''SELECT * FROM users''')
-    users_data = mycursor.fetchall()
-    mycursor.close()
+def create_database_Session(url):
+    engine = create_engine(url, echo=True)
+    Base.metadata.create_all(bind=engine)
+    Session = sessionmaker(bind=engine)
+    return Session
 
-    users = []
-    for user in users_data:
-        user_dict = {
-            'id': user[0],
-            'name': user[1],
-            'password': user[2],
-            'email': user[3],
-        }
-        users.append(user_dict)
 
+
+
+def create_user(Session, id, name, password, email):
+    session = Session()
+    user = User(id, name, password, email)
+    session.merge(user)
+    session.commit()
+    session.close()
+    return user
+
+
+def update_user(Session, id, name, password, email, users):
+    session = Session()
+    user = next((user for user in users if user.id == id), None)
+    if user != None:
+        user.name = name
+        user.password = password
+        user.email = email
+        session.merge(user)
+        session.commit()
+        session.close()
+    return user
+
+
+
+def get_users(Session):
+    session = Session()
+    results = session.query(User.id, User.name, User.password, User.email).all()
+    users = [User(*r) for r in results]
+    session.close()
     return users
 
-def get_products():
-
-    mycursor = mydb.cursor()
-    mycursor.execute('''SELECT * FROM products''')
-    product_data = mycursor.fetchall()
-    mycursor.close()
-
-    products = []
-    for product in product_data:
-        product_dict = {
-            'id': product[0],
-            'name': product[1],
-            'cost_to_show': product[2],
-            'cost': float(product[2]),
-            'cloth_cathegory': product[3],
-            'gender' : product[4],
-            'image': product[5]
-        }
-        products.append(product_dict)
-
+def get_products_to_dict(Session):
+    session = Session()
+    results = session.query(Product.id, Product.name, Product.cost_to_show, Product.cloth_cathegory, Product.gender, Product.image).all()
+    products = [Product(*r).to_dict() for r in results]
+    session.close()
     return products
+
+
+
+    
+

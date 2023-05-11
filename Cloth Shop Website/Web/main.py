@@ -1,15 +1,22 @@
 from flask import render_template, redirect, url_for, jsonify, request, session, Flask
-from database import get_users, get_products, mydb
 from utils import filter_products, check_login, check_if_error
+from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
+
+
+
+
 
 
 
 app = Flask(__name__)
 app.secret_key = 'm23T#mr4weio4t4gsd$%@'
-users = get_users()
-products = get_products()
+
+db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
 
+users = get_users(db_Session)
+print(users)
+products = get_products_to_dict(db_Session)
 
 @app.route('/')
 def home():
@@ -73,25 +80,14 @@ def account():
 
 
 
-            error = check_if_error(users, username, id, email, password)
+            error = check_if_error(users, id, username, password, email)
 
             if error == '':
-                cursor = mydb.cursor()
 
-                sql = "UPDATE users SET Name = %s, Password = %s, `e-mail` = %s WHERE idUsers = %s"
-
-                val = (username, password, email, id)
-                cursor.execute(sql, val)
-
-                mydb.commit()
-
-                cursor.close()
-                session['user'] = {
-                    'email': email, 
-                    'id': id, 
-                    'username': username, 
-                    'password': password,
-                }
+                user = update_user(db_Session, id, username, password, email, users)
+                
+                if user != None:
+                    session['user'] = user.to_dict()
 
         user_info = session['user']
         return render_template('account.html', user_info = user_info, error = error)
@@ -111,7 +107,7 @@ def login():
 
 
         if potential_error == 'good':
-            session['user'] = user_info
+            session['user'] = user_info.to_dict()
             return redirect(url_for('account'))
 
 
@@ -127,31 +123,16 @@ def create_account():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        id = users[-1]['id'] + 1 ## this should be changed
+        id = users[-1].id + 1 ## this should be changed
         error = check_if_error(users, username, id, email, password)
 
-        print(error)
-
         if error == '':
-            cursor = mydb.cursor()
-
-            sql = "INSERT INTO users (idUsers, Name, Password, `e-mail`) VALUES (%s, %s, %s, %s)"
-
-            val = (id, username, password, email)
-            cursor.execute(sql, val)
-            mydb.commit()
-            cursor.close()
-
-            this_user = {
-                'email': email, 
-                'id': id, 
-                'username': username, 
-                'password': password,
-            }
+            
+            this_user = create_user(db_Session, id, username, password, email)
 
             users.append(this_user)
 
-            session['user'] = this_user
+            session['user'] = this_user.to_dict()
 
             return redirect(url_for('account'))
         
@@ -167,7 +148,7 @@ def create_account():
 def basket():
 
     filtered_products = [product for product in products if product['id'] in session['basket']]
-    total_cost = sum(product['cost'] for product in filtered_products)
+    total_cost = sum(product.cost for product in filtered_products)
     #print(filtered_products)
     return render_template('basket.html', products = filtered_products, total_cost = total_cost)
 
@@ -180,7 +161,7 @@ def delete_product(product_id):
             basket.remove(product_id)
             session.modified = True
             filtered_products = [product for product in products if product['id'] in session['basket']]
-            total_cost = sum([product['cost'] for product in filtered_products])
+            total_cost = sum([product.cost for product in filtered_products])
             return jsonify({'success': True, 'totalCost': total_cost, 'products': filtered_products})
     return jsonify({'success': False, 'message': 'Product not found in the basket'})
 

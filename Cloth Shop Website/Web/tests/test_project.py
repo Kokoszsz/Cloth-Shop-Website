@@ -1,4 +1,5 @@
-from database import get_users, get_products
+from database import update_user, create_user
+from models import User
 
 
 def test_connection(client):
@@ -14,78 +15,56 @@ def test_navigation_bar(client):
     response = client.get('/')
     assert b'<div class="menu">' in response.data
 
+def test_update_user(Session):
+    # Create test users
+    user1 = User(id=1, name="John", password="password", email="john@example.com")
+    user2 = User(id=2, name="Jane", password="password", email="jane@example.com")
+    users = [user1, user2]
+
+    # Update user 1
+    update_user(Session, 1, "New Name", "newpassword", "newemail@example.com", users)
+
+    # Retrieve user 1 from database and check attributes
+    session = Session()
+    db_user1 = session.query(User).filter_by(id=1).first()
+    session.close()
+    assert db_user1.name == "New Name"
+    assert db_user1.password == "newpassword"
+    assert db_user1.email == "newemail@example.com"
+
+    # Update user 3 (doesn't exist)
+    update_user(Session, 3, "New User", "newpassword", "newemail@example.com", users)
+
+    # Check that user list is still the same
+    assert len(users) == 2
 
 
-def test_get_users():
-    users = get_users()
 
-    assert isinstance(users, list)
+def test_create_user(Session):
+    user_id = 4
+    user_name = "Test User"
+    user_password = "password"
+    user_email = "testuser@example.com"
 
-    assert len(users) > 0
+    user = create_user(Session, user_id, user_name, user_password, user_email)
 
-    for user in users:
-        assert isinstance(user, dict)
+    assert user.id == user_id
+    assert user.name == user_name
+    assert user.password == user_password
+    assert user.email == user_email
 
-    expected_keys = ['id', 'name', 'password', 'email']
-    for user in users:
-        assert all(key in user for key in expected_keys)
-
-def test_get_products():
-    products = get_products()
-
-    assert isinstance(products, list)
-
-    assert len(products) > 0
-
-    for user in products:
-        assert isinstance(user, dict)
-
-    expected_keys = ['id', 'name', 'cost_to_show', 'cost', 'cloth_cathegory', 'gender', 'image']
-    for user in products:
-        assert all(key in user for key in expected_keys)
-
-def test_login(client):
-    valid_username = 'test'
-    valid_password = '123'
-    user_info = {'name': valid_username, 'email': 'test123@gmail.com', 'id': 1, 'password': valid_password}
-
-    response = client.post('/login', data={'login': valid_username, 'password': valid_password, 'action': 'None'})
-
-    assert response.status_code == 302
-
-    assert response.location == 'http://localhost/account'
-
-    with client.session_transaction() as session:
-        assert session['user'] == user_info
+    session = Session()
+    db_user = session.query(User).filter_by(id=user_id).first()
+    assert db_user != None
+    assert db_user.name == user_name
+    assert db_user.password == user_password
+    assert db_user.email == user_email
+    session.close()
 
 
-def test_logout(client):
-    with client.session_transaction() as session:
-        session['user'] = {'name': 'test', 'email': 'test123@gmail.com', 'id': 1, 'password': 123}
 
-    response = client.get('/logout')
 
-    assert response.status_code == 302
-    assert response.location == 'http://localhost/'
 
-    with client.session_transaction() as session:
-        assert 'user' not in session
 
-def test_create_account(client):
-    valid_username = 'test123'
-    valid_password = 'test123'
-    user_info = {'username': valid_username, 'email': 'test123@tets123.com', 'password': valid_password}
 
-    response = client.post('/create_account', data={'username': valid_username, 'email': 'test123@tets123.com', 'password': valid_password})
 
-    assert response.status_code == 302
-
-    assert response.location == 'http://localhost/account'
-
-    with client.session_transaction() as session:
-        assert user_info['username'] == session['user']['username']
-        assert user_info['email'] == session['user']['email']
-        assert user_info['password'] == session['user']['password']
-
-def test_delete_user(client):
-    pass

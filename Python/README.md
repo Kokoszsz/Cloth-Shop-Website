@@ -20,7 +20,7 @@ The objective of the game is to checkmate the opponent's king by placing it unde
 5. If your move puts the opponent's king under attack, the opponent must respond by moving their king or by moving another piece to block the attack.
 6. Take turns moving pieces until one player achieves checkmate, or until the game ends in a stalemate or draw. Then game restarts automatically 
 
-Important
+#### Important ####
 Not all rules are implemented like:
 - castling
 - swapping a pawn when it reaches the opposite edge
