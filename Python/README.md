@@ -1,4 +1,4 @@
-## Pytohn programs ##
+## Python programs ##
 Simple Python programs and games mostly build using pygame library
 
 ### Installing ###
