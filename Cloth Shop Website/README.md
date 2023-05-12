@@ -24,7 +24,7 @@ To install and run the project, follow these steps:
 5. Go to http://localhost:5000 on your web browser to view the app.
 
 ### Documentation ###
-For more infromation about project go to [Cloth Shop Project Documents](./Cloth%20Shop%20Website/documents)
+For more infromation about project go to [Cloth Shop Project Documents](./documents)
 
 ### Status ###
 The project is currently under development, with ongoing improvements and updates planned for the future.
