@@ -15,6 +15,7 @@ A few short scripts written in Python
 4. Snake
 5. Tetris 
 6. Download images 
+
 For more information go to project folder [Python](./Python)
 
 ###  Blender arts ###

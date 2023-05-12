@@ -83,5 +83,5 @@ When a row is filled with blocks, that row disappears and the player scores poin
 The game gets faster with each score the player earns.
 
 ### Download images ###
-small program that using selenium downloads images from imgur.com. and store it in images folder (if there is no such a folder it creates on)
-You can change kind of downlaoded picture by chenging 'Word_Search' variable and modyfing number of downloaded images by changing 'Number_of_pictures' variables.
+Small program that using selenium downloads images from imgur.com. and store it in images folder (if there is no such a folder it creates on)
+You can change kind of downlaoded picture by chenging ```Word_Search``` variable and modyfing number of downloaded images by changing ```Number_of_pictures``` variable.
