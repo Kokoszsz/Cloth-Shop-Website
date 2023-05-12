@@ -84,4 +84,4 @@ The game gets faster with each score the player earns.
 
 ### Download images ###
 Small program that using selenium downloads images from imgur.com. and store it in images folder (if there is no such a folder it creates on)
-You can change kind of downlaoded picture by chenging ```Word_Search``` variable and modyfing number of downloaded images by changing ```Number_of_pictures``` variables.
+You can change kind of downlaoded picture by chenging ```Word_Search``` variable and modyfing number of downloaded images by changing ```Number_of_pictures``` variable.
