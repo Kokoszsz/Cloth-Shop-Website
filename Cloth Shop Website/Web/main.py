@@ -20,7 +20,6 @@ products = get_products_to_dict(db_Session)
 
 @app.route('/')
 def home():
-    session['basket'] = []
     return render_template('home.html')
 
 
@@ -44,8 +43,8 @@ def get_filtered_products():
         genders.append('male')
     if 'female' in request.form:
         genders.append('female')    
-    if 't_shirt' in request.form:
-        kinds.append('t_shirt')
+    if 't-shirt' in request.form:
+        kinds.append('t-shirt')
     if 'jeans' in request.form:
         kinds.append('jeans')
     if 'shirt' in request.form:
@@ -146,22 +145,21 @@ def create_account():
 
 @app.route('/basket')
 def basket():
-
     filtered_products = [product for product in products if product['id'] in session['basket']]
-    total_cost = sum(product.cost for product in filtered_products)
-    #print(filtered_products)
+    total_cost = sum(product['cost'] for product in filtered_products)
+    total_cost = round(total_cost, 2)
     return render_template('basket.html', products = filtered_products, total_cost = total_cost)
 
 @app.route('/basket/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
     if 'basket' in session:
         basket = session['basket']
-        print(basket)
         if product_id in basket:
             basket.remove(product_id)
             session.modified = True
             filtered_products = [product for product in products if product['id'] in session['basket']]
-            total_cost = sum([product.cost for product in filtered_products])
+            total_cost = sum([product['cost'] for product in filtered_products])
+            total_cost = round(total_cost, 2)
             return jsonify({'success': True, 'totalCost': total_cost, 'products': filtered_products})
     return jsonify({'success': False, 'message': 'Product not found in the basket'})
 
@@ -176,13 +174,19 @@ def logout():
         pass
 
 
-## if you are logged in and you try to go back to login page you will get redirected to home page
 @app.before_request
-def check_if_logged():
+def before_request():
     if 'user' in session and request.endpoint in ['login']:
         return redirect(url_for('home'))
     if 'user' in session and request.endpoint in ['create_account']:
         return redirect(url_for('home'))
+    ## if you are logged in and you try to go back to login page you will get redirected to home page
+
+    if 'basket' not in session:
+        session['basket'] = []
+    ## sets empty basket
+
+
 
 ## User will be unable to go back to a previously visited page and remaining logged in after logging out
 @app.after_request

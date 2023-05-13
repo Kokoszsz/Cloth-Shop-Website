@@ -53,6 +53,7 @@ class Product(Base):
             'id': self.id,
             'name': self.name,
             'cost_to_show': self.cost_to_show,
+            'cost': self.cost,
             'cloth_cathegory': self.cloth_cathegory,
             'gender': self.gender,
             'image': self.image

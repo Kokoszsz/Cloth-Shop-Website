@@ -1,10 +1,41 @@
 from database import update_user, create_user
 from models import User
+from unittest.mock import patch
 
-
-def test_connection(client):
+def test_connection_home(client):
     response = client.get('/')
     assert response.status_code == 200
+
+def test_connection_cloth(client):
+    response = client.get('/cloth')
+    assert response.status_code == 200
+
+@patch('main.products')
+def test_connection_basket(mock_products, client):
+    products = [
+        {'id': 1, 'name': 'Product 1', 'cost_to_show': 24.99, 'cost': '24.99', 'cloth_cathegory': 'jeans', 'gender': 'man', 'image': ''},
+        {'id': 2, 'name': 'Product 2', 'cost_to_show': 25.99, 'cost': '25.99', 'cloth_cathegory': 'jeans', 'gender': 'woman', 'image': ''},
+        {'id': 3, 'name': 'Product 3', 'cost_to_show': 26.99, 'cost': '26.99', 'cloth_cathegory': 'jeans', 'gender': 'woman', 'image': ''},
+        {'id': 4, 'name': 'Product 4', 'cost_to_show': 27.99, 'cost': '27.99', 'cloth_cathegory': 'jeans', 'gender': 'man', 'image': ''}
+    ]
+
+    mock_products.return_value = products
+
+    with client.session_transaction() as session:
+        session['basket'] = [1, 2, 3]  
+
+    response = client.get('/basket')
+    assert response.status_code == 200
+
+
+def test_connection_login(client):
+    response = client.get('/login')
+    assert response.status_code == 200
+
+def test_connection_create_account(client):
+    response = client.get('/create_account')
+    assert response.status_code == 200
+
 
 
 def test_title_home_page(client):

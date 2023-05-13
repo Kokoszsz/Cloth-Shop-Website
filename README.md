@@ -1,10 +1,10 @@
 ## Repository presents my projects ##
 
 
-###  Cloth Shop ###
+###  Cloth Shop Website ###
 
 The Cloth Shop project is a web application that was developed using Flask, a Python-based web framework.
-For more information go to project folder [Cloth Shop Website](./Cloth%20Shop%20Website)
+For more information go to [project folder](./Cloth%20Shop%20Website)
 
 ### Python programs ###
 
@@ -16,7 +16,13 @@ A few short scripts written in Python
 5. Tetris 
 6. Download images 
 
-For more information go to project folder [Python](./Python)
+For more information go to [project folder](./Python)
+
+### Python selenium tests ###
+
+Automation tests created in python using selenium framework. 
+Tests are designed to test certain features of a website from a project [Cloth Shop Website](./Cloth%20Shop%20Website)
+For more infromation go to [project folder](./Python selenium tests)
 
 ###  Blender arts ###
 3D models created in Blender 
