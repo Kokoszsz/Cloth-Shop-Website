@@ -24,16 +24,16 @@ To install and run the project, follow these steps:
 5. Go to http://localhost:5000 on your web browser to view the app.
 
 ### Documentation ###
-For more information about project go to [Cloth Shop Project Documents](./documents)
+For more information about project go to [Cloth Shop Website Project Documents](./documents)
 
-#### Cloth Shop Project Documentation #### 
+#### Cloth Shop Website Project Documentation #### 
 
-The Cloth Shop Project Documentation is a comprehensive document that provides detailed information about the Cloth Shop web project. 
+The Cloth Shop Website Project Documentation is a comprehensive document that provides detailed information about the Cloth Shop Website project. 
 It includes essential details such as the project's goals, objectives and an overview of the technology stack used for development. 
 
 #### Jira Issues CSV ####
 
-The Jira Issues CSV file contains a comprehensive list of all current issues present in Jira as of the 14th of May 2023. These issues include tasks, test cases and other items related to the Cloth Shop project.
+The Jira Issues CSV file contains a comprehensive list of all current issues present in Jira as of the 14th of May 2023. These issues include tasks, test cases and other items related to the Cloth Shop Website project.
 The CSV file provides valuable information about each issue, including issue IDs, summaries, descriptions, priorities, and assignees. 
 
 
