@@ -23,8 +23,8 @@ class Pawn(Figure):
             if self.color == 'white':
                 if board[self.pos_y - 1][self.pos_x] == '0':
                     where_can_move.append([self.pos_y - 1, self.pos_x])
-                if self.pos_y == 6 and board[self.pos_y - 2][self.pos_x] == '0':
-                    where_can_move.append([self.pos_y - 2, self.pos_x])
+                    if self.pos_y == 6 and board[self.pos_y - 2][self.pos_x] == '0':
+                        where_can_move.append([self.pos_y - 2, self.pos_x])
                 if board[self.pos_y - 1][self.pos_x + 1] in 'hmtqkp':
                     where_can_move.append([self.pos_y - 1, self.pos_x + 1])
                 if board[self.pos_y - 1][self.pos_x - 1] in 'hmtqkp':
@@ -33,8 +33,8 @@ class Pawn(Figure):
             elif self.color == 'black':
                 if board[self.pos_y + 1][self.pos_x] == '0':
                     where_can_move.append([self.pos_y + 1, self.pos_x])
-                if self.pos_y == 1 and board[self.pos_y + 2][self.pos_x] == '0':
-                    where_can_move.append([self.pos_y + 2, self.pos_x])
+                    if self.pos_y == 1 and board[self.pos_y + 2][self.pos_x] == '0':
+                        where_can_move.append([self.pos_y + 2, self.pos_x])
                 if board[self.pos_y + 1][self.pos_x + 1] in 'HMTQKP':
                     where_can_move.append([self.pos_y + 1, self.pos_x + 1])
                 if board[self.pos_y + 1][self.pos_x - 1] in 'HMTQKP':
