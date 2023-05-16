@@ -208,19 +208,69 @@ def check_if_no_more_moves(figures, player, board):
                 return False
     return True
 
+def change_rook_position_when_castling(player_turn, new_x_pos, new_y_pos, figures, figure_picked, board):
+    if player_turn == 'white':
+
+        if new_y_pos == 7 and new_x_pos == 1:
+            board[7][0] = '0'
+            board[7][2] = 'T'
+            for figure in figures:
+                if figure.pos_x == 0 and figure.pos_y == 7:
+                    if figure.castling == False:
+                        figure.object.x = 100*2  ## updating rook sprite position
+                        figure.pos_x = 2     ## updating rook position
+                        figure.castling = True
+                    break
+
+        elif new_y_pos == 7 and new_x_pos == 6:
+            board[7][7] = '0'
+            board[7][5] = 'T'
+            for figure in figures:
+                if figure.pos_x == 7 and figure.pos_y == 7:
+                    if figure.castling == False:
+                        figure.object.x = 100*5  ## updating rook sprite position
+                        figure.pos_x = 5 ## updating rook position
+                        figure.castling = True
+                    break
+
+    elif player_turn == 'black':
+        if new_y_pos == 0 and new_x_pos == 1:
+                board[0][0] = '0'
+                board[0][2] = 't'
+                for figure in figures:
+                    if figure.pos_x == 0 and figure.pos_y == 0:
+                        if figure.castling == False:
+                            figure.object.x = 100*2  ## updating rook sprite position
+                            figure.pos_x = 2     ## updating rook position
+                            figure.castling = True
+                        break
+
+        elif (new_y_pos == 0 and new_x_pos == 6):
+            board[0][7] = '0'
+            board[0][5] = 't'
+            for figure in figures:
+                if figure.pos_x == 0 and figure.pos_y == 7:
+                    if figure.castling == False:
+                        figure.object.x = 100*5  ## updating rook sprite position
+                        figure.pos_x = 5 ## updating rook position
+                        figure.castling = True
+                    break
+            
+    return board, figures
+
 
 def main():
 
     ## define how board looks
     board = [   
-            ['t','h','m','q','k','m','h','t'],
-            ['p','p','p','p','p','p','p','p'],
+            ['t','h','m','q','q','m','h','t'],
+            ['p','p','p','0','0','p','p','p'],
             ['0','0','0','0','0','0','0','0'],
             ['0','0','0','0','0','0','0','0'],
             ['0','0','0','0','0','0','0','0'],
             ['0','0','0','0','0','0','0','0'],
-            ['P','P','P','P','P','P','P','P'],
-            ['T','H','M','Q','K','M','H','T']
+            ['P','P','P','0','P','P','P','P'],
+            ['T','0','0','0','K','M','H','T']
         ]
     done = False
     figures = create_figures(board)
@@ -229,13 +279,14 @@ def main():
     figure_picked = None
     movable_positions = None
     check = None
-    grid  = erase_grid(check)
+    grid = erase_grid(check)
 
     while not done:
         # --- Main event loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
+                
             elif pygame.mouse.get_pressed()[0]:
                 m_pos = pygame.mouse.get_pos()
 
@@ -254,6 +305,18 @@ def main():
                     new_y_pos = (m_pos[1]//HEIGHT)
 
                     if is_valid_move(movable_positions, new_x_pos, new_y_pos):
+
+                        
+                        ### responsible for dealing with castling
+                        if isinstance(figure_picked, King):
+                            if figure_picked.castling == False:
+                                board, figures = change_rook_position_when_castling(player_turn, new_x_pos, new_y_pos, figures, figure_picked, board)
+                                figure_picked.castling = True
+
+                        if isinstance(figure_picked, Rook):
+                            figure_picked.castling = True
+                            
+
 
                         board[figure_picked.pos_y][figure_picked.pos_x] = '0'   ## updating board position
                         board[new_y_pos][new_x_pos] = figure_picked.symbol

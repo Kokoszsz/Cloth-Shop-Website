@@ -32,3 +32,5 @@ Python selenium tests/__pycache__/test_logout.cpython-39-pytest-7.3.1.pyc
 .pytest_cache/CACHEDIR.TAG
 .pytest_cache/README.md
 Python programs/Chess/__pycache__/chess_pawn.cpython-311.pyc
+Python programs/Chess/__pycache__/chess_pawn.cpython-39.pyc
+Python programs/Chess/tempCodeRunnerFile.py

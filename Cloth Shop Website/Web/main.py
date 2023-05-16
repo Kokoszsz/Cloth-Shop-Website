@@ -3,11 +3,6 @@ from utils import filter_products, check_login, check_if_error
 from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
 
 
-
-
-
-
-
 app = Flask(__name__)
 app.secret_key = 'm23T#mr4weio4t4gsd$%@'
 

@@ -198,6 +198,7 @@ class Rook(Figure):
         self.image = pygame.image.load(os.path.join(dir_path, f'gfx/rook_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
+        self.castling = False
 
     def check_if_occupied(self, symbols_our, symbols_enemy, board):
         where_can_move = []
@@ -401,6 +402,7 @@ class King(Figure):
         self.image = pygame.image.load(os.path.join(dir_path, f'gfx/king_{self.color}.png'))
         self.object_image = pygame.transform.rotate(pygame.transform.scale(self.image, (80, 80)),0)
         self.object = pygame.Rect(pos_x*100, pos_y*100, 80, 80)
+        self.castling = False
 
 
     def check_if_occupied(self, symbols, board):
@@ -432,6 +434,13 @@ class King(Figure):
             if self.pos_x + 1 < 8 and self.pos_y - 1 >= 0:
                 if board[self.pos_y - 1][self.pos_x + 1] not in symbols:
                         where_can_move.append([self.pos_y - 1, self.pos_x + 1])
+
+
+            if self.castling == False:
+                if board[self.pos_y][1] == '0' and board[self.pos_y][2] == '0' and board[self.pos_y][3] == '0':
+                    where_can_move.append([self.pos_y, 1])
+                if board[self.pos_y][5] == '0' and board[self.pos_y][6] == '0':
+                    where_can_move.append([self.pos_y, 6])
             
 
         except:

@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-driver = webdriver.Firefox()
+driver = webdriver.Chrome()
 
 driver.get("http://localhost:5000")
 

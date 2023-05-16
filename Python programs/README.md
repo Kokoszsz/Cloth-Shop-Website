@@ -22,7 +22,6 @@ The objective of the game is to checkmate the opponent's king by placing it unde
 
 #### Important ####
 Not all rules are implemented like:
-- castling
 - swapping a pawn when it reaches the opposite edge
 - en passant move
 
