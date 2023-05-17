@@ -1,5 +1,5 @@
 import pygame, copy
-from chess_pawn import Pawn, Knight, Bishop, Rook, Queen, King
+from chess_figures import Pawn, Knight, Bishop, Rook, Queen, King
 
 # Define some colors
 GRAY = (128, 128, 128)
@@ -87,7 +87,7 @@ def erase_grid(check):
       
 
 def draw_board(figures, grid):
-    # Create the chessboard pattern
+    ## Create the chessboard pattern
     for row in range(8):
         for column in range(8):
 
@@ -101,7 +101,7 @@ def draw_board(figures, grid):
                             HEIGHT])
     
     for figure in figures:
-        screen.blit(figure.object_image, (figure.object.x + 10, figure.object.y + 10))
+        screen.blit(figure.object_image, (figure.figure_rect.x + 10, figure.figure_rect.y + 10))
 
 
 ## Higlights where selected figure can move and if it's occupied by an enemy
@@ -120,7 +120,7 @@ def highlight_selected_figure(figure_picked, grid):
 ## Selects a particular figure on a board
 def get_figure(figures, mouse_pos, player):
     for figure in figures:
-        if figure.object.x <= mouse_pos[0] and figure.object.x + WIDTH >= mouse_pos[0] and figure.object.y <= mouse_pos[1] and figure.object.y + HEIGHT >= mouse_pos[1]:
+        if figure.figure_rect.x <= mouse_pos[0] and figure.figure_rect.x + WIDTH >= mouse_pos[0] and figure.figure_rect.y <= mouse_pos[1] and figure.figure_rect.y + HEIGHT >= mouse_pos[1]:
             if player == figure.color:
                 return figure
             else:
@@ -144,37 +144,38 @@ def remove_captured_figure(figures, x_pos, y_pos, player_turn):
     return figures
 
 ## Checks if player's king will be under attack if player moves his figure (figure_picked)
-def is_king_in_check(position, figure_picked, board, player_turn, figures):
+def is_our_king_in_check(position, figure_picked, board, player_turn, figures):
 
     local_board = copy.deepcopy(board)
     local_board[figure_picked.pos_y][figure_picked.pos_x] = '0'   ## updating board position
     local_board[position[0]][position[1]] = figure_picked.symbol
 
-    for figure in figures:
-        if figure.color != player_turn:
+    for enemy_figure in figures:
+        if enemy_figure.color != player_turn:
 
-            if figure.pos_x == position[1] and figure.pos_y == position[0]: ##allows picked_figure to kill figure that is threatning a king
-                if figure_picked.symbol != 'k' or figure_picked.symbol != 'K': ## king canot kill a figure if he would be check again
-                    return False
-            
-            figure_positions = figure.check_if_can_move(local_board)
-            for figure_position in figure_positions:
-                if player_turn == 'white':
-                    if local_board[figure_position[0]][figure_position[1]] == 'K':
-                        return True
-                elif player_turn == 'black':
-                    if local_board[figure_position[0]][figure_position[1]] == 'k':
-                        return True
+            if enemy_figure.pos_x != position[1] or enemy_figure.pos_y != position[0]:
+
+                enemy_figure_positions = enemy_figure.check_if_can_move(local_board)
+
+                for enemy_figure_position in enemy_figure_positions:
+                    if player_turn == 'white':
+                        if local_board[enemy_figure_position[0]][enemy_figure_position[1]] == 'K':
+                            return True
+                    elif player_turn == 'black':
+                        if local_board[enemy_figure_position[0]][enemy_figure_position[1]] == 'k':
+                            return True
     return False
 
 ## Check if moving somewhere will cause own king to be under check
 def movable_positions_without_check(movable_positions, figure_picked, board, player, figures):
     new_movable_positions = []
     for position in movable_positions:
-        if not is_king_in_check(position, figure_picked, board, player, figures):
+        if not is_our_king_in_check(position, figure_picked, board, player, figures):
             new_movable_positions.append(position)
 
     return new_movable_positions
+
+## Get positions where picked figure can move
 def get_movable_positions(board, figure_picked, player_turn, figures):   
     movable_positions = figure_picked.check_if_can_move(board)
     movable_positions = movable_positions_without_check(movable_positions, figure_picked, board, player_turn, figures)
@@ -182,7 +183,7 @@ def get_movable_positions(board, figure_picked, player_turn, figures):
     return movable_positions
 
 ## Check if enemy king is under check
-def check_if_check(board, player_turn, figures, grid, check):
+def check_if_enemy_under_check(board, player_turn, figures, grid, check):
     for figure in figures:
         if figure.color == player_turn:
             positions = figure.check_if_can_move(board)
@@ -210,57 +211,34 @@ def check_if_no_more_moves(figures, player, board):
 
 def change_rook_position_when_castling(player_turn, new_x_pos, new_y_pos, figures, figure_picked, board):
     if player_turn == 'white':
-
         if new_y_pos == 7 and new_x_pos == 1:
-            board[7][0] = '0'
-            board[7][2] = 'T'
-            for figure in figures:
-                if figure.pos_x == 0 and figure.pos_y == 7:
-                    if figure.castling == False:
-                        figure.object.x = 100*2  ## updating rook sprite position
-                        figure.pos_x = 2     ## updating rook position
-                        figure.castling = True
-                    break
-
+            move_rook_castling(7, 0, 2, figures, board)
         elif new_y_pos == 7 and new_x_pos == 6:
-            board[7][7] = '0'
-            board[7][5] = 'T'
-            for figure in figures:
-                if figure.pos_x == 7 and figure.pos_y == 7:
-                    if figure.castling == False:
-                        figure.object.x = 100*5  ## updating rook sprite position
-                        figure.pos_x = 5 ## updating rook position
-                        figure.castling = True
-                    break
-
+            move_rook_castling(7, 7, 5, figures, board)
     elif player_turn == 'black':
         if new_y_pos == 0 and new_x_pos == 1:
-                board[0][0] = '0'
-                board[0][2] = 't'
-                for figure in figures:
-                    if figure.pos_x == 0 and figure.pos_y == 0:
-                        if figure.castling == False:
-                            figure.object.x = 100*2  ## updating rook sprite position
-                            figure.pos_x = 2     ## updating rook position
-                            figure.castling = True
-                        break
+            move_rook_castling(0, 0, 2, figures, board)
+        elif new_y_pos == 0 and new_x_pos == 6:
+            move_rook_castling(0, 7, 5, figures, board)
 
-        elif (new_y_pos == 0 and new_x_pos == 6):
-            board[0][7] = '0'
-            board[0][5] = 't'
-            for figure in figures:
-                if figure.pos_x == 0 and figure.pos_y == 7:
-                    if figure.castling == False:
-                        figure.object.x = 100*5  ## updating rook sprite position
-                        figure.pos_x = 5 ## updating rook position
-                        figure.castling = True
-                    break
-            
     return board, figures
 
 
-def main():
+def move_rook_castling(y_pos, old_x_pos, new_x_pos, figures, board):
+    board[y_pos][old_x_pos] = '0'
+    board[y_pos][new_x_pos] = 'T' if y_pos == 7 else 't'
+    for figure in figures:
+        if figure.pos_x == old_x_pos and figure.pos_y == y_pos:
+            if not figure.castling:
+                figure.figure_rect.x = 100 * new_x_pos  ## updating rook sprite position
+                figure.pos_x = new_x_pos  ## updating rook position
+                figure.castling = True
+            break
 
+
+
+def main():
+    
     ## define how board looks
     board = [   
         ['t','h','m','q','k','m','h','t'],
@@ -321,14 +299,14 @@ def main():
                         board[figure_picked.pos_y][figure_picked.pos_x] = '0'   ## updating board position
                         board[new_y_pos][new_x_pos] = figure_picked.symbol
                         
-                        figure_picked.object.x = 100*new_x_pos  ## updating sprite position
-                        figure_picked.object.y = 100*new_y_pos
+                        figure_picked.figure_rect.x = 100*new_x_pos  ## updating sprite position
+                        figure_picked.figure_rect.y = 100*new_y_pos
                         figure_picked.pos_x = new_x_pos     ## updating object position
                         figure_picked.pos_y = new_y_pos
 
                         figures = remove_captured_figure(figures, new_x_pos, new_y_pos, player_turn)
 
-                        grid, check = check_if_check(board, player_turn, figures, grid, check)
+                        grid, check = check_if_enemy_under_check(board, player_turn, figures, grid, check)
 
                         if check != None:
                             if check_if_no_more_moves(figures, enemy_turn, board):
@@ -342,6 +320,7 @@ def main():
 
                         for element in board:  ## control loop
                             print(element)
+                        print('')
 
                         ## Change which player's turn
                         temp = player_turn
