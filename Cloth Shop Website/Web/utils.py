@@ -17,11 +17,11 @@ def check_login(username, password, users):
     else:
         return 'Wrong Username', None
     
-def check_if_error(users, id, username, password, email):
+def check_if_error(users, username, email, password):
     if username != '':
         if email != '':
-            if all(user.name != username or user.id == id for user in users):
-                if all(user.email != email or user.id == id for user in users):
+            if all(user.name != username for user in users):
+                if all(user.email != email for user in users):
                     if password != '':
                         return ''
                     else:

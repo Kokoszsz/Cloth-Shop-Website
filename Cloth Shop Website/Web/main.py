@@ -117,8 +117,14 @@ def create_account():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        id = users[-1].id + 1 ## this should be changed
-        error = check_if_error(users, username, id, email, password)
+
+        id = users[-1].id + 1 
+        ids = [user.id for user in users ]
+        while id in ids:
+            id += 1
+        ## this should be changed
+
+        error = check_if_error(users, username, email, password)
 
         if error == '':
             
