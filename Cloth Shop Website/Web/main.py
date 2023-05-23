@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, jsonify, request, session, Flask
-from utils import filter_products, check_login, check_if_error
+from utils import filter_products, check_login, check_if_error, get_product_by_id
 from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
 
 
@@ -163,6 +163,17 @@ def delete_product(product_id):
             total_cost = round(total_cost, 2)
             return jsonify({'success': True, 'totalCost': total_cost, 'products': filtered_products})
     return jsonify({'success': False, 'message': 'Product not found in the basket'})
+
+
+@app.route('/product_detail/<int:product_id>')
+def product_detail(product_id):
+
+    product = get_product_by_id(products, product_id)
+    if product is not None:
+        return render_template('product_detail.html', product=product)
+    else:
+        # If product is None, return a custom error message or redirect to a different page
+        return render_template('product_not_found.html')
 
 
 

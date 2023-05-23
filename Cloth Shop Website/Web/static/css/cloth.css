@@ -193,6 +193,12 @@
 	border: none;
 	cursor: pointer;
 }
+
+.product-link {
+	display: block;
+	color: black;
+	text-decoration: none;
+}
   
 
 
