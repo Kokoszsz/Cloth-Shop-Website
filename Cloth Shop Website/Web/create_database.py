@@ -23,15 +23,15 @@ def insert_data_to_database(Session):
     ]
 
     products_data = [
-        (1, "Great T-shirt", "34", "t-shirt", "male", "grey_t_shirt.jpg"),
-        (2, "Brown T-shirt", "54", "t-shirt", "male", "borwn_t_shirt.png"),
-        (3, "Red T-shirt", "37", "t-shirt", "male", "another_red_t_shirt.jpg"),
-        (4, "Red T-shirt Extra", "69.99", "t-shirt", "male", "red_t_shirt.png"),
-        (5, "Black Shirt", "56.99", "shirt", "female", "black_shirt.png"),
-        (6, "Pink Shirt", "49.99", "shirt", "female", "pink_blouse.png"),
-        (7, "Standard Jeans", "59.99", "jeans", "female", "jeans.jpg"),
-        (8, "Jeans Extra", "79.99", "jeans", "female", "a_few_jeans.jpeg"),
-        (9, "Male Jeans", "56.99", "jeans", "male", "more_jeans.jpg")
+        (1, "Great T-shirt", 34, "t-shirt", "male", "grey_t_shirt.jpg"),
+        (2, "Brown T-shirt", 54, "t-shirt", "male", "borwn_t_shirt.png"),
+        (3, "Red T-shirt", 37, "t-shirt", "male", "another_red_t_shirt.jpg"),
+        (4, "Red T-shirt Extra", 69.99, "t-shirt", "male", "red_t_shirt.png"),
+        (5, "Black Shirt", 56.99, "shirt", "female", "black_shirt.png"),
+        (6, "Pink Shirt", 49.99, "shirt", "female", "pink_blouse.png"),
+        (7, "Standard Jeans", 59.99, "jeans", "female", "jeans.jpg"),
+        (8, "Jeans Extra", 79.99, "jeans", "female", "a_few_jeans.jpeg"),
+        (9, "Male Jeans", 56.99, "jeans", "male", "more_jeans.jpg")
     ]
 
     for user in users_data:

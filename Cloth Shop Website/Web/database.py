@@ -45,7 +45,7 @@ def get_users(Session):
 
 def get_products_to_dict(Session):
     session = Session()
-    results = session.query(Product.id, Product.name, Product.cost_to_show, Product.cloth_cathegory, Product.gender, Product.image).all()
+    results = session.query(Product.id, Product.name, Product.cost, Product.cloth_cathegory, Product.gender, Product.image).all()
     products = [Product(*r).to_dict() for r in results]
     session.close()
     return products

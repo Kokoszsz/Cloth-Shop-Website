@@ -49,7 +49,7 @@ def get_filtered_products():
 
     return jsonify({'products': filtered_products})
 
-@app.route("/my-route", methods=["POST"])
+@app.route("/add-to-basket", methods=["POST"])
 def my_route():
 
     product_ID = int(request.json["product_ID"])

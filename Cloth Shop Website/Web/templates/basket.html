@@ -15,13 +15,13 @@
         <div class="name"></div>
 
         <div class="container">
-            <h1 class="basket-heading">Your Basket: {{ total_cost }} $</h1>
+            <h1 class="basket-heading">Your Basket: {{ "{:.2f}".format(total_cost) }} $</h1>
             <div class="basket-items">
                 {% for product in products %}
                     <div class="basket-item">
                         <div class="basket-item-details">
                             <h3>{{ product.name }}</h3>
-                            <p>Price: {{ product.cost_to_show }} $</p>
+                            <p>Price: {{ "{:.2f}".format(product.cost) }} $</p>
                             <label for="quantity-{{ product.id }}">Quantity:</label>
                             <input type="number" id="quantity-{{ product.id }}" name="quantity-{{ product.id }}" min="1" value="1" onchange="updateQuantity('{{ product.id }}')">
                             <a href="#" class="remove-from-basket" id="{{ product.id }}">

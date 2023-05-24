@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, Float
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -34,16 +34,15 @@ class Product(Base):
 
     id = Column('id', Integer, primary_key = True)
     name = Column('name', String)
-    cost_to_show = Column('cost', String)
+    cost = Column('cost', Float)
     cloth_cathegory = Column('cloth_cathegory', String)
     gender = Column('gender', String)
     image = Column('image', String)
 
-    def __init__(self, id, name, cost_to_show, cloth_cathegory, gender, image):
+    def __init__(self, id, name, cost, cloth_cathegory, gender, image):
         self.id = id
         self.name= name
-        self.cost_to_show = cost_to_show
-        self.cost = float(cost_to_show)
+        self.cost = cost
         self.cloth_cathegory = cloth_cathegory
         self.gender = gender
         self.image = image
@@ -52,7 +51,6 @@ class Product(Base):
         return {
             'id': self.id,
             'name': self.name,
-            'cost_to_show': self.cost_to_show,
             'cost': self.cost,
             'cloth_cathegory': self.cloth_cathegory,
             'gender': self.gender,
