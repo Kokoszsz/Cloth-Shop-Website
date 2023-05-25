@@ -11,8 +11,6 @@ def create_database_Session(url):
     return Session
 
 
-
-
 def create_user(Session, id, name, password, email):
     session = Session()
     user = User(id, name, password, email)
@@ -20,7 +18,6 @@ def create_user(Session, id, name, password, email):
     session.commit()
     session.close()
     return user
-
 
 def update_user(Session, id, name, password, email, users):
     session = Session()
@@ -33,7 +30,6 @@ def update_user(Session, id, name, password, email, users):
         session.commit()
         session.close()
     return user
-
 
 
 def get_users(Session):

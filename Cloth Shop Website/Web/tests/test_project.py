@@ -1,5 +1,5 @@
-from database import update_user, create_user
-from models import User
+from database import update_user, create_user, get_users, get_products_to_dict
+from models import User, Product
 from unittest.mock import patch
 from utils import filter_products, check_login, check_if_error, get_product_by_id
 
@@ -21,13 +21,12 @@ def test_connection_basket(mock_products, client):
     ]
 
     mock_products.return_value = products
-
+    
     with client.session_transaction() as session:
         session['basket'] = [1, 2, 3]  
 
     response = client.get('/basket')
     assert response.status_code == 200
-
 
 def test_connection_login(client):
     response = client.get('/login')
@@ -37,8 +36,6 @@ def test_connection_create_account(client):
     response = client.get('/create_account')
     assert response.status_code == 200
 
-
-
 def test_title_home_page(client):
     response = client.get('/')
     assert b'<title>Kokosz Cloth Shop</title>' in response.data
@@ -47,38 +44,17 @@ def test_navigation_bar(client):
     response = client.get('/')
     assert b'<div class="menu">' in response.data
 
-def test_update_user(Session):
-    # Create test users
-    users = [
-        User(id=1, name="John", password="password", email="john@example.com"),
-        User(id=2, name="Jane", password="password", email="jane@example.com")
-    ]
 
-    # Update user 1
-    update_user(Session, 1, "New Name", "newpassword", "newemail@example.com", users)
-
-    # Retrieve user 1 from database and check attributes
-    session = Session()
-    db_user1 = session.query(User).filter_by(id=1).first()
-    session.close()
-    assert db_user1.name == "New Name"
-    assert db_user1.password == "newpassword"
-    assert db_user1.email == "newemail@example.com"
-
-    # Update user 3 (doesn't exist)
-    update_user(Session, 3, "New User", "newpassword", "newemail@example.com", users)
-
-    # Check that user list is still the same
-    assert len(users) == 2
-
+### Test functions from database.py
 
 
 def test_create_user(Session):
+
     # Define test data
-    user_id = 4
-    user_name = "Test User"
+    user_id = 1
+    user_name = "John"
     user_password = "password"
-    user_email = "testuser@example.com"
+    user_email = "john@example.com"
 
     # Create user
     user = create_user(Session, user_id, user_name, user_password, user_email)
@@ -98,9 +74,74 @@ def test_create_user(Session):
     assert db_user.email == user_email
     session.close()
 
+def test_get_users(Session):
+    users = get_users(Session)
+    # Make sure there is only one user creted in previous test
+    assert len(users) == 1
+
+    # Make sure data of this user is correct
+    assert users[0].id == 1
+    assert users[0].name == "John"
+    assert users[0].password == "password"
+    assert users[0].email == "john@example.com"
+
+    
+
+def test_update_user(Session):
+    # Create test users
+    users = [
+        User(id=1, name="John", password="password", email="john@example.com")
+    ]
+
+    # Update user 1
+    user = update_user(Session, 1, "New Name", "newpassword", "newemail@example.com", users)
+
+    # Check if user was properly updated
+    assert user.name == "New Name"
+    assert user.password == "newpassword"
+    assert user.email == "newemail@example.com"
+
+    # Retrieve user 1 from database and check attributes
+    session = Session()
+    db_user1 = session.query(User).filter_by(id=1).first()
+    session.close()
+    assert db_user1.name == "New Name"
+    assert db_user1.password == "newpassword"
+    assert db_user1.email == "newemail@example.com"
+
+    # Update user 3 (doesn't exist)
+    update_user(Session, 3, "New User", "newpassword", "newemail@example.com", users)
+
+    # Check that user list is still the same
+    assert len(users) == 1
+
+def test_get_products_to_dict(Session):
+    # Check if there are no products
+    product = get_products_to_dict(Session)
+    assert product == []
+
+    # Add a product  
+    session = Session()
+    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
+    session.merge(product)
+    session.commit()
+    session.close()
+
+    # Make sure there is only one product
+    products = get_products_to_dict(Session)
+    assert len(products) == 1
+
+    # Make sure data of added product is correct
+    assert products[0]['id'] == 1
+    assert products[0]['name'] == 'product_test'
+    assert products[0]['cost'] == 20
+    assert products[0]['cloth_cathegory'] == 'jeans'
+    assert products[0]['gender'] == 'male'
+    assert products[0]['image'] == 'image'
 
 
-### test functions from test_utils
+### Test functions from utils.py
+
 def test_filter_products():
     # Define test data
     products = [
