@@ -1,6 +1,6 @@
-from database import update_user, create_user, get_users, get_products_to_dict
-from models import User, Product
 from unittest.mock import patch
+from models import User, Product
+from database import update_user, create_user, get_users, get_products_to_dict
 from utils import filter_products, check_login, check_if_error, get_product_by_id
 
 def test_connection_home(client):
