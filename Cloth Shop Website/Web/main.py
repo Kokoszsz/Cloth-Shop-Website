@@ -112,7 +112,7 @@ def create_account():
             id += 1
         ## this should be changed
 
-        error = check_if_error(users, username, email, password)
+        error = check_if_error(users, id, username, email, password)
 
         if error == '':
             

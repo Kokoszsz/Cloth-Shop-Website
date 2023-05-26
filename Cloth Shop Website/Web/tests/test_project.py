@@ -221,27 +221,27 @@ def test_check_if_error():
     ]
 
     # Test case 1: Valid inputs, no errors expected
-    result = check_if_error(users, 'Alice', 'alice@example.com', 'password3')
+    result = check_if_error(users, 3, 'Alice', 'alice@example.com', 'password3')
     assert result == ''
 
     # Test case 2: Empty username, expect 'No Username' error
-    result = check_if_error(users, '', 'alice@example.com', 'password3')
+    result = check_if_error(users, 3, '', 'alice@example.com', 'password3')
     assert result == 'No Username'
 
     # Test case 3: Existing username, expect 'Already such a User' error
-    result = check_if_error(users, 'john', 'alice@example.com', 'password3')
+    result = check_if_error(users, 3, 'john', 'alice@example.com', 'password3')
     assert result == 'Already such a User'
 
     # Test case 4: Empty email, expect 'No E-mail' error
-    result = check_if_error(users, 'Alice', '', 'password3')
+    result = check_if_error(users, 3, 'Alice', '', 'password3')
     assert result == 'No E-mail'
 
     # Test case 5: Existing email, expect 'Already such an E-mail' error
-    result = check_if_error(users, 'Alice', 'john@example.com', 'password3')
+    result = check_if_error(users, 3, 'Alice', 'john@example.com', 'password3')
     assert result == 'Already such an E-mail'
 
     # Test case 6: Empty password, expect 'No password' error
-    result = check_if_error(users, 'Alice', 'alice@example.com', '')
+    result = check_if_error(users, 3, 'Alice', 'alice@example.com', '')
     assert result == 'No password'
 
 
