@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 
 
 
-driver = webdriver.Chrome()
+driver = webdriver.Firefox()
 
 driver.get('http://localhost:5000')
 

@@ -1,7 +1,7 @@
 from database import update_user, create_user, get_users, get_products_to_dict
 from models import User, Product
 from unittest.mock import patch
-from utils import filter_products, check_login, check_if_error, get_product_by_id
+from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
 
 def test_connection_home(client):
     response = client.get('/')
@@ -260,6 +260,46 @@ def test_get_product_by_id():
     # Test case 2: Invalid product ID, expect None to be returned
     result = get_product_by_id(products, 4)
     assert result is None
+
+def test_get_genders_and_kinds():
+    # Define test data
+    request1 = ['male', 't-shirt', 'shirt']
+    request2 = ['female', 'jeans']
+    request3 = ['male', 'female', 't-shirt', 'jeans', 'shirt']
+    request4 = []
+    request5 = ['jeans', 'shirt']
+    request6 = ['male', 'female']
+    
+    # Test first request
+    genders1, kinds1 = get_genders_and_kinds(request1)
+    assert genders1 == ['male']
+    assert kinds1 == ['t-shirt', 'shirt']
+
+    # Test second request
+    genders2, kinds2 = get_genders_and_kinds(request2)
+    assert genders2 == ['female']
+    assert kinds2 == ['jeans']
+
+    # Test third request
+    genders3, kinds3 = get_genders_and_kinds(request3)
+    assert genders3 == ['male', 'female']
+    assert kinds3 == ['t-shirt', 'jeans', 'shirt']
+
+    # Test fourth request
+    genders4, kinds4 = get_genders_and_kinds(request4)
+    assert genders4 == []
+    assert kinds4 == []
+
+    # Test fifth request
+    genders5, kinds5 = get_genders_and_kinds(request5)
+    assert genders5 == []
+    assert kinds5 == ['jeans', 'shirt']
+
+    # Test sixth request
+    genders6, kinds6 = get_genders_and_kinds(request6)
+    assert genders6 == ['male', 'female']
+    assert kinds6 == []
+
 
 
 

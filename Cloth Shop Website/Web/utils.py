@@ -40,4 +40,20 @@ def get_product_by_id(products, product_id):
         if product['id'] == product_id:
             return product
     return None
+
+def get_genders_and_kinds(request):
+    genders = []
+    kinds = []
+    if 'male' in request:
+        genders.append('male')
+    if 'female' in request:
+        genders.append('female')    
+    if 't-shirt' in request:
+        kinds.append('t-shirt')
+    if 'jeans' in request:
+        kinds.append('jeans')
+    if 'shirt' in request:
+        kinds.append('shirt')
+
+    return genders, kinds
     

@@ -200,7 +200,7 @@ class Shape:
     two: list[int]
     three: list[int]
 
-
+## Draws grid
 def grid():
     
     x = 0
@@ -212,6 +212,7 @@ def grid():
         y += (CELL_SIZE+1)
         pygame.draw.line(screen, (WHITE), (0,y), (WIDTH/2,y))
 
+## Draws board
 def draw_board(object, second_object, third_object, myfont, POINTS):
     screen.fill(BLACK)
     grid()
@@ -227,12 +228,13 @@ def draw_board(object, second_object, third_object, myfont, POINTS):
 
     pygame.display.update()
 
+## Creates a random object 
 def draw_object():
     which_object = random.choice(OBJECTS)
     return Object(which_object)
 
 
-
+## When there is a row of all red block, it disappears and every cell above goes down and player gets a score
 def check_if_score(object, second_object, third_object, myfont, POINTS, VELOCITY):
     for yy in range(HEIGHT//(CELL_SIZE+1) - 1,1,-1):
             if all(screen.get_at((x*(CELL_SIZE+1)+1,(yy)*(CELL_SIZE+1)+1)) == RED  for x in range((WIDTH//2)//(CELL_SIZE+1))):
@@ -250,24 +252,23 @@ def check_if_score(object, second_object, third_object, myfont, POINTS, VELOCITY
                 POINTS += 1
     return pygame.time.get_ticks() - VELOCITY, VELOCITY, POINTS
                 
-
+## Checks if player lost. Player loses when red objects touch top of the screen
 def check_if_lose(myBiggerFont):
     for cell in ALL_OBJECTS:
         if cell.y <= CELL_SIZE:
             text = myBiggerFont.render("YOU LOST", 1, (GREEN))
             screen.blit(text, (WIDTH/2 - text.get_width()/2, HEIGHT/2 - text.get_height()/2))
             pygame.display.update()
-            pygame.time.delay(5000)
+            pygame.time.delay(3000)
             main()
     
 
 
-
+## Responsible for moving current object down every loop
 def move_down(object, second_object, third_object):
     if all(cell.y < HEIGHT - (CELL_SIZE + 1) for cell in object.body) and all(RED != screen.get_at((cell.x, cell.y + (CELL_SIZE + 1))) for cell in object.body): 
         for cell in object.body:
             cell.y += (CELL_SIZE + 1)
-            
             
         return object, second_object, third_object
     else:
@@ -283,22 +284,28 @@ def move_down(object, second_object, third_object):
         third_object = draw_object()
         return object, second_object, third_object
 
+## Moves object to the left  
 def move_left(object):
     if all(cell.x > 1 for cell in object.body) and all(RED != screen.get_at((cell.x - CELL_SIZE, cell.y)) for cell in object.body):    ## if there is red not move
         for cell in object.body:
             cell.x -= (CELL_SIZE + 1)
+
+## Moves object to the right  
 def move_right(object):
     if all(cell.x < WIDTH//2 - CELL_SIZE for cell in object.body) and all(RED != screen.get_at((cell.x + 2*CELL_SIZE, cell.y)) for cell in object.body):  ## if there is red not move
         for cell in object.body:
             cell.x += (CELL_SIZE + 1)
 
 
+## Moves object immediately down
 def move_whole_down(object):
     while all(cell.y < HEIGHT - 2 * CELL_SIZE for cell in object.body) and all(RED != screen.get_at((cell.x, cell.y + 2 * CELL_SIZE)) for cell in object.body):
         for cell in object.body:
             cell.y += CELL_SIZE + 1
             
 
+
+## Function that handles all events
 def tetris_events(object, Pause, myBiggerFont):
 
     for event in pygame.event.get():

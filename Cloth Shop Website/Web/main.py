@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, jsonify, request, session, Flask
-from utils import filter_products, check_login, check_if_error, get_product_by_id
+from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
 from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
 
 
@@ -31,19 +31,7 @@ def get_filtered_products():
         min_value = 0
         max_value = 0
 
-    genders = []
-    kinds = []
-
-    if 'male' in request.form:
-        genders.append('male')
-    if 'female' in request.form:
-        genders.append('female')    
-    if 't-shirt' in request.form:
-        kinds.append('t-shirt')
-    if 'jeans' in request.form:
-        kinds.append('jeans')
-    if 'shirt' in request.form:
-        kinds.append('shirt')
+    genders, kinds = get_genders_and_kinds(request.form)
 
     filtered_products = filter_products(products, min_value, max_value, genders, kinds)
 
@@ -129,9 +117,7 @@ def create_account():
         if error == '':
             
             this_user = create_user(db_Session, id, username, password, email)
-
             users.append(this_user)
-
             session['user'] = this_user.to_dict()
 
             return redirect(url_for('account'))
