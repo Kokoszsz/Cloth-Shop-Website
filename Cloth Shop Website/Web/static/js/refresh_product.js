@@ -36,7 +36,7 @@ document.querySelector('.filter form').addEventListener('submit', function(e) {
   
             var price = document.createElement('p');
             price.className = 'price';
-            price.textContent = product.cost_to_show + ' $';
+            price.textContent = product.cost.toFixed(2) + ' $';
             productData.appendChild(price);
   
             var addToBasket = document.createElement('a');

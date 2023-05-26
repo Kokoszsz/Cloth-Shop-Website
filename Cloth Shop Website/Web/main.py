@@ -24,8 +24,8 @@ def cloth():
 
 @app.route('/filtered-products', methods=['POST'])
 def get_filtered_products():
-    min_value = int(request.form['minvalue'])
-    max_value = int(request.form['maxvalue'])
+    min_value = float(request.form['minvalue'])
+    max_value = float(request.form['maxvalue'])
 
     if min_value >= max_value:
         min_value = 0
