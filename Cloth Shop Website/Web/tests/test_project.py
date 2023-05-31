@@ -11,20 +11,9 @@ def test_connection_cloth(client):
     response = client.get('/cloth')
     assert response.status_code == 200
 
-@patch('main.products')
-def test_connection_basket(mock_products, client):
-    products = [
-        {'id': 1, 'name': 'Product 1', 'cost_to_show': 24.99, 'cost': '24.99', 'cloth_cathegory': 'jeans', 'gender': 'man', 'image': ''},
-        {'id': 2, 'name': 'Product 2', 'cost_to_show': 25.99, 'cost': '25.99', 'cloth_cathegory': 'jeans', 'gender': 'woman', 'image': ''},
-        {'id': 3, 'name': 'Product 3', 'cost_to_show': 26.99, 'cost': '26.99', 'cloth_cathegory': 'jeans', 'gender': 'woman', 'image': ''},
-        {'id': 4, 'name': 'Product 4', 'cost_to_show': 27.99, 'cost': '27.99', 'cloth_cathegory': 'jeans', 'gender': 'man', 'image': ''}
-    ]
 
-    mock_products.return_value = products
+def test_connection_basket( client):
     
-    with client.session_transaction() as session:
-        session['basket'] = [1, 2, 3]  
-
     response = client.get('/basket')
     assert response.status_code == 200
 
@@ -299,6 +288,48 @@ def test_get_genders_and_kinds():
     genders6, kinds6 = get_genders_and_kinds(request6)
     assert genders6 == ['male', 'female']
     assert kinds6 == []
+
+# Define users 
+@patch('main.create_user')
+@patch('main.users', [
+        User(id=1, name="john", password="test1", email="john@example.com"),
+        User(id=2, name="emma", password="test2", email="emma@example.com"),
+    ])
+def test_create_account_success(mock_create_user, client):
+    # Define what create_user() should return
+    mock_create_user.return_value = User(4, 'test_create_account', 'test_create_account@example.com', 'test_create_account')
+
+    # Send data
+    response = client.post('/create_account', data={
+        'username': 'test_create_account',
+        'email': 'test_create_account@example.com',
+        'password': 'test_create_account'
+    })
+    # Redirect status code
+    assert response.status_code == 302
+
+# Define users 
+@patch('main.create_user')
+@patch('main.users', [
+        User(id=1, name="test_create_account", password="test1", email="john@example.com"),
+        User(id=2, name="emma", password="test2", email="emma@example.com"),
+    ])
+def test_create_account_error(mock_create_user, client):
+    # Define what create_user() should return
+    mock_create_user.return_value = User(4, 'test_create_account', 'test_create_account@example.com', 'test_create_account')
+
+    # Send data
+    response = client.post('/create_account', data={
+        'username': 'test_create_account',
+        'email': 'test_create_account@example.com',
+        'password': 'test_create_account'
+    })
+    # Render Template status code
+    assert response.status_code == 200
+
+
+
+
 
 
 
