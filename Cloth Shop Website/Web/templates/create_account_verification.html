@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create Account Verification</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/create_account_verification.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="verification-box">
+            <form action="#" method="post">
+                <h1>Please enter the verification code</h1>
+                <p>An email containing a verification code has been sent to your email address. Please enter the code below:</p>
+                <input type="text" id="verification-code" name="verification-code" placeholder="Enter the verification code" maxlength="6">
+                <input type="submit" class="button" name="confirm" value="Confirm">
+                <input type="submit" class="button" name="resend" value="Send again">
+            </form>
+        </div>
+    </div>
+</body>
+</html>
