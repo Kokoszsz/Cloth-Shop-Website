@@ -25,8 +25,6 @@ def account_registration_verification(message, verification_code):
 
 def send_email(type_of_message, receiver):
 
-    print(receiver)
-
     sender = 'email adress that sends message'
     sender_password = 'password to that email'
 

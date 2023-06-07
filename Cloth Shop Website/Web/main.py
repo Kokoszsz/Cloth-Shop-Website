@@ -115,7 +115,8 @@ def create_account():
 
         if error == '':
 
-            verification_code = send_email('account registration verification', email)
+            verification_code = send_email('account registration verification')
+            
             session['new_user'] = {'id': id, 'username': username, 'password': password, 'email': email, 'verification code': verification_code}
 
             # this will be changed to appear after user provided valid code

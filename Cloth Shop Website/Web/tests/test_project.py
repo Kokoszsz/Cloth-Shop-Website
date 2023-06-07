@@ -290,33 +290,38 @@ def test_get_genders_and_kinds():
     assert kinds6 == []
 
 # Define users 
-@patch('main.create_user')
+@patch('main.send_email')
 @patch('main.users', [
-        User(id=1, name="john", password="test1", email="john@example.com"),
-        User(id=2, name="emma", password="test2", email="emma@example.com"),
-    ])
-def test_create_account_success(mock_create_user, client):
-    # Define what create_user() should return
-    mock_create_user.return_value = User(4, 'test_create_account', 'test_create_account@example.com', 'test_create_account')
-
+    User(id=1, name="john", password="test1", email="john@example.com"),
+    User(id=2, name="emma", password="test2", email="emma@example.com"),
+])
+def test_create_account_success(mock_send_email, client):
+    
+    # Mock the send_email function and set the return value
+    mock_send_email.return_value = 000000
+    
     # Send data
     response = client.post('/create_account', data={
         'username': 'test_create_account',
         'email': 'test_create_account@example.com',
         'password': 'test_create_account'
     })
+    
     # Redirect status code
     assert response.status_code == 302
 
+
+
 # Define users 
-@patch('main.create_user')
+@patch('main.send_email')
 @patch('main.users', [
         User(id=1, name="test_create_account", password="test1", email="john@example.com"),
         User(id=2, name="emma", password="test2", email="emma@example.com"),
     ])
-def test_create_account_error(mock_create_user, client):
-    # Define what create_user() should return
-    mock_create_user.return_value = User(4, 'test_create_account', 'test_create_account@example.com', 'test_create_account')
+def test_create_account_error(mock_send_email, client):
+
+    # Mock the send_email function and set the return value
+    mock_send_email.return_value = 000000
 
     # Send data
     response = client.post('/create_account', data={
