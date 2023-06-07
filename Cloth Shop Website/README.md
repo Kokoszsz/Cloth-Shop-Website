@@ -23,6 +23,8 @@ To install and run the project, follow these steps:
 4. Run the app by executing the main.py file.
 5. Go to http://localhost:5000 on your web browser to view the app.
 
+! Email feature is not working properly. While the code has been established, it is important to note that a dedicated email address for sending user messages is currently unavailable because of lack of proper email adress that could send messages.
+
 ### Documentation ###
 For more information about project go to [Cloth Shop Website Project Documents](./Documents)
 
