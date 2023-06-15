@@ -7,16 +7,16 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cloth.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontello.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/product_added_message.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/upper_bottom_black.css') }}"/>
        
     </head>
     <body>
-        <div class="main-box"></div>
+        <div class="upper-black "></div>
           
-        </div>
         <div class="name">
             {% include 'menu.html' %}
         </div>
-        <div class="name"></div>
+        <div class="bottom-black "></div>
 
         <div class = "content">
             
@@ -37,7 +37,7 @@
                         <label>Max value:</label>
                         <input type="number" name="maxvalue" value="0">
                     </div>
-                    <input type="submit" name = "filter_button" value = "Filter"class="filter-button"></input>
+                    <input type="submit" name="filter_button" value="Filter"class="filter-button"></input>
                     
                 </form>
 

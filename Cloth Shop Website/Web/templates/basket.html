@@ -6,16 +6,20 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/menu.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontello.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/basket.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/upper_bottom_black.css') }}"/>
        
     </head>
 
     <body>
-        <div class="main-box"></div>
+        <div class="upper-black"></div>
         {% include 'menu.html' %}
-        <div class="name"></div>
+        <div class="bottom-black"></div>
 
         <div class="container">
-            <h1 class="basket-heading">Your Basket: {{ "{:.2f}".format(total_cost) }} $</h1>
+            <div class="basket-header">
+                <h1 class="basket-heading">Your Basket: {{ "{:.2f}".format(total_cost) }} $</h1>
+                    <a href="/checkout" class="order-link" >Order</a>
+            </div>
             <div class="basket-items">
                 {% for product in products %}
                     <div class="basket-item">

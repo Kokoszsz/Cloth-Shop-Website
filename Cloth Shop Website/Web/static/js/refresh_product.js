@@ -29,10 +29,15 @@ document.querySelector('.filter form').addEventListener('submit', function(e) {
             var productData = document.createElement('div');
             productData.className = 'product-data';
             productDetails.appendChild(productData);
+
+            var productLink = document.createElement('a');
+            productLink.href = 'cloth/product_detail/' + product.id; 
+            productLink.className = 'product-link';
+            productData.appendChild(productLink);
   
             var name = document.createElement('h2');
             name.textContent = product.name;
-            productData.appendChild(name);
+            productLink.appendChild(name);
   
             var price = document.createElement('p');
             price.className = 'price';

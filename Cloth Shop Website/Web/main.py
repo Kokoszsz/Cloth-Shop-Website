@@ -171,7 +171,7 @@ def create_account_verification():
     # Render the verification template
     return render_template('create_account_verification.html')
 
-@app.route('/basket')
+@app.route('/basket', methods = ['GET'])
 def basket():
     filtered_products = [product for product in products if product['id'] in session['basket']]
     total_cost = sum(product['cost'] for product in filtered_products)
@@ -191,10 +191,15 @@ def delete_product(product_id):
             return jsonify({'success': True, 'totalCost': total_cost, 'products': filtered_products})
     return jsonify({'success': False, 'message': 'Product not found in the basket'})
 
+@app.route('/checkout')
+def order():
+    if 'user' in session:
+        return render_template('checkout.html')
+    return redirect(url_for('login'))
 
-@app.route('/product_detail/<int:product_id>')
+
+@app.route('/cloth/product_detail/<int:product_id>')
 def product_detail(product_id):
-
     product = get_product_by_id(products, product_id)
     if product is not None:
         return render_template('product_detail.html', product=product)

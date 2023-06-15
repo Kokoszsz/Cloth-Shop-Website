@@ -1,0 +1,11 @@
+.upper-black {
+    width: 100%;
+   background-color: black;
+   height: 8vh;
+}
+
+.bottom-black {
+	background-color: black;
+	height: 4vh;
+	width: 100%;
+}
