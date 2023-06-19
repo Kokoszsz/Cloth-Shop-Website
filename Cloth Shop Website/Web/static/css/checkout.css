@@ -1,0 +1,73 @@
+body {
+    background-color: white;
+    color: black;
+}
+
+.container {
+    width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid rgb(0, 0, 0);
+}
+
+h1 {
+    color: #bd8c8c;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: rgb(0, 0, 0);
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+textarea {
+    width: 95%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid rgb(0, 0, 0);
+}
+
+button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #bd8c8c;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+	background-color: #a67c7c;
+  }
+
+
+  #suggestions-container {
+    position: absolute;
+    z-index: 1;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    max-height: 150px;
+    overflow-y: auto;
+    width: 30%;
+  }
+  
+  .suggestion-item {
+    padding: 16px 24px;
+    cursor: pointer;
+  }
+  
+  .suggestion-item:hover {
+    background-color: #ddd;
+  }
+  
+
+

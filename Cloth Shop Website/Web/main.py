@@ -18,6 +18,10 @@ products = get_products_to_dict(db_Session)
 def home():
     return render_template('home.html')
 
+@app.route('/test')
+def test():
+    return render_template('test.html')
+
 
 @app.route('/cloth')
 def cloth():
@@ -115,7 +119,7 @@ def create_account():
 
         if error == '':
 
-            verification_code = send_email('account registration verification')
+            verification_code = send_email('account registration verification', email)
             
             session['new_user'] = {'id': id, 'username': username, 'password': password, 'email': email, 'verification code': verification_code}
 
@@ -193,9 +197,12 @@ def delete_product(product_id):
 
 @app.route('/checkout')
 def order():
-    if 'user' in session:
+    if session['basket']:
+        if 'user' in session:
+            user_info = session['user']
+            return render_template('checkout.html', user_info = user_info)
         return render_template('checkout.html')
-    return redirect(url_for('login'))
+    return redirect(url_for('basket'))
 
 
 @app.route('/cloth/product_detail/<int:product_id>')
@@ -212,6 +219,7 @@ def product_detail(product_id):
 def logout():
     if 'user' in session:
         session.pop('user', None)
+        session['basket'] = []
         return redirect(url_for('home'))
     else:
         pass
