@@ -3,6 +3,7 @@ name: Run Tests
 run-name: Web Tests
 
 on: [push]
+
 jobs:
   test:
     runs-on: ubuntu-latest
