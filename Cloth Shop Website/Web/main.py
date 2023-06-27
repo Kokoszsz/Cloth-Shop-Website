@@ -7,7 +7,7 @@ from send_email import send_email
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY_CLOTH_SHOP')
+app.secret_key = os.environ.get('SECRET_KEY_CLOTH_SHOP', 'DefaultSecretKeyTesting123456789')
 db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
 
