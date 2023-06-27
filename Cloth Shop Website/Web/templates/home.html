@@ -12,12 +12,13 @@
   <div class="main-box">
         <h1 class="main">Welcome to Kokosz Cloth Shop</h1>
   </div>
+  
 
     <div class="help">
     {% include 'menu.html' %}
     </div>
 
-    <div>
+    <div id="fade-container">
         
         <h2 class="main-headers">About us</h2>
         <h3 class="headers">Our history</h3>
@@ -48,5 +49,6 @@
 
       
       <script type="text/javascript" src="{{ url_for('static', filename='js/slide_bar.js') }}"></script>
+      <script type="text/javascript" src="{{ url_for('static', filename='js/text_gradually_appearing.js') }}"></script>
 </body>
 </html>

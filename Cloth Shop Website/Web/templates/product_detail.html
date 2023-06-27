@@ -7,6 +7,7 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/product_detail.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontello.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/product_added_message.css') }}"/>
+
        
     </head>
 
@@ -15,9 +16,14 @@
         {% include 'menu.html' %}
 
         <div class="container">
-            <div class="product-image">
-              <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+
+            <div class="product-image" id="img-container">
+              <div class="img-zoom-container">
+                <img id="product-image-id" src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+                <div id="myresult" class="img-zoom-result"></div>
+              </div>
             </div>
+
             <div class="product-details">
               <h1 class="product-name">{{ product.name }}</h1>
               <div class="price-icon">
@@ -37,4 +43,10 @@
         
     </body>
     <script type="text/javascript" src="{{ url_for('static', filename='js/add_to_basket.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/zoom_in.js') }}"></script>
+    <script>
+      // Initiate zoom effect:
+      imageZoom("product-image-id", "myresult");
+    </script>
+      
 </html>

@@ -1,12 +1,13 @@
-from flask import render_template, redirect, url_for, jsonify, request, session, Flask
+from flask import Flask, render_template, redirect, url_for, jsonify, request, session
+import os
 from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
 from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
 from send_email import send_email
 
 
-app = Flask(__name__)
-app.secret_key = 'm23T#mr4weio4t4gsd$%@'
 
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY_CLOTH_SHOP')
 db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
 
@@ -17,11 +18,6 @@ products = get_products_to_dict(db_Session)
 @app.route('/')
 def home():
     return render_template('home.html')
-
-@app.route('/test')
-def test():
-    return render_template('test.html')
-
 
 @app.route('/cloth')
 def cloth():
@@ -152,7 +148,7 @@ def create_account_verification():
                     session['user'] = user.to_dict()
 
                 else:
-                    print('wrong code')
+                    ## wrong code
                     return render_template('create_account_verification.html')
 
 
@@ -196,7 +192,7 @@ def delete_product(product_id):
     return jsonify({'success': False, 'message': 'Product not found in the basket'})
 
 @app.route('/checkout')
-def order():
+def checkout():
     if session['basket']:
         if 'user' in session:
             user_info = session['user']

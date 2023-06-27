@@ -35,7 +35,7 @@ It includes essential details such as the project's goals, objectives and an ove
 
 #### Jira Issues CSV ####
 
-The Jira Issues CSV file contains a comprehensive list of all current issues present in Jira as of the 14th of May 2023. These issues include tasks, test cases and other items related to the Cloth Shop Website project.
+The Jira Issues CSV file contains a comprehensive list of all current issues present in Jira as of the 27th of June 2023. These issues include tasks, test cases and other items related to the Cloth Shop Website project.
 The CSV file provides valuable information about each issue, including issue IDs, summaries, descriptions, priorities, and assignees. 
 
 

@@ -45,10 +45,15 @@ body::before {
 }
 
 .headers {
-    color: white;
-    font-size: 2em;
-    text-align: center;
-  }
+  color: white;
+  font-size: 2em;
+  text-align: center;
+}
+
+#fade-container > * {
+	opacity: 0;
+	transition: opacity 1s ease-in-out;
+}
 
 .panel {
   position: fixed;
@@ -69,6 +74,7 @@ body::before {
 .panel-content {
   padding: 20px;
 }
+
 
 
 
