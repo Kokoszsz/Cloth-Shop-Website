@@ -44,7 +44,6 @@
   
   .product-image {
     flex: 1;
-    display: flex;
     justify-content: center;
     align-items: flex-start;
   }
@@ -87,6 +86,32 @@
     color: black;
     text-align: center;
     margin-top: 20px;
+  }
+
+  .rating {
+    unicode-bidi: bidi-override;
+    direction: rtl;
+    text-align: center;
+  }
+
+  .rating input {
+    display: none;
+  }
+
+  .rating label {
+    display: inline-block;
+    padding: 5px;
+    font-size: 24px;
+    color: #ccc;
+    cursor: pointer;
+  }
+
+  .rating label::before {
+    content: "\2605";
+  }
+
+  .rating input:checked ~ label {
+    color: gold;
   }
   
   svg {

@@ -1,5 +1,5 @@
-from database import update_user, create_user, get_users, get_products_to_dict
-from models import User, Product
+from database import update_user, create_user, get_users, get_products_to_dict, get_ratings, create_rating, remove_rating, get_certain_rating
+from models import User, Product, Rating
 from unittest.mock import patch
 from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
 
@@ -128,6 +128,92 @@ def test_get_products_to_dict(Session):
     assert products[0]['gender'] == 'male'
     assert products[0]['image'] == 'image'
 
+def test_get_ratings(Session):
+    # Check if there are no ratings
+    ratings = get_ratings(Session)
+    assert ratings == []
+
+    # Add a rating  
+    session = Session()
+    rating = Rating(1, 3, 4, 2.1)
+    session.merge(rating)
+    session.commit()
+    session.close()
+
+    # Make sure there is only one product
+    ratings = get_ratings(Session)
+    assert len(ratings) == 1
+
+    # Make sure data of added product is correct
+    assert ratings[0].id == 1
+    assert ratings[0].product_id == 3
+    assert ratings[0].user_id == 4
+    assert ratings[0].rating_points == 2.1
+
+def test_create_rating(Session):
+    rating1 = (1, 3, 1, 3.5) 
+    rating_result = create_rating(Session, rating1[0], rating1[1], rating1[2], rating1[3])
+    assert rating_result == 'Could not find this product or this user'
+
+
+    # Add a product  
+    session = Session()
+    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
+    session.merge(product)
+    session.commit()
+
+    # Add a user
+    user = User(1, 'test123', '123', 'test@mail')
+    session.merge(user)
+    session.commit()
+    session.close()
+
+    rating1 = (1, 1, 1, 2.5) 
+    rating_result = create_rating(Session, rating1[0], rating1[1], rating1[2], rating1[3])
+    obj_rating_correct = Rating(*rating1)
+    assert rating_result.id == obj_rating_correct.id
+    assert rating_result.product_id == obj_rating_correct.product_id
+    assert rating_result.user_id == obj_rating_correct.user_id
+    assert rating_result.rating_points == obj_rating_correct.rating_points
+
+def test_get_certain_rating(Session):
+
+    # Add a rating  
+    session = Session()
+    rating = Rating(1, 2, 1, 2.0)
+    session.merge(rating)
+    session.commit()
+    session.close()
+
+    rating_obj = get_certain_rating(Session, 2, 1)
+    assert rating_obj.id == rating.id
+    assert rating_obj.product_id == rating.product_id
+    assert rating_obj.user_id == rating.user_id
+    assert rating_obj.rating_points == rating.rating_points
+
+def test_remove_rating(Session):
+    # Add a product  
+    session = Session()
+    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
+    session.merge(product)
+    session.commit()
+
+    # Add a user
+    user = User(1, 'test123', '123', 'test@mail')
+    session.merge(user)
+    session.commit()
+    session.close()
+
+    # Add a rating  
+    session = Session()
+    product = Rating(1, 1, 1, 3) 
+    session.merge(product)
+    session.commit()
+    session.close()
+
+    remove_rating(Session, 1, 1)
+    results = get_ratings(Session)
+    assert results == []
 
 ### Test functions from utils.py
 

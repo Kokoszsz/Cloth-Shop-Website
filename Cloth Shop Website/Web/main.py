@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, jsonify, request, session
 import os
 from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
-from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
+from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user, get_ratings, create_rating, remove_rating, get_certain_rating
 from send_email import send_email
 
 
@@ -14,6 +14,9 @@ db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/myd
 users = get_users(db_Session)
 print(users)
 products = get_products_to_dict(db_Session)
+print(products)
+ratings = get_ratings(db_Session)
+print(ratings)
 
 @app.route('/')
 def home():
@@ -204,11 +207,41 @@ def checkout():
 @app.route('/cloth/product_detail/<int:product_id>')
 def product_detail(product_id):
     product = get_product_by_id(products, product_id)
+    initial_rating = None
+    if 'user' in session:
+        user_id = session['user']['id']
+        rating_obj = get_certain_rating(db_Session, product_id, user_id)
+        if rating_obj:
+            initial_rating = rating_obj.rating_points
     if product is not None:
-        return render_template('product_detail.html', product=product)
+        return render_template('product_detail.html', product=product, initial_rating=initial_rating)
     else:
         # If product is None, return a custom error message or redirect to a different page
         return render_template('product_not_found.html')
+    
+@app.route('/save_rating', methods=['POST'])
+def save_rating():
+    data = request.get_json()
+    rating_data = float(data['rating'])
+    product_id_data = int(data['productId'])
+    user_id = session['user']['id']
+    id = ratings[-1].id + 1 
+    ids = [rating.id for rating in ratings]
+    while id in ids:
+        id += 1
+    create_rating(db_Session, id, product_id_data, user_id, rating_data)
+
+    return jsonify({'message': 'Rating saved successfully'})
+
+@app.route('/reset_rating', methods=['POST'])
+def reset_rating():
+    data = request.get_json()
+    product_id_data = int(data['productId'])
+    user_id = session['user']['id']
+
+    remove_rating(db_Session, product_id_data, user_id)
+    return jsonify({'message': 'Rating reset successfully'})
+
 
 
 @app.route('/logout')

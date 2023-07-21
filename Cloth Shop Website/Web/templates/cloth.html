@@ -25,18 +25,45 @@
 
                     <h3>Filter by:</h3>
                     <div class="checkboxes">
-                        <label><input type="checkbox" name="male" value="male"> Man</label><br>
-                        <label><input type="checkbox" name="female" value="female"> Woman</label><br>
-                        <label><input type="checkbox" name="t-shirt" value="t-shirt"> T-shirt</label><br>
-                        <label><input type="checkbox" name="jeans" value="jeans"> Jeans</label><br>
-                        <label><input type="checkbox" name="shirt" value="shirt"> Shirt</label><br>
-                    </div>
-                    <div class="inputs">
-                        <label>Min value:</label>
-                        <input type="number" name="minvalue" value="0">
-                        <label>Max value:</label>
-                        <input type="number" name="maxvalue" value="0">
-                    </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="male" value="male" id="maleCheckbox">
+                          <label class="form-check-label" for="maleCheckbox">
+                            Man
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="female" value="female" id="femaleCheckbox">
+                          <label class="form-check-label" for="femaleCheckbox">
+                            Woman
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="t-shirt" value="t-shirt" id="tshirtCheckbox">
+                          <label class="form-check-label" for="tshirtCheckbox">
+                            T-shirt
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="jeans" value="jeans" id="jeansCheckbox">
+                          <label class="form-check-label" for="jeansCheckbox">
+                            Jeans
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="shirt" value="shirt" id="shirtCheckbox">
+                          <label class="form-check-label" for="shirtCheckbox">
+                            Shirt
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <div class="inputs">
+                        <label for="minValueInput">Min value:</label>
+                        <input class="form-control" type="number" name="minvalue" value="0" id="minValueInput">
+                        <label for="maxValueInput">Max value:</label>
+                        <input class="form-control" type="number" name="maxvalue" value="0" id="maxValueInput">
+                      </div>
+                      
                     <input type="submit" name="filter_button" value="Filter"class="filter-button"></input>
                     
                 </form>

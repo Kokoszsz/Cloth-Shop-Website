@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import User, Product, Base
+from models import User, Product, Rating, Base
 
 
 
@@ -39,12 +39,91 @@ def get_users(Session):
     session.close()
     return users
 
+
+def get_user(Session, user_id):
+    session = Session()
+    result = session.query(User.id, User.name, User.password, User.email).filter(User.id == user_id).first()
+    session.close()
+
+    if result:
+        user = User(*result)
+        return user
+    else:
+        return None
+
+
 def get_products_to_dict(Session):
     session = Session()
     results = session.query(Product.id, Product.name, Product.cost, Product.cloth_cathegory, Product.gender, Product.image).all()
     products = [Product(*r).to_dict() for r in results]
     session.close()
     return products
+
+def get_product(Session, product_id):
+    session = Session()
+    result = session.query(Product.id, Product.name, Product.cost, Product.cloth_cathegory, Product.gender, Product.image).filter(Product.id == product_id).first()
+    session.close()
+
+    if result:
+        product = Product(*result)
+        return product
+    else:
+        return None
+
+
+def modify_rating(session, rating_obj, rating_points):
+    rating_obj.rating_points = rating_points
+    session.merge(rating_obj)
+    session.commit()
+    session.close()
+    return rating_obj
+
+
+def create_rating(Session, id, product_id, user_id, new_rating_points):
+    session = Session()
+
+    if get_user(Session, user_id) and get_product(Session, product_id):
+        rating_objects = session.query(Rating).all()
+        for rating_obj in rating_objects:
+            if rating_obj.product_id == product_id and rating_obj.user_id == user_id:
+                return modify_rating(session, rating_obj, new_rating_points)
+
+        rating_obj = Rating(id, product_id, user_id, new_rating_points)
+        session.merge(rating_obj)
+        session.commit()
+        session.close()
+        return rating_obj
+        
+
+    return 'Could not find this product or this user'
+
+
+def get_ratings(Session):
+    session = Session()
+    results = session.query(Rating).all()
+    session.close()
+    return results
+
+def get_certain_rating(Session, product_id, user_id):
+    session = Session()
+    rating = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
+    session.close()
+    return rating
+
+def remove_rating(Session, product_id, user_id):
+    session = Session()
+    rating = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
+
+    if rating:
+        session.delete(rating)
+        session.commit()
+        session.close()
+        return True  
+    else:
+        session.close()
+        return False  
+
+
 
 
 
