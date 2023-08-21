@@ -17,6 +17,8 @@
 
         <div class="container">
 
+          <div class="product-information">
+
             <div class="product-image" id="img-container">
               <div class="img-zoom-container">
                 <img id="product-image-id" src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
@@ -54,8 +56,29 @@
               </div>
               <p class="product-description">{{ product.description }}</p>
             </div>
+          </div>
 
-            
+
+          <div id="reviewForm">
+            <input type="text" id="reviewText" placeholder="Write something max 1000 characters...">
+            <button id="reviewButton" onclick="submitReview()" data-product-id="{{ product.id }}">Post Review</button>
+          </div>
+
+          <div id="reviews">
+            {% for review in initial_reviews %}
+              <div id = "revieContainer" class="reviewContainer" data-review-id="{{ review.id }}">
+                <div class="review">{{review.content}}</div>
+                {% if session['user'] %}
+                  {% if review.user_id == session['user'].id %}
+
+                  <button class="removeButton" onclick="removeReview(this)">Remove</button>
+
+                  {% endif %}
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          
         </div>
         {% include 'product_added_message.html' %}
         
@@ -63,6 +86,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/add_to_basket.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/zoom_in.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/rating.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/review.js') }}"></script>
     <script>
       // Initiate zoom effect:
       imageZoom("product-image-id", "myresult");

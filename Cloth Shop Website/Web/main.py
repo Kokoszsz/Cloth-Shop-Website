@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, jsonify, request, session
 import os
 from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
-from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user, get_ratings, create_rating, remove_rating, get_certain_rating
+from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
+from database import *
 from send_email import send_email
 
 
@@ -11,12 +12,13 @@ app.secret_key = os.environ.get('SECRET_KEY_CLOTH_SHOP', 'DefaultSecretKeyTestin
 db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
 
-users = get_users(db_Session)
-print(users)
+test_users = get_users(db_Session)
+print(test_users)
 products = get_products_to_dict(db_Session)
 print(products)
-ratings = get_ratings(db_Session)
-print(ratings)
+test_ratings = get_ratings(db_Session)
+print(test_ratings)
+print(get_all_reviews(db_Session))
 
 @app.route('/')
 def home():
@@ -64,6 +66,8 @@ def account():
             email = request.form['email']
             password = request.form['password']
 
+            users = get_users(db_Session)
+
             error = check_if_error(users, id, username, password, email)
 
             if error == '':
@@ -87,6 +91,7 @@ def login():
         username = request.form['login']
         password = request.form['password']
 
+        users = get_users(db_Session)
         potential_error, user_info = check_login(username, password, users)
 
 
@@ -108,11 +113,9 @@ def create_account():
         email = request.form['email']
         password = request.form['password']
 
-        id = users[-1].id + 1 
+        users = get_users(db_Session)
         ids = [user.id for user in users ]
-        while id in ids:
-            id += 1
-        ## this should be changed
+        id = max(ids)+1 ## this should be changed
 
         error = check_if_error(users, id, username, email, password)
 
@@ -147,7 +150,6 @@ def create_account_verification():
                 
                     session.pop('new_user', None)
                     user = create_user(db_Session, id, username, password, email)
-                    users.append(user)
                     session['user'] = user.to_dict()
 
                 else:
@@ -206,15 +208,18 @@ def checkout():
 
 @app.route('/cloth/product_detail/<int:product_id>')
 def product_detail(product_id):
-    product = get_product_by_id(products, product_id)
+    product_dict = get_product_by_id(products, product_id)
     initial_rating = None
+    initial_reviews = None
+    if product_dict:
+        initial_reviews = get_reviews_of_a_product(db_Session, product_dict['id'])
     if 'user' in session:
         user_id = session['user']['id']
         rating_obj = get_certain_rating(db_Session, product_id, user_id)
         if rating_obj:
             initial_rating = rating_obj.rating_points
-    if product is not None:
-        return render_template('product_detail.html', product=product, initial_rating=initial_rating)
+    if product_dict is not None:
+        return render_template('product_detail.html', product=product_dict, initial_rating=initial_rating, initial_reviews=initial_reviews, )
     else:
         # If product is None, return a custom error message or redirect to a different page
         return render_template('product_not_found.html')
@@ -225,10 +230,10 @@ def save_rating():
     rating_data = float(data['rating'])
     product_id_data = int(data['productId'])
     user_id = session['user']['id']
+    ratings = get_ratings(db_Session)
     id = ratings[-1].id + 1 
     ids = [rating.id for rating in ratings]
-    while id in ids:
-        id += 1
+    id = max(ids) + 1
     create_rating(db_Session, id, product_id_data, user_id, rating_data)
 
     return jsonify({'message': 'Rating saved successfully'})
@@ -241,6 +246,34 @@ def reset_rating():
 
     remove_rating(db_Session, product_id_data, user_id)
     return jsonify({'message': 'Rating reset successfully'})
+
+
+@app.route('/save_review', methods=['POST'])
+def save_review():
+    if not 'user' in session:
+         return jsonify({'message': 'user not logged in'})
+    data = request.get_json()
+    review_content = str(data['content'])
+    product_id_data = int(data['productId'])
+    user_id = session['user']['id']
+    reviews = get_all_reviews(db_Session)
+    ids = [review.id for review in reviews]
+    id = max(ids) + 1
+    review_object = create_review(db_Session, id, product_id_data, user_id, review_content)
+    if review_object:
+        object_id = review_object.id
+        return jsonify({'message': 'Review saved successfully', 'id': object_id})
+    else:
+        return jsonify({'message': 'error'})
+
+@app.route('/delete_review', methods=['POST'])
+def delete_review():
+    data = request.get_json()
+    print(data)
+    reviewId = int(data['reviewId'])
+
+    success = remove_review(db_Session, reviewId)
+    return jsonify({'success': success})
 
 
 

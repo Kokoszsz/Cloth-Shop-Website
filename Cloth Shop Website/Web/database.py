@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import User, Product, Rating, Base
+from models import User, Product, Rating, Review ,Base
 
 
 
@@ -122,6 +122,53 @@ def remove_rating(Session, product_id, user_id):
     else:
         session.close()
         return False  
+    
+    
+
+def create_review(Session, id, product_id, user_id, review_content):
+    session = Session()
+    if get_user(Session, user_id) and get_product(Session, product_id):
+        review_objects = session.query(Review).all()
+        for review_object in review_objects:
+            if review_object.product_id == product_id and review_object.user_id == user_id:
+                print("User already created review for this product")
+                return False
+            
+
+        review_object = Review(id, product_id, user_id, review_content)
+        session.merge(review_object)
+        session.commit()
+        session.close()
+        return review_object
+    
+def get_reviews_of_a_product(Session, product_id):
+    session = Session()
+    reviews = session.query(Review).filter_by(product_id=product_id).all()
+    session.close()
+    return reviews
+
+def get_all_reviews(Session):
+    session = Session()
+    reviews = session.query(Review).all()
+    session.close()
+    return reviews
+
+
+
+def remove_review(Session, review_id):
+    session = Session()
+    review = session.query(Review).filter_by(id=review_id).first()
+
+    if review:
+        session.delete(review)
+        session.commit()
+        session.close()
+        return True  
+    else:
+        session.close()
+        return False  
+
+    
 
 
 

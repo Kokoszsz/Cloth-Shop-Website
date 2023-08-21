@@ -10,7 +10,7 @@ star.addEventListener('click', () => {
   // Create a data object to send as JSON
   const data = { rating: rating, productId: productId };
 
-  // Send the rating and product ID to your Flask app using the Fetch API
+  // Send the rating and product ID to Flask app 
   fetch('/save_rating', {
     method: 'POST',
     headers: {
@@ -21,7 +21,6 @@ star.addEventListener('click', () => {
     .then((response) => response.json())
     .then((data) => {
       console.log('User rated: ' + rating + ' for product ID: ' + productId);
-      // You can handle the response from the server here if needed.
     })
     .catch((error) => {
       console.error('Error sending rating:', error);
@@ -30,14 +29,12 @@ star.addEventListener('click', () => {
 );
 
 resetBtn.addEventListener('click', () => {
-    // Reset the rating by unchecking all radio buttons
-
     
     stars.forEach((star) => (star.checked = false));
     
     const productId = resetBtn.closest('.rating').dataset.productId;
     const data = {productId: productId};
-    // Send the rating and product ID to your Flask app using the Fetch API
+    // Send the rating and product ID to Flask app
     fetch('/reset_rating', {
         method: 'POST',
         headers: {

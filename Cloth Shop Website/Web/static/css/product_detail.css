@@ -13,6 +13,12 @@
     max-width: 80%;
     margin: 0 auto;
     padding: 50px;
+    display: block;
+    position: relative;
+  }
+
+  .product-information {
+    margin: 0 auto;
     display: flex;
     align-items: flex-start;
     position: relative;
@@ -117,6 +123,38 @@
   svg {
     color: black;
   }
+
+
+  #reviewForm {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 40px;
+}
+
+#reviewText {
+    width: 70%;
+    padding: 5px;
+}
+
+#reviewButton {
+    padding: 5px 10px;
+    background-color: #bd8c8c;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.reviewContainer {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.review {
+    margin-bottom: 10px;
+}
   
 
   

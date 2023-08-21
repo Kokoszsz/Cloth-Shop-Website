@@ -1,7 +1,8 @@
-from database import update_user, create_user, get_users, get_products_to_dict, get_ratings, create_rating, remove_rating, get_certain_rating
-from models import User, Product, Rating
+from database import *
+from models import User, Product, Rating, Review
 from unittest.mock import patch
 from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
+from flask import session
 
 def test_connection_home(client):
     response = client.get('/')
@@ -215,6 +216,126 @@ def test_remove_rating(Session):
     results = get_ratings(Session)
     assert results == []
 
+def test_create_review(Session):
+
+
+    # Add a product  
+    session = Session()
+    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
+    session.merge(product)
+    session.commit()
+
+    # Add a user
+    user = User(1, 'test123', '123', 'test@mail')
+    session.merge(user)
+    session.commit()
+    session.close()
+
+    review = (1, 1, 1, 'great product') 
+    review_object = create_review(Session, review[0], review[1], review[2], review[3])
+
+
+    obj_review_correct = Review(*review)
+    assert review_object.id == obj_review_correct.id
+    assert review_object.product_id == obj_review_correct.product_id
+    assert review_object.user_id == obj_review_correct.user_id
+    assert review_object.content == obj_review_correct.content
+
+def test_create_review(Session):
+
+
+    # Add a product  
+    session = Session()
+    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
+    session.merge(product)
+    session.commit()
+
+    # Add a user
+    user = User(1, 'test123', '123', 'test@mail')
+    session.merge(user)
+    session.commit()
+    session.close()
+
+    review = (1, 1, 1, 'great product') 
+    review_object = create_review(Session, review[0], review[1], review[2], review[3])
+
+
+    obj_review_correct = Review(*review)
+    assert review_object.id == obj_review_correct.id
+    assert review_object.product_id == obj_review_correct.product_id
+    assert review_object.user_id == obj_review_correct.user_id
+    assert review_object.content == obj_review_correct.content
+
+def test_get_reviews_of_a_product(Session):
+    # Add a product
+    session = Session()
+    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
+    session.merge(product)
+    session.commit()
+    session.close()
+
+    # Add reviews
+    reviews = [
+        (1, 1, 1, 'great product'),
+        (2, 1, 2, 'nice quality'),
+        (3, 1, 3, 'not satisfied')
+    ]
+
+    session = Session()
+    for review in reviews:
+        session.merge(Review(*review))
+    session.commit()
+
+    product_reviews = get_reviews_of_a_product(Session, 1)
+    assert len(product_reviews) == len(reviews)
+    for x, review in enumerate(product_reviews):
+        assert review.id == reviews[x][0]
+        assert review.product_id == reviews[x][1]
+        assert review.user_id == reviews[x][2]
+        assert review.content == reviews[x][3]
+
+    session.close()
+
+def test_get_all_reviews(Session):
+    # Add reviews
+    reviews = [
+        (1, 1, 1, 'great product'),
+        (2, 2, 2, 'nice quality'),
+        (3, 3, 3, 'not satisfied')
+    ]
+
+    session = Session()
+    for review in reviews:
+        session.merge(Review(*review))
+    session.commit()
+
+    all_reviews = get_all_reviews(Session)
+    assert len(all_reviews) == len(reviews)
+
+    session.close()
+
+def test_remove_review(Session):
+    # Add a review
+    session = Session()
+    review = Review(1, 1, 1, 'good review')
+    session.merge(review)
+    session.commit()
+    session.close()
+
+    # Remove the review
+    review_id = 1
+    result = remove_review(Session, review_id)
+    assert result is True
+
+    # Check if the review is removed
+    session = Session()
+    removed_review = session.query(Review).filter_by(id=review_id).first()
+    session.close()
+    assert removed_review is None
+
+
+
+
 ### Test functions from utils.py
 
 def test_filter_products():
@@ -377,33 +498,6 @@ def test_get_genders_and_kinds():
 
 # Define users 
 @patch('main.send_email')
-@patch('main.users', [
-    User(id=1, name="john", password="test1", email="john@example.com"),
-    User(id=2, name="emma", password="test2", email="emma@example.com"),
-])
-def test_create_account_success(mock_send_email, client):
-    
-    # Mock the send_email function and set the return value
-    mock_send_email.return_value = 000000
-    
-    # Send data
-    response = client.post('/create_account', data={
-        'username': 'test_create_account',
-        'email': 'test_create_account@example.com',
-        'password': 'test_create_account'
-    })
-    
-    # Redirect status code
-    assert response.status_code == 302
-
-
-
-# Define users 
-@patch('main.send_email')
-@patch('main.users', [
-        User(id=1, name="test_create_account", password="test1", email="john@example.com"),
-        User(id=2, name="emma", password="test2", email="emma@example.com"),
-    ])
 def test_create_account_error(mock_send_email, client):
 
     # Mock the send_email function and set the return value
@@ -416,7 +510,26 @@ def test_create_account_error(mock_send_email, client):
         'password': 'test_create_account'
     })
     # Render Template status code
+    assert response.status_code == 302
+
+# Mock the get_users function to return some existing users
+@patch('main.get_users')
+def test_create_account_errorr(mock_get_users, client):
+    # Mock the get_users function to return some existing users
+    mock_get_users.return_value = [
+        User(id=1, name="john", password="test1", email="john@example.com"),
+        User(id=2, name="emma", password="test2", email="emma@example.com"),
+    ]
+
+    response = client.post('/create_account', data={
+        'username': 'john',  # This username already exists
+        'email': 'test_create_account@example.com',
+        'password': 'test_create_account'
+    })
+
     assert response.status_code == 200
+
+    
 
 
 

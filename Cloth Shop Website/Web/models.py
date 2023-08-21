@@ -1,6 +1,7 @@
 from typing import Any
-from sqlalchemy import Column, String, Integer, Float
+from sqlalchemy import Column, String, Integer, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+import datetime
 
 Base = declarative_base()
 
@@ -86,3 +87,32 @@ class Rating(Base):
 
     def __repr__(self):
         return f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), rating points ({self.rating_points})"
+    
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    id = Column('id', Integer, primary_key=True)
+    product_id = Column('product_id', Integer)
+    user_id = Column('user_id', Integer)
+    content = Column('content', String)
+    date = Column('date', DateTime, default=datetime.datetime.utcnow)
+
+    def __init__(self, id, product_id, user_id, content) -> None:
+        self.id = id
+        self.product_id = product_id
+        self.user_id = user_id
+        self.content = content
+ 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_id': self.product_id,
+            'user_id': self.user_id,
+            'content': self.content,
+            'date': self.date
+        }
+        
+
+    def __repr__(self):
+        return f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), review content ({self.content}), review date ({self.date})"
