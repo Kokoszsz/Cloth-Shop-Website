@@ -63,21 +63,22 @@
             <input type="text" id="reviewText" placeholder="Write something max 1000 characters...">
             <button id="reviewButton" onclick="submitReview()" data-product-id="{{ product.id }}">Post Review</button>
           </div>
-
+          <div id="errorContainer"></div>
+          
           <div id="reviews">
+            
             {% for review in initial_reviews %}
-              <div id = "revieContainer" class="reviewContainer" data-review-id="{{ review.id }}">
-                <div class="review">{{review.content}}</div>
-                {% if session['user'] %}
-                  {% if review.user_id == session['user'].id %}
-
-                  <button class="removeButton" onclick="removeReview(this)">Remove</button>
-
-                  {% endif %}
-                {% endif %}
-              </div>
+                <div id="revieContainer" class="reviewContainer" data-review-id="{{ review.id }}">
+                    <div class="review">{{review.content}}</div>
+                    {% if session['user'] %}
+                        {% if review.user_id == session['user'].id %}
+                            <button class="removeButton" onclick="removeReview(this)">Remove</button>
+                        {% endif %}
+                    {% endif %}
+                </div>
             {% endfor %}
-          </div>
+        </div>
+        
           
         </div>
         {% include 'product_added_message.html' %}

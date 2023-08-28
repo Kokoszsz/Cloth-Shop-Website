@@ -233,7 +233,10 @@ def save_rating():
     ratings = get_ratings(db_Session)
     id = ratings[-1].id + 1 
     ids = [rating.id for rating in ratings]
-    id = max(ids) + 1
+    try:
+        id = max(ids) + 1
+    except:
+        id = 1
     create_rating(db_Session, id, product_id_data, user_id, rating_data)
 
     return jsonify({'message': 'Rating saved successfully'})
@@ -258,7 +261,10 @@ def save_review():
     user_id = session['user']['id']
     reviews = get_all_reviews(db_Session)
     ids = [review.id for review in reviews]
-    id = max(ids) + 1
+    try:
+        id = max(ids) + 1
+    except:
+        id = 1
     review_object = create_review(db_Session, id, product_id_data, user_id, review_content)
     if review_object:
         object_id = review_object.id

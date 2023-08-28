@@ -133,6 +133,11 @@
     padding: 40px;
 }
 
+#reviews {
+  padding: 40px;
+
+}
+
 #reviewText {
     width: 70%;
     padding: 5px;
