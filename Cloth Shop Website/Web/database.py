@@ -50,6 +50,7 @@ def get_user(Session, user_id):
         return user
     else:
         return None
+    
 
 
 def get_products_to_dict(Session):

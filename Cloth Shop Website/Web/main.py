@@ -1,10 +1,9 @@
 from flask import Flask, render_template, redirect, url_for, jsonify, request, session
 import os
-from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
-from database import create_database_Session, get_users, get_products_to_dict, update_user, create_user
+from utils import *
 from database import *
 from send_email import send_email
-
+from werkzeug.routing import BaseConverter
 
 
 app = Flask(__name__)
@@ -19,6 +18,15 @@ print(products)
 test_ratings = get_ratings(db_Session)
 print(test_ratings)
 print(get_all_reviews(db_Session))
+
+app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
+
+
+def url_name_filter(value):
+    return value.replace(" ", "-")
+
+app.jinja_env.filters['url_name'] = url_name_filter
+
 
 @app.route('/')
 def home():
@@ -206,20 +214,25 @@ def checkout():
     return redirect(url_for('basket'))
 
 
-@app.route('/cloth/product_detail/<int:product_id>')
-def product_detail(product_id):
-    product_dict = get_product_by_id(products, product_id)
+@app.route('/cloth/product_detail/<product_name>')
+def product_detail(product_name):
+
+    product_name = product_name.replace("-", " ")
+    product_name = product_name.replace('T shirt', "T-shirt") ## temp solution
+
+    product_dict = get_product_by_name(products, product_name)
     initial_rating = None
     initial_reviews = None
+    users = get_users(db_Session)
     if product_dict:
         initial_reviews = get_reviews_of_a_product(db_Session, product_dict['id'])
     if 'user' in session:
         user_id = session['user']['id']
-        rating_obj = get_certain_rating(db_Session, product_id, user_id)
+        rating_obj = get_certain_rating(db_Session, product_name, user_id)
         if rating_obj:
             initial_rating = rating_obj.rating_points
     if product_dict is not None:
-        return render_template('product_detail.html', product=product_dict, initial_rating=initial_rating, initial_reviews=initial_reviews, )
+        return render_template('product_detail.html', product=product_dict, initial_rating=initial_rating, initial_reviews=initial_reviews, users=users)
     else:
         # If product is None, return a custom error message or redirect to a different page
         return render_template('product_not_found.html')

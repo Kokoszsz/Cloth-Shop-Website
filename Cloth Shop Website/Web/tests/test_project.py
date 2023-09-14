@@ -1,7 +1,7 @@
 from database import *
 from models import User, Product, Rating, Review
 from unittest.mock import patch
-from utils import filter_products, check_login, check_if_error, get_product_by_id, get_genders_and_kinds
+from utils import filter_products, check_login, check_if_error, get_product_by_name, get_genders_and_kinds
 from flask import session
 
 def test_connection_home(client):
@@ -441,7 +441,7 @@ def test_check_if_error():
     assert result == 'No password'
 
 
-def test_get_product_by_id():
+def test_get_product_by_name():
     # Define test data
     products = [
         {'id': 1, 'name': 'cloth1', 'cost_to_show': '10', 'cost': 10, 'cloth_cathegory': 'Shirt', 'gender': 'Male', 'image': 'test'},
@@ -450,11 +450,11 @@ def test_get_product_by_id():
     ]
 
     # Test case 1: Valid product ID, expect product to be returned
-    result = get_product_by_id(products, 2)
+    result = get_product_by_name(products, 'cloth2')
     assert result == {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test'}
 
     # Test case 2: Invalid product ID, expect None to be returned
-    result = get_product_by_id(products, 4)
+    result = get_product_by_name(products, 'cloth4')
     assert result is None
 
 def test_get_genders_and_kinds():

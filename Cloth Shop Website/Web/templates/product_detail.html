@@ -58,18 +58,22 @@
             </div>
           </div>
 
-
-          <div id="reviewForm">
-            <input type="text" id="reviewText" placeholder="Write something max 1000 characters...">
-            <button id="reviewButton" onclick="submitReview()" data-product-id="{{ product.id }}">Post Review</button>
-          </div>
-          <div id="errorContainer"></div>
+          {% if "user" in session %}
+            <div id="reviewForm">
+              <input type="text" id="reviewText" placeholder="Write something, max 1000 characters...">
+              <button id="reviewButton" onclick="submitReview()" data-product-id="{{ product.id }}">Post Review</button>
+            </div>
+            <div id="errorContainer"></div>
+          {% endif %}
           
           <div id="reviews">
-            
             {% for review in initial_reviews %}
                 <div id="revieContainer" class="reviewContainer" data-review-id="{{ review.id }}">
-                    <div class="review">{{review.content}}</div>
+                    <div class="reviewHeader">
+                        <span class="userName">{{ users|get_username_by_id(review.user_id) }}</span>
+                        <span class="reviewDate">{{ review.date }}</span>
+                    </div>
+                    <div class="review">{{ review.content }}</div>
                     {% if session['user'] %}
                         {% if review.user_id == session['user'].id %}
                             <button class="removeButton" onclick="removeReview(this)">Remove</button>
@@ -78,6 +82,7 @@
                 </div>
             {% endfor %}
         </div>
+        
         
           
         </div>

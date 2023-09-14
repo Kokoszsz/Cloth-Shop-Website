@@ -35,9 +35,9 @@ def check_if_error(users, id, username, email, password):
     else:
         return 'No Username'
     
-def get_product_by_id(products, product_id):
+def get_product_by_name(products, product_name):
     for product in products:
-        if product['id'] == product_id:
+        if product['name'] == product_name:
             return product
     return None
 
@@ -56,4 +56,13 @@ def get_genders_and_kinds(request):
         kinds.append('shirt')
 
     return genders, kinds
+
+
+
+def get_username_by_id_filter(users, user_id):
+    for user in users:
+        if user.id == user_id:
+            return user.name
+    return 'Unknown' 
+
     
