@@ -28,6 +28,11 @@ def url_name_filter(value):
 app.jinja_env.filters['url_name'] = url_name_filter
 
 
+@app.template_filter('nl2br')
+def nl2br_filter(s):
+    return s.replace('\n', '<br>')
+
+
 @app.route('/')
 def home():
     return render_template('home.html')

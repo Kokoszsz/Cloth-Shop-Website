@@ -1,0 +1,22 @@
+<div id="reviews">
+    {% for review in initial_reviews %}
+        <div id="reviewContainer" class="reviewContainer" data-review-id="{{ review.id }}">
+            <div class="reviewHeader">
+                <div class="headerLeft">
+                    <span class="userName">{{ users|get_username_by_id(review.user_id) }}</span>
+                    <div></div> <!-- place for user icon -->
+                    <div class="date">
+                        <span class="reviewDate">{{ review.date }}</span>
+                    </div>
+                </div>
+                <div class="reviewContent">{{ review.content|nl2br|safe }}</div>
+            </div>
+            
+            {% if session['user'] %}
+                {% if review.user_id == session['user'].id %}
+                    <button class="removeButton" onclick="removeReview(this)">Remove</button>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>

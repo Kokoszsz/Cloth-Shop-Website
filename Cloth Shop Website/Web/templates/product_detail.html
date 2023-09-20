@@ -7,6 +7,7 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/product_detail.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontello.css') }}"/>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/product_added_message.css') }}"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reviews.css') }}"/>
 
        
     </head>
@@ -60,28 +61,13 @@
 
           {% if "user" in session %}
             <div id="reviewForm">
-              <input type="text" id="reviewText" placeholder="Write something, max 1000 characters...">
+              <textarea id="reviewText" placeholder="Write something, max 1000 characters..."></textarea>
               <button id="reviewButton" onclick="submitReview()" data-product-id="{{ product.id }}">Post Review</button>
             </div>
             <div id="errorContainer"></div>
           {% endif %}
           
-          <div id="reviews">
-            {% for review in initial_reviews %}
-                <div id="revieContainer" class="reviewContainer" data-review-id="{{ review.id }}">
-                    <div class="reviewHeader">
-                        <span class="userName">{{ users|get_username_by_id(review.user_id) }}</span>
-                        <span class="reviewDate">{{ review.date }}</span>
-                    </div>
-                    <div class="review">{{ review.content }}</div>
-                    {% if session['user'] %}
-                        {% if review.user_id == session['user'].id %}
-                            <button class="removeButton" onclick="removeReview(this)">Remove</button>
-                        {% endif %}
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
+          {% include 'reviews.html' %}
         
         
           

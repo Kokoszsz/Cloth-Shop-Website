@@ -1,0 +1,46 @@
+.reviewContainer {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.reviewHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 5px;
+}
+
+.headerLeft {
+    display: flex;
+    width: 10%;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.reviewContent {
+    border: 2px solid #ccc;
+    width: 80%;
+    word-wrap: break-word; 
+    display:inline-block;
+}
+
+.userName {
+    margin-right: 10px;
+}
+
+.date {
+    padding: 5%;
+}
+
+.reviewDate {
+    text-align: right;
+}
+
+.removeButton {
+    width: auto;
+    margin-top: 5px;
+}

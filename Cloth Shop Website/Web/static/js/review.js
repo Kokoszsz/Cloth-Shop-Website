@@ -90,26 +90,73 @@ async function removeReview(buttonElement) {
 
 
 function displayReview(text, reviewId) {
+    // Create reviewContainer div
     const reviewContainer = document.createElement("div");
     reviewContainer.classList.add("reviewContainer");
-    reviewContainer.id = 'reviewContainer';
-    reviewContainer.setAttribute("data-review-id", reviewId);
+    reviewContainer.dataset.reviewId = reviewId;
 
-    const reviewDiv = document.createElement("div");
-    reviewDiv.classList.add("review");
-    reviewDiv.textContent = text;
+    // Create reviewHeader div
+    const reviewHeader = document.createElement("div");
+    reviewHeader.classList.add("reviewHeader");
 
+    // Create headerLeft div
+    const headerLeft = document.createElement("div");
+    headerLeft.classList.add("headerLeft");
+
+    // Create userName span
+    const userName = document.createElement("span");
+    userName.classList.add("userName");
+    // Replace this with the logic to get the username by ID
+    userName.textContent = "User Name"; // Example username
+
+    // Create userIcon div
+    const userIcon = document.createElement("div");
+    // Add the logic to set the user icon
+
+    // Append userName and userIcon to headerLeft
+    headerLeft.appendChild(userName);
+    headerLeft.appendChild(userIcon);
+
+    // Create reviewContent div
+    const reviewContent = document.createElement("div");
+    reviewContent.classList.add("reviewContent");
+    // Set innerHTML to properly render line breaks
+    reviewContent.innerHTML = text;
+
+    // Enable word wrapping
+    reviewContent.style.wordWrap = "break-word";
+
+    // Append headerLeft, reviewContent, and headerRight to reviewHeader
+    reviewHeader.appendChild(headerLeft);
+    reviewHeader.appendChild(reviewContent);
+
+
+    // Create reviewDate span
+    const reviewDate = document.createElement("span");
+    reviewDate.classList.add("reviewDate");
+    // Replace this with the review date
+    reviewDate.textContent = "Review Date"; // Example date
+
+    // Append reviewDate to headerRight
+    headerLeft.appendChild(reviewDate);
+
+    // Create removeButton button
     const removeButton = document.createElement("button");
     removeButton.classList.add("removeButton");
     removeButton.textContent = "Remove";
-
-    removeButton.addEventListener("click", function() {
+    removeButton.addEventListener("click", function () {
         removeReview(removeButton);
     });
 
-    reviewContainer.appendChild(reviewDiv);
+    // Append reviewHeader and removeButton to reviewContainer
+    reviewContainer.appendChild(reviewHeader);
     reviewContainer.appendChild(removeButton);
 
+    // Append reviewContainer to reviewsContainer
     reviewsContainer.appendChild(reviewContainer);
+
+    // Clear the reviewText input
     reviewText.value = "";
 }
+
+
