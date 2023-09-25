@@ -3,7 +3,6 @@ import os
 from utils import *
 from database import *
 from send_email import send_email
-from werkzeug.routing import BaseConverter
 
 
 app = Flask(__name__)
@@ -20,13 +19,7 @@ print(test_ratings)
 print(get_all_reviews(db_Session))
 
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
-
-
-def url_name_filter(value):
-    return value.replace(" ", "-")
-
-app.jinja_env.filters['url_name'] = url_name_filter
-
+    
 
 @app.template_filter('nl2br')
 def nl2br_filter(s):
@@ -39,7 +32,8 @@ def home():
 
 @app.route('/cloth')
 def cloth():
-    return render_template('cloth.html', products = products)
+    product_data_json = jsonify(products)
+    return render_template('cloth.html', products = products, products_json = product_data_json)
 
 @app.route('/filtered-products', methods=['POST'])
 def get_filtered_products():
@@ -111,7 +105,6 @@ def login():
         if potential_error == 'good':
             session['user'] = user_info.to_dict()
             return redirect(url_for('account'))
-
 
     return render_template('login.html', error = potential_error)
 
@@ -219,13 +212,12 @@ def checkout():
     return redirect(url_for('basket'))
 
 
-@app.route('/cloth/product_detail/<product_name>')
-def product_detail(product_name):
+@app.route('/cloth/product_detail/<product_url>')
+def product_detail(product_url):
 
-    product_name = product_name.replace("-", " ")
-    product_name = product_name.replace('T shirt', "T-shirt") ## temp solution
 
-    product_dict = get_product_by_name(products, product_name)
+    product_dict = get_product_by_url(products, product_url)
+    product_name = product_dict['name']
     initial_rating = None
     initial_reviews = None
     users = get_users(db_Session)

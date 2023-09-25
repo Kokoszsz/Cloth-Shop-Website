@@ -12,7 +12,6 @@ document.querySelector('.filter form').addEventListener('submit', function(e) {
     }).then(function(data) {
         var productGrid = document.getElementById('product-grid');
         productGrid.innerHTML = '';
-  
         data.products.forEach(function(product) {
             var productItem = document.createElement('div');
             productItem.className = 'product-item';
@@ -31,7 +30,7 @@ document.querySelector('.filter form').addEventListener('submit', function(e) {
             productDetails.appendChild(productData);
 
             var productLink = document.createElement('a');
-            productLink.href = 'cloth/product_detail/' + product.id; 
+            productLink.href = 'cloth/product_detail/' + product['url'];
             productLink.className = 'product-link';
             productData.appendChild(productLink);
   

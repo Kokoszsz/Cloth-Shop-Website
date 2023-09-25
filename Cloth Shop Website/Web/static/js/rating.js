@@ -28,20 +28,22 @@ star.addEventListener('click', () => {
 })
 );
 
-resetBtn.addEventListener('click', () => {
-    
-    stars.forEach((star) => (star.checked = false));
-    
-    const productId = resetBtn.closest('.rating').dataset.productId;
-    const data = {productId: productId};
-    // Send the rating and product ID to Flask app
-    fetch('/reset_rating', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-    .then((response) => response.json())
-    console.log('Rating reset.');
-});
+if (resetBtn) {
+  resetBtn.addEventListener('click', () => {
+      
+      stars.forEach((star) => (star.checked = false));
+      
+      const productId = resetBtn.closest('.rating').dataset.productId;
+      const data = {productId: productId};
+      // Send the rating and product ID to Flask app
+      fetch('/reset_rating', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+      })
+      .then((response) => response.json())
+      console.log('Rating reset.');
+  });
+}

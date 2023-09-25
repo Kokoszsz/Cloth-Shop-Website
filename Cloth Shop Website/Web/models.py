@@ -48,16 +48,10 @@ class Product(Base):
         self.cloth_cathegory = cloth_cathegory
         self.gender = gender
         self.image = image
+        self.url = self.to_url()
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'cost': self.cost,
-            'cloth_cathegory': self.cloth_cathegory,
-            'gender': self.gender,
-            'image': self.image,
-        }
+    def to_url(self):
+        return self.name.replace(' ', '-')
 
     def __repr__(self):
         return f"({self.id})"

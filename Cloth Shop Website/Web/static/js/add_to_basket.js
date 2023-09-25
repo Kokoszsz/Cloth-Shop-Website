@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var modal = document.getElementById("myModal");
 			modal.style.display = "block";
-
+      document.body.style.overflow = 'hidden';
 
       var xhr = new XMLHttpRequest();
       xhr.open("POST", "/add-to-basket");
@@ -22,5 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function closeModal() {
   var modal = document.getElementById("myModal");
 
-	modal.style.display = "none";
+  document.body.style.overflow = 'auto';
+  modal.style.display = "none";
 }

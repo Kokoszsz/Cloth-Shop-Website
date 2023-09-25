@@ -35,9 +35,9 @@ def check_if_error(users, id, username, email, password):
     else:
         return 'No Username'
     
-def get_product_by_name(products, product_name):
+def get_product_by_url(products, product_url):
     for product in products:
-        if product['name'] == product_name:
+        if product['url'] == product_url:
             return product
     return None
 

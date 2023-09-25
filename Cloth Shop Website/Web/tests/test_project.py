@@ -1,7 +1,7 @@
 from database import *
 from models import User, Product, Rating, Review
 from unittest.mock import patch
-from utils import filter_products, check_login, check_if_error, get_product_by_name, get_genders_and_kinds
+from utils import filter_products, check_login, check_if_error, get_product_by_url, get_genders_and_kinds
 from flask import session
 
 def test_connection_home(client):
@@ -112,7 +112,7 @@ def test_get_products_to_dict(Session):
 
     # Add a product  
     session = Session()
-    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
+    product = Product(1, 'product test', 20, 'jeans', 'male', 'image')
     session.merge(product)
     session.commit()
     session.close()
@@ -123,11 +123,12 @@ def test_get_products_to_dict(Session):
 
     # Make sure data of added product is correct
     assert products[0]['id'] == 1
-    assert products[0]['name'] == 'product_test'
+    assert products[0]['name'] == 'product test'
     assert products[0]['cost'] == 20
     assert products[0]['cloth_cathegory'] == 'jeans'
     assert products[0]['gender'] == 'male'
     assert products[0]['image'] == 'image'
+    assert products[0]['url'] == 'product-test'
 
 def test_get_ratings(Session):
     # Check if there are no ratings
@@ -441,20 +442,20 @@ def test_check_if_error():
     assert result == 'No password'
 
 
-def test_get_product_by_name():
+def test_get_product_by_url():
     # Define test data
     products = [
-        {'id': 1, 'name': 'cloth1', 'cost_to_show': '10', 'cost': 10, 'cloth_cathegory': 'Shirt', 'gender': 'Male', 'image': 'test'},
-        {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test'},
-        {'id': 3, 'name': 'cloth3', 'cost_to_show': '30', 'cost': 30, 'cloth_cathegory': 'Shoes', 'gender': 'Male', 'image': 'test'},
+        {'id': 1, 'name': 'cloth1', 'cost_to_show': '10', 'cost': 10, 'cloth_cathegory': 'Shirt', 'gender': 'Male', 'image': 'test', 'url': 'cloth1'},
+        {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test', 'url': 'cloth2'},
+        {'id': 3, 'name': 'cloth3', 'cost_to_show': '30', 'cost': 30, 'cloth_cathegory': 'Shoes', 'gender': 'Male', 'image': 'test', 'url': 'cloth3'},
     ]
 
     # Test case 1: Valid product ID, expect product to be returned
-    result = get_product_by_name(products, 'cloth2')
-    assert result == {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test'}
+    result = get_product_by_url(products, 'cloth2')
+    assert result == {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test', 'url': 'cloth2'}
 
     # Test case 2: Invalid product ID, expect None to be returned
-    result = get_product_by_name(products, 'cloth4')
+    result = get_product_by_url(products, 'cloth4')
     assert result is None
 
 def test_get_genders_and_kinds():

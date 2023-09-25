@@ -55,19 +55,19 @@ def get_user(Session, user_id):
 
 def get_products_to_dict(Session):
     session = Session()
-    results = session.query(Product.id, Product.name, Product.cost, Product.cloth_cathegory, Product.gender, Product.image).all()
-    products = [Product(*r).to_dict() for r in results]
+    results = session.query(Product).all()
+    products = [{'id': r.id, 'name': r.name, 'cost': r.cost, 'cloth_cathegory': r.cloth_cathegory,
+                 'gender': r.gender, 'image': r.image, 'url': r.to_url()} for r in results]
     session.close()
     return products
 
 def get_product(Session, product_id):
     session = Session()
-    result = session.query(Product.id, Product.name, Product.cost, Product.cloth_cathegory, Product.gender, Product.image).filter(Product.id == product_id).first()
+    result = session.query(Product).filter(Product.id == product_id).first()
     session.close()
 
     if result:
-        product = Product(*result)
-        return product
+        return result
     else:
         return None
 

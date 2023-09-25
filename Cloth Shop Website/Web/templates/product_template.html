@@ -4,7 +4,7 @@
   {% endif %}
   <div class="product-details">
       <div class="product-data">
-            <a href="{{ url_for('product_detail', product_name=product.name|url_name) }}" class="product-link"> 
+            <a href="{{ url_for('product_detail', product_url=product.url) }}" class="product-link"> 
                 <h2>{{ product.name }}</h2>
             </a>
             <p class="price">{{ "{:.2f}".format(product.cost) }} $</p>

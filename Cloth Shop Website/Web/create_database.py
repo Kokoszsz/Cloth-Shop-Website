@@ -9,6 +9,7 @@ Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)
 
+
 def insert_data_to_database(Session):
     session = Session()
 
