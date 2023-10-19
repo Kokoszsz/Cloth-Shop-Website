@@ -9,7 +9,18 @@ body{
   bottom: 20px; 
   right: 20px; 
   z-index: 9999; 
+  background-color: #dd3c3c;
+	border:rgb(0, 0, 0);
+	color: rgb(0, 0, 0);
+  cursor: pointer;
+	padding: 4px 8px;
+	font-size: 22px;
+  font-family: Roboto;
 }
+
+#showBugsButton:hover {
+	background-color: #a30f0f;
+  }
 
 
 .menu {

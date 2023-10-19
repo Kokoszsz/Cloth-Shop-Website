@@ -9,7 +9,7 @@ const bugBasket = [
 ];
 
 const bugCloth = [
-    { marginLeft: 17, marginTop: 10, width: 150, height: 150, title: 'Min and Max value', description: 'Min value and Max value are overlapping other elements when making window shorter.' },
+    { marginLeft: 17, marginTop: 10, width: 150, height: 150, title: 'Min and Max values', description: 'Min value and Max value are overlapping other elements when making window narrower.' },
 ];
 
 let bugsVisible = false;
@@ -40,7 +40,6 @@ function getCurrentPage() {
 }
 
 document.getElementById('showBugsButton').addEventListener('click', function () {
-    // Determine the current page (you can use the window.location or another method)
     const currentPage = getCurrentPage(); // Implement this function to return the current page
 
     if (bugsVisible) {
@@ -87,7 +86,7 @@ function showBugs(bugData) {
         tooltip.style.flexDirection = 'column';
         tooltip.style.alignItems = 'center';
         tooltip.style.justifyContent = 'center';
-        tooltip.style.backgroundColor = 'white';
+        tooltip.style.backgroundColor = '#dd3c3c';
         tooltip.style.marginLeft = `${bug.marginLeft}%`;
         tooltip.style.marginTop = `${bug.marginTop}%`;
         tooltip.style.padding = '20px';

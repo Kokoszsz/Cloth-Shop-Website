@@ -47,6 +47,7 @@ document.querySelector('.filter form').addEventListener('submit', function(e) {
             addToBasket.className = 'add-to-basket';
             addToBasket.href = '#';
             addToBasket.dataset.product_id = product.id;
+            addToBasket.dataset.product_name = product.name;
             productDetails.appendChild(addToBasket);
   
             var cartPlusSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

@@ -52,7 +52,6 @@ def get_filtered_products():
 
 @app.route("/add-to-basket", methods=["POST"])
 def my_route():
-
     product_ID = int(request.json["product_ID"])
 
     session['basket'].append(product_ID)

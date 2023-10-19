@@ -6,7 +6,7 @@ window.addEventListener('load', () => {
       setTimeout(() => {
         element.style.opacity = '1';
       }, delay);
-      delay += 800; // Adjust the delay between each element appearing
+      delay += 800;
     });
-  }, 1000); // Wait for 5 seconds before executing the code
+  }, 1000); 
 });
