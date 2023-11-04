@@ -1,6 +1,7 @@
 // Define bug data for each page
 const bugProductDetail = [
     { marginLeft: 17, marginTop: 10, width: 250, height: 150, title: 'Magnifier featrue', description: 'Magnifier featrue does not work properly for some products.' },
+    { marginLeft: 25, marginTop: 24, width: 250, height: 150, title: 'Username and date', description: 'Username and date are not provided when user post a review. Page must be reloaded to see results.' },
 ];
 
 const bugBasket = [
@@ -10,6 +11,10 @@ const bugBasket = [
 
 const bugCloth = [
     { marginLeft: 17, marginTop: 10, width: 150, height: 150, title: 'Min and Max values', description: 'Min value and Max value are overlapping other elements when making window narrower.' },
+];
+
+const bugCheckout = [
+    { marginLeft: 22, marginTop: 26, width: 200, height: 150, title: 'Country selection', description: 'Country that is not present on the list can be entered (or this country could event not exist).' },
 ];
 
 let bugsVisible = false;
@@ -56,6 +61,9 @@ document.getElementById('showBugsButton').addEventListener('click', function () 
                 break;
             case 'cloth':
                 showBugs(bugCloth);
+                break;
+            case 'checkout':
+                showBugs(bugCheckout);
                 break;
             // Add more cases for other pages
             default:

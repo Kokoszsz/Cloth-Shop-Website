@@ -21,20 +21,20 @@
             <form action="#" method="post">
               <label for="username">Username:</label>
               <input type="text" id="username" name="username" value="">
-                {% if 'User' in error %}
+                {% if error and 'User' in error %}
                     <p style="color:red">{{ error }}</p>
                 {% else %}
                     <br><br>
                 {% endif %}
               <label for="email">E-mail:</label>
               <input type="email" id="email" name="email" value="">
-                {% if 'E-mail' in error %}
+                {% if error and 'E-mail' in error %}
                     <p style="color:red">{{ error }}</p>
                 {% else %}
                     <br><br>
                 {% endif %}
               <label for="password">Password:</label>
-                {% if 'password' in error %}
+                {% if error and 'password' in error %}
                     <p style="color:red">{{ error }}</p>
                 {% endif %}
               <input type="password" id="password" name="password" value=""><br><br>

@@ -419,27 +419,35 @@ def test_check_if_error():
 
     # Test case 1: Valid inputs, no errors expected
     result = check_if_error(users, 3, 'Alice', 'alice@example.com', 'password3')
-    assert result == ''
+    assert result is None
 
     # Test case 2: Empty username, expect 'No Username' error
     result = check_if_error(users, 3, '', 'alice@example.com', 'password3')
-    assert result == 'No Username'
+    assert result == 'No Username provided'
 
     # Test case 3: Existing username, expect 'Already such a User' error
     result = check_if_error(users, 3, 'john', 'alice@example.com', 'password3')
-    assert result == 'Already such a User'
+    assert result == 'Already such an User'
 
     # Test case 4: Empty email, expect 'No E-mail' error
     result = check_if_error(users, 3, 'Alice', '', 'password3')
-    assert result == 'No E-mail'
+    assert result == 'No E-mail provided'
 
     # Test case 5: Existing email, expect 'Already such an E-mail' error
     result = check_if_error(users, 3, 'Alice', 'john@example.com', 'password3')
     assert result == 'Already such an E-mail'
 
     # Test case 6: Empty password, expect 'No password' error
-    result = check_if_error(users, 3, 'Alice', 'alice@example.com', '')
-    assert result == 'No password'
+    result = check_if_error(users, 3, 'Alice', 'alice@example.com', '123')
+    assert result == 'Password must consist of at lest 8 characters'
+
+    # Test case 7: Space in username, expect 'Username can not have spaces' error
+    result = check_if_error(users, 3, 'Ali ce', 'alice@example.com', 'password3')
+    assert result == 'Username can not have spaces'
+
+    # Test case 8: Space in password, expect 'Password can not have spaces' error
+    result = check_if_error(users, 3, 'Alice', 'alice@example.com', 'pass word3')
+    assert result == 'Password can not have spaces'
 
 
 def test_get_product_by_url():

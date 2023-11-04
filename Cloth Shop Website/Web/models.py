@@ -13,18 +13,26 @@ class User(Base):
     password = Column('password', String)
     email = Column('email', String)
 
-    def __init__(self, id, name, password, email):
+    def __init__(self, id, name, password, email, surname=None, phone=None, country=None, city=None):
         self.id = id
         self.name= name
         self.password = password
         self.email = email
+        self.surname = surname
+        self.phone = phone
+        self.country = country
+        self.city = city
 
     def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
             'password': self.password,
-            'email': self.email
+            'email': self.email,
+            'surname': self.surname,
+            'phone': self.phone,
+            'country': self.country,
+            'city': self.city
         }
 
     def __repr__(self):

@@ -18,22 +18,26 @@ def check_login(username, password, users):
         return 'Wrong Username', None
     
 def check_if_error(users, id, username, email, password):
+    if ' ' in username:
+        return 'Username can not have spaces'
+    if ' ' in password:
+        return 'Password can not have spaces'
     if username != '':
         if email != '':
             if all(user.name != username or user.id == id for user in users):
                 if all(user.email != email or user.id == id for user in users):
-                    if password != '':
-                        return ''
+                    if len(password) < 8:
+                        return 'Password must consist of at lest 8 characters'
                     else:
-                        return 'No password'
+                        return None
                 else:
                     return 'Already such an E-mail'
             else:
-                return 'Already such a User'
+                return 'Already such an User'
         else:
-            return 'No E-mail'
+            return 'No E-mail provided'
     else:
-        return 'No Username'
+        return 'No Username provided'
     
 def get_product_by_url(products, product_url):
     for product in products:

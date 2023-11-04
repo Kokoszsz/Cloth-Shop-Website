@@ -22,6 +22,32 @@ h1 {
   margin-top: 0;
 }
 
+h2 {
+  color: black;
+  text-align: center;
+}
+
+.expand {
+  margin-left: 400px; 
+  cursor: pointer;
+  display: inline-block; 
+  transition: transform 0.3s;
+}
+
+.expand.rotate {
+  transform: rotate(180deg);
+}
+
+.hidden {
+  display: block; 
+  height: auto;
+  max-height: 0; 
+  opacity: 0; 
+  overflow: hidden;
+  transition: max-height 0.5s, opacity 0.5s;
+}
+
+
 label {
   display: block;
   margin-bottom: 10px;

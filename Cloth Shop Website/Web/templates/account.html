@@ -20,20 +20,43 @@
             <form action="#" method="post">
               <label for="username">Username:</label>
               <input type="text" id="username" name="username" value="{{ user_info.name }}">
-                {% if 'User' in error %}
+                {% if error and 'User' in error %}
                     <p style="color:red">{{ error }}</p>
                 {% else %}
                     <br><br>
                 {% endif %}
               <label for="email">E-mail:</label>
               <input type="email" id="email" name="email" value="{{ user_info.email }}">
-                {% if 'E-mail' in error %}
+                {% if error and 'E-mail' in error %}
                     <p style="color:red">{{ error }}</p>
                 {% else %}
                     <br><br>
                 {% endif %}
               <label for="password">Password:</label>
-              <input type="password" id="password" name="password" value="{{ user_info.password }}"><br><br>
+              <input type="password" id="password" name="password" value="{{ user_info.password }}">
+                {% if error and 'Password' in error %}
+                    <p style="color:red">{{ error }}</p>
+                {% else %}
+                    <br><br>
+                {% endif %}
+              <h2>Detail Information</h2>
+              <div class="expand">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
+                    <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                </svg>
+              </div>
+              <div class="hidden">
+                <label for="surname">Surname:</label>
+                <input type="text" id="surname" name="surname" value="{{ user_info.surname }}">
+                <label for="phone">Phone number:</label>
+                <input type="text" id="phone" name="phone" value="{{ user_info.phone }}">
+                <label for="country">Country:</label>
+                <input type="text" id="country" name="country" value="{{ user_info.country }}">
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city" value="{{ user_info.city }}">
+              </div>
+
+
               <input type="submit" value="Save Changes">
             </form>
           </div>
@@ -42,4 +65,5 @@
 
     </body>
     <script type="text/javascript" src="{{ url_for('static', filename='js/show_bugs.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/rotate.js') }}"></script>
 </html>

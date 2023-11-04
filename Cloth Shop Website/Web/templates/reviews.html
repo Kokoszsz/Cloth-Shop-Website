@@ -11,12 +11,13 @@
                 </div>
                 <div class="reviewContent">{{ review.content|nl2br|safe }}</div>
             </div>
-            
-            {% if session['user'] %}
-                {% if review.user_id == session['user'].id %}
-                    <button class="removeButton" onclick="removeReview(this)">Remove</button>
+            <div class="removeContainer">
+                {% if session['user'] %}
+                    {% if review.user_id == session['user'].id %}
+                        <button class="removeButton" onclick="removeReview(this)">Remove</button>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
+            </div>
         </div>
     {% endfor %}
 </div>

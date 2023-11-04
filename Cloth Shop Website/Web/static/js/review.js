@@ -140,6 +140,10 @@ function displayReview(text, reviewId) {
     // Append reviewDate to headerRight
     headerLeft.appendChild(reviewDate);
 
+    const removeContainer = document.createElement("div");
+    removeContainer.classList.add("removeContainer");
+    reviewContent.style.textAlign = "right";
+
     // Create removeButton button
     const removeButton = document.createElement("button");
     removeButton.classList.add("removeButton");
@@ -147,10 +151,11 @@ function displayReview(text, reviewId) {
     removeButton.addEventListener("click", function () {
         removeReview(removeButton);
     });
-
+    
     // Append reviewHeader and removeButton to reviewContainer
+    removeContainer.appendChild(removeButton)
     reviewContainer.appendChild(reviewHeader);
-    reviewContainer.appendChild(removeButton);
+    reviewContainer.appendChild(removeContainer);
 
     // Append reviewContainer to reviewsContainer
     reviewsContainer.appendChild(reviewContainer);

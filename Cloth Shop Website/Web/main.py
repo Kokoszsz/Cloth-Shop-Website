@@ -20,11 +20,9 @@ print(get_all_reviews(db_Session))
 
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
     
-
 @app.template_filter('nl2br')
 def nl2br_filter(s):
     return s.replace('\n', '<br>')
-
 
 @app.route('/')
 def home():
@@ -60,7 +58,7 @@ def my_route():
 
 @app.route('/account', methods = ['POST', 'GET'])
 def account():
-    error = ''
+    error = None
 
     if 'user' not in session:
         return redirect(url_for('login'))
@@ -74,13 +72,12 @@ def account():
 
             users = get_users(db_Session)
 
-            error = check_if_error(users, id, username, password, email)
-
-            if error == '':
+            error = check_if_error(users, id, username, email, password)
+            if error is None:
 
                 user = update_user(db_Session, id, username, password, email, users)
                 
-                if user != None:
+                if user is not None:
                     session['user'] = user.to_dict()
 
         user_info = session['user']
@@ -88,7 +85,7 @@ def account():
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
-    potential_error = ''
+    potential_error = None
     if request.method == 'POST':
 
         if request.form['action'] == "Create account":
@@ -111,7 +108,7 @@ def login():
 @app.route('/create_account', methods = ['POST', 'GET'])
 def create_account():
 
-    error = ''
+    error = None
 
     if request.method == 'POST':
         username = request.form['username']
@@ -124,7 +121,7 @@ def create_account():
 
         error = check_if_error(users, id, username, email, password)
 
-        if error == '':
+        if error is None:
 
             verification_code = send_email('account registration verification', email)
             

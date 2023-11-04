@@ -40,7 +40,11 @@
     text-align: right;
 }
 
+.removeContainer {
+    text-align: right;
+}
+
 .removeButton {
-    width: auto;
+    width: 10%;
     margin-top: 5px;
 }
