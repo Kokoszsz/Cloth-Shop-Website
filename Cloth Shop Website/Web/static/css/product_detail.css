@@ -98,6 +98,11 @@
     unicode-bidi: bidi-override;
     direction: rtl;
     text-align: center;
+    display: flex;
+    margin: 10px;
+    margin-right: 200px;
+    gap: 20px;
+    justify-content: center;
   }
 
   .rating input {

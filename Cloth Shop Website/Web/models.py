@@ -12,8 +12,12 @@ class User(Base):
     name = Column('name', String)
     password = Column('password', String)
     email = Column('email', String)
+    surname = Column('surname', String)
+    phone = Column('phone', String)
+    country = Column('country', String)
+    city = Column('city', String)
 
-    def __init__(self, id, name, password, email, surname=None, phone=None, country=None, city=None):
+    def __init__(self, id, name, password, email, surname="", phone="", country="", city=""):
         self.id = id
         self.name= name
         self.password = password
@@ -36,7 +40,7 @@ class User(Base):
         }
 
     def __repr__(self):
-        return f"({self.id}), ({self.name}), ({self.password}), ({self.email})"
+        return f"({self.id}), ({self.name}), ({self.password}), ({self.email}), ({self.surname})"
         
     
 class Product(Base):

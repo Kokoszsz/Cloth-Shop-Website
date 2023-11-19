@@ -10,6 +10,7 @@ app.secret_key = os.environ.get('SECRET_KEY_CLOTH_SHOP', 'DefaultSecretKeyTestin
 db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
 
+
 test_users = get_users(db_Session)
 print(test_users)
 products = get_products_to_dict(db_Session)
@@ -69,14 +70,17 @@ def account():
             username = request.form['username']
             email = request.form['email']
             password = request.form['password']
+            surname = request.form['surname']
+            phone_number = request.form['phone']
+            country = request.form['country']
+            city = request.form['city']
 
             users = get_users(db_Session)
 
             error = check_if_error(users, id, username, email, password)
             if error is None:
 
-                user = update_user(db_Session, id, username, password, email, users)
-                
+                user = update_user(db_Session, id, username, password, email, users, surname, phone_number, country, city)
                 if user is not None:
                     session['user'] = user.to_dict()
 
@@ -213,7 +217,6 @@ def product_detail(product_url):
 
 
     product_dict = get_product_by_url(products, product_url)
-    product_name = product_dict['name']
     initial_rating = None
     initial_reviews = None
     users = get_users(db_Session)
@@ -221,11 +224,16 @@ def product_detail(product_url):
         initial_reviews = get_reviews_of_a_product(db_Session, product_dict['id'])
     if 'user' in session:
         user_id = session['user']['id']
-        rating_obj = get_certain_rating(db_Session, product_name, user_id)
+        rating_obj = get_certain_rating(db_Session, product_dict['id'], user_id)
         if rating_obj:
             initial_rating = rating_obj.rating_points
     if product_dict is not None:
-        return render_template('product_detail.html', product=product_dict, initial_rating=initial_rating, initial_reviews=initial_reviews, users=users)
+        all_ratings, num_of_ratings = get_all_ratings_of_a_product(db_Session, product_dict['id'])
+        if num_of_ratings:
+            rating_average = sum([rating.rating_points for rating in all_ratings])/num_of_ratings
+        else:
+            rating_average = 0
+        return render_template('product_detail.html', product=product_dict, initial_rating=initial_rating, initial_reviews=initial_reviews, users=users, rating=rating_average)
     else:
         # If product is None, return a custom error message or redirect to a different page
         return render_template('product_not_found.html')

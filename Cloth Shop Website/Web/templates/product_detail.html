@@ -25,22 +25,24 @@
                 <img id="product-image-id" src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
                 <div id="myresult" class="img-zoom-result"></div>
               </div>
-
-              {% if "user" in session %}
-                <div class="rating" data-product-id="{{ product.id }}">
-                  <input type="radio" name="rating" id="star5" value="5" {% if initial_rating == 5 %}checked{% endif %}>
-                  <label for="star5"></label>
-                  <input type="radio" name="rating" id="star4" value="4" {% if initial_rating == 4 %}checked{% endif %}>
-                  <label for="star4"></label>
-                  <input type="radio" name="rating" id="star3" value="3" {% if initial_rating == 3 %}checked{% endif %}>
-                  <label for="star3"></label>
-                  <input type="radio" name="rating" id="star2" value="2" {% if initial_rating == 2 %}checked{% endif %}>
-                  <label for="star2"></label>
-                  <input type="radio" name="rating" id="star1" value="1" {% if initial_rating == 1 %}checked{% endif %}>
-                  <label for="star1"></label>
+              <div class="rating" data-product-id="{{ product.id }}">
+                {% if "user" in session %}
                   <button id="reset-btn">Reset Rating</button>
+                  <div class="stars">
+                    <input type="radio" name="rating" id="star5" value="5" {% if initial_rating == 5 %}checked{% endif %}>
+                    <label for="star5"></label>
+                    <input type="radio" name="rating" id="star4" value="4" {% if initial_rating == 4 %}checked{% endif %}>
+                    <label for="star4"></label>
+                    <input type="radio" name="rating" id="star3" value="3" {% if initial_rating == 3 %}checked{% endif %}>
+                    <label for="star3"></label>
+                    <input type="radio" name="rating" id="star2" value="2" {% if initial_rating == 2 %}checked{% endif %}>
+                    <label for="star2"></label>
+                    <input type="radio" name="rating" id="star1" value="1" {% if initial_rating == 1 %}checked{% endif %}>
+                    <label for="star1"></label>
                 </div>
               {% endif %}
+              <div>Total Rating {{rating}}</div>
+            </div>
 
             </div>
 

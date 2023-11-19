@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 from models import User, Product, Rating, Review ,Base
-
 
 
 def create_database_Session(url):
@@ -19,13 +19,17 @@ def create_user(Session, id, name, password, email):
     session.close()
     return user
 
-def update_user(Session, id, name, password, email, users):
+def update_user(Session, id, name, password, email, users, surname="", phone_number="", country="", city=""):
     session = Session()
     user = next((user for user in users if user.id == id), None)
-    if user != None:
+    if user is not None:
         user.name = name
         user.password = password
         user.email = email
+        user.surname = surname
+        user.phone = phone_number
+        user.country = country
+        user.city = city
         session.merge(user)
         session.commit()
         session.close()
@@ -34,7 +38,7 @@ def update_user(Session, id, name, password, email, users):
 
 def get_users(Session):
     session = Session()
-    results = session.query(User.id, User.name, User.password, User.email).all()
+    results = session.query(User.id, User.name, User.password, User.email, User.surname, User.phone, User.country, User.city).all()
     users = [User(*r) for r in results]
     session.close()
     return users
@@ -42,7 +46,7 @@ def get_users(Session):
 
 def get_user(Session, user_id):
     session = Session()
-    result = session.query(User.id, User.name, User.password, User.email).filter(User.id == user_id).first()
+    result = session.query(User.id, User.name, User.password, User.email, User.surname, User.phone, User.country, User.city).filter(User.id == user_id).first()
     session.close()
 
     if result:
@@ -111,6 +115,12 @@ def get_certain_rating(Session, product_id, user_id):
     session.close()
     return rating
 
+def get_all_ratings_of_a_product(Session, product_id):
+    session = Session()
+    ratings = session.query(Rating).filter_by(product_id=product_id).all()
+    session.close()
+    return ratings, len(ratings)
+
 def remove_rating(Session, product_id, user_id):
     session = Session()
     rating = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
@@ -142,10 +152,21 @@ def create_review(Session, id, product_id, user_id, review_content):
         session.close()
         return review_object
     
+def format_review_dates(reviews):
+    
+    for review in reviews:
+        date_object = datetime.strptime(str(review.date), '%Y-%m-%d %H:%M:%S.%f')
+        formatted_date = date_object.strftime('%Y-%m-%d %H:%M')
+        
+        review.date = formatted_date
+    
+    return reviews
+    
 def get_reviews_of_a_product(Session, product_id):
     session = Session()
     reviews = session.query(Review).filter_by(product_id=product_id).all()
     session.close()
+    reviews = format_review_dates(reviews)
     return reviews
 
 def get_all_reviews(Session):
