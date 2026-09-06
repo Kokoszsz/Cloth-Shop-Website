@@ -1,7 +1,7 @@
-from typing import Any
 from sqlalchemy import Column, String, Integer, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
 
@@ -10,7 +10,7 @@ class User(Base):
 
     id = Column('id', Integer, primary_key = True)
     name = Column('name', String)
-    password = Column('password', String)
+    password_hash = Column('password', String(256))
     email = Column('email', String)
     surname = Column('surname', String)
     phone = Column('phone', String)
@@ -19,19 +19,28 @@ class User(Base):
 
     def __init__(self, id, name, password, email, surname="", phone="", country="", city=""):
         self.id = id
-        self.name= name
-        self.password = password
+        self.name = name
+        self.set_password(password)
         self.email = email
         self.surname = surname
         self.phone = phone
         self.country = country
         self.city = city
 
+    def set_password(self, password):
+        """Hash and store the given plaintext password."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Return True if the given plaintext password matches the stored hash."""
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, password)
+
     def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
-            'password': self.password,
             'email': self.email,
             'surname': self.surname,
             'phone': self.phone,
@@ -40,7 +49,7 @@ class User(Base):
         }
 
     def __repr__(self):
-        return f"({self.id}), ({self.name}), ({self.password}), ({self.email}), ({self.surname})"
+        return f"({self.id}), ({self.name}), ({self.email}), ({self.surname})"
         
     
 class Product(Base):

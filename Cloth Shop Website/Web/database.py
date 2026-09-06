@@ -24,7 +24,7 @@ def update_user(Session, id, name, password, email, users, surname="", phone_num
     user = next((user for user in users if user.id == id), None)
     if user is not None:
         user.name = name
-        user.password = password
+        user.set_password(password)
         user.email = email
         user.surname = surname
         user.phone = phone_number
@@ -38,22 +38,16 @@ def update_user(Session, id, name, password, email, users, surname="", phone_num
 
 def get_users(Session):
     session = Session()
-    results = session.query(User.id, User.name, User.password, User.email, User.surname, User.phone, User.country, User.city).all()
-    users = [User(*r) for r in results]
+    users = session.query(User).all()
     session.close()
     return users
 
 
 def get_user(Session, user_id):
     session = Session()
-    result = session.query(User.id, User.name, User.password, User.email, User.surname, User.phone, User.country, User.city).filter(User.id == user_id).first()
+    user = session.query(User).filter(User.id == user_id).first()
     session.close()
-
-    if result:
-        user = User(*result)
-        return user
-    else:
-        return None
+    return user
     
 
 

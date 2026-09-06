@@ -52,7 +52,8 @@ def test_create_user(Session):
     # Check if user was created correctly
     assert user.id == user_id
     assert user.name == user_name
-    assert user.password == user_password
+    assert user.check_password(user_password)
+    assert user.password_hash != user_password  # stored value must not be the plaintext
     assert user.email == user_email
 
     # Check if newly created user is in database
@@ -60,7 +61,8 @@ def test_create_user(Session):
     db_user = session.query(User).filter_by(id=user_id).first()
     assert db_user != None
     assert db_user.name == user_name
-    assert db_user.password == user_password
+    assert db_user.check_password(user_password)
+    assert db_user.password_hash != user_password
     assert db_user.email == user_email
     session.close()
 
@@ -72,7 +74,7 @@ def test_get_users(Session):
     # Make sure data of this user is correct
     assert users[0].id == 1
     assert users[0].name == "John"
-    assert users[0].password == "password"
+    assert users[0].check_password("password")
     assert users[0].email == "john@example.com"
 
     
@@ -88,7 +90,7 @@ def test_update_user(Session):
 
     # Check if user was properly updated
     assert user.name == "New Name"
-    assert user.password == "newpassword"
+    assert user.check_password("newpassword")
     assert user.email == "newemail@example.com"
 
     # Retrieve user 1 from database and check attributes
@@ -96,7 +98,7 @@ def test_update_user(Session):
     db_user1 = session.query(User).filter_by(id=1).first()
     session.close()
     assert db_user1.name == "New Name"
-    assert db_user1.password == "newpassword"
+    assert db_user1.check_password("newpassword")
     assert db_user1.email == "newemail@example.com"
 
     # Update user 3 (doesn't exist)
@@ -397,7 +399,7 @@ def test_check_login():
     assert result == 'good'
     assert user.id == 1
     assert user.name == "john"
-    assert user.password == "test1"
+    assert user.check_password("test1")
     assert user.email == "john@example.com"
 
     # Test case: Correct username, wrong password
