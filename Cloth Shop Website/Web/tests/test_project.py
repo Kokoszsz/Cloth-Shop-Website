@@ -508,11 +508,20 @@ def test_get_genders_and_kinds():
     assert kinds6 == []
 
 # Define users 
-@patch('main.send_email')
-def test_create_account_error(mock_send_email, client):
+@patch('main.create_user')
+@patch('main.get_users')
+def test_create_account_success(mock_get_users, mock_create_user, client):
 
-    # Mock the send_email function and set the return value
-    mock_send_email.return_value = 000000
+    # Keep the real database out of it - the route now writes on success
+    mock_get_users.return_value = [
+        User(id=1, name="john", password="test1", email="john@example.com"),
+    ]
+    mock_create_user.return_value = User(
+        id=2,
+        name='test_create_account',
+        password='test_create_account',
+        email='test_create_account@example.com',
+    )
 
     # Send data
     response = client.post('/create_account', data={
@@ -520,8 +529,38 @@ def test_create_account_error(mock_send_email, client):
         'email': 'test_create_account@example.com',
         'password': 'test_create_account'
     })
-    # Render Template status code
+
+    # The account is created straight away and the user is logged in
     assert response.status_code == 302
+    assert response.headers['Location'].endswith('/account')
+    mock_create_user.assert_called_once()
+
+
+@patch('main.create_user')
+@patch('main.get_users')
+def test_create_account_keeps_credentials_out_of_the_session(mock_get_users, mock_create_user, client):
+
+    mock_get_users.return_value = [
+        User(id=1, name="john", password="test1", email="john@example.com"),
+    ]
+    mock_create_user.return_value = User(
+        id=2,
+        name='cookie_check',
+        password='sup3rsecretpassword',
+        email='cookie_check@example.com',
+    )
+
+    client.post('/create_account', data={
+        'username': 'cookie_check',
+        'email': 'cookie_check@example.com',
+        'password': 'sup3rsecretpassword'
+    })
+
+    # The session cookie is signed, not encrypted - nothing secret may go in it
+    with client.session_transaction() as flask_session:
+        assert 'new_user' not in flask_session
+        assert 'sup3rsecretpassword' not in str(dict(flask_session))
+        assert 'password' not in flask_session['user']
 
 # Mock the get_users function to return some existing users
 @patch('main.get_users')

@@ -2,7 +2,6 @@ from flask import Flask, render_template, redirect, url_for, jsonify, request, s
 import os
 from utils import *
 from database import *
-from send_email import send_email
 
 
 app = Flask(__name__)
@@ -126,61 +125,14 @@ def create_account():
         error = check_if_error(users, id, username, email, password)
 
         if error is None:
+            user = create_user(db_Session, id, username, password, email)
+            session['user'] = user.to_dict()
+            return redirect(url_for('account'))
 
-            verification_code = send_email('account registration verification', email)
-            
-            session['new_user'] = {'id': id, 'username': username, 'password': password, 'email': email, 'verification code': verification_code}
-
-            # this will be changed to appear after user provided valid code
-            return redirect(url_for('create_account_verification'))
-        
         else:
             return render_template('create_account.html', error = error)
 
     return render_template('create_account.html', error = error)
-
-@app.route('/create_account_verification', methods = ['POST', 'GET'])
-def create_account_verification():
-
-
-    if request.method == 'POST':
-        if 'confirm' in request.form and request.form['confirm'] == "Confirm":
-            if session['new_user'] is not None:
-                id = session['new_user']['id']
-                username = session['new_user']['username']
-                password = session['new_user']['password']
-                email = session['new_user']['email']
-                verification_code = session['new_user']['verification code']
-
-                if verification_code == request.form['verification-code']:
-                
-                    session.pop('new_user', None)
-                    user = create_user(db_Session, id, username, password, email)
-                    session['user'] = user.to_dict()
-
-                else:
-                    ## wrong code
-                    return render_template('create_account_verification.html')
-
-
-            ## Check if code provided by user is valid
-            return redirect(url_for('account'))
-        
-        elif 'resend' in request.form and request.form['resend'] == "Send again":
-            email = session['new_user']['email']
-            verification_code = send_email('account registration verification', email)
-            session['new_user']['verification code'] = verification_code
-
-    # Check if the request is redirected from the create_account route
-    referrer = request.referrer
-    if referrer is None or '/create_account' not in referrer:
-        # If the referrer is not from the create_account route, redirect to a different page
-        return redirect(url_for('home'))
-
-    # Rest of the code...
-
-    # Render the verification template
-    return render_template('create_account_verification.html')
 
 @app.route('/basket', methods = ['GET'])
 def basket():
