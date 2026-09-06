@@ -1,5 +1,11 @@
 
+import os
+
 import pytest
+
+# main configures the app at import time, so this must come first
+os.environ.setdefault('APP_ENV', 'testing')
+
 from main import app
 from database import create_database_Session
 

@@ -1,11 +1,11 @@
 from flask import Flask, render_template, redirect, url_for, jsonify, request, session
-import os
+from config import get_config
 from utils import *
 from database import *
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY_CLOTH_SHOP', 'DefaultSecretKeyTesting123456789')
+app.config.from_object(get_config())
 db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
 
@@ -284,5 +284,5 @@ def add_header(response):
 
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', debug=True)
+    app.run(host=app.config['HOST'], port=app.config['PORT'], debug=app.config['DEBUG'])
 
