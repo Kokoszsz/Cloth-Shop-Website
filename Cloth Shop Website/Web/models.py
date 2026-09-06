@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Integer, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import validates
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -92,13 +93,12 @@ class Rating(Base):
         self.user_id = user_id
         self.rating_points = rating_points
 
-    def __post_init__(self):
-        self.validate_rating()
-
-    def validate_rating(self):
-        if not 1 <= self.rating_points <= 5:
+    @validates('rating_points')
+    def validate_rating(self, key, value):
+        if not 1 <= value <= 5:
             raise ValueError("Rating must be between 1 and 5 (inclusive)")
-        
+        return value
+
 
     def __repr__(self):
         return f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), rating points ({self.rating_points})"

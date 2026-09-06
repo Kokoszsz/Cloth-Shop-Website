@@ -195,6 +195,8 @@ def save_rating():
     data = request.get_json()
     rating_data = float(data['rating'])
     product_id_data = int(data['productId'])
+    if not 1 <= rating_data <= 5:
+        return jsonify({'message': 'Rating must be between 1 and 5 (inclusive)'}), 400
     user_id = session['user']['id']
     ratings = get_ratings(db_Session)
     id = ratings[-1].id + 1 
