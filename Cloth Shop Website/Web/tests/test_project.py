@@ -1,4 +1,17 @@
-from database import *
+from database import (
+    create_rating,
+    create_review,
+    create_user,
+    get_all_reviews,
+    get_certain_rating,
+    get_products_to_dict,
+    get_ratings,
+    get_reviews_of_a_product,
+    get_users,
+    remove_rating,
+    remove_review,
+    update_user,
+)
 from models import User, Product, Rating, Review
 from unittest.mock import patch
 from utils import filter_products, check_login, check_if_error, get_product_by_url, get_genders_and_kinds

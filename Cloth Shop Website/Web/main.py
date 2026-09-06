@@ -1,7 +1,27 @@
 from flask import Flask, render_template, redirect, url_for, jsonify, request, session
 from config import get_config
-from utils import *
-from database import *
+from utils import (
+    check_if_error,
+    check_login,
+    filter_products,
+    get_genders_and_kinds,
+    get_product_by_url,
+    get_username_by_id_filter,
+)
+from database import (
+    create_database_Session,
+    create_rating,
+    create_review,
+    create_user,
+    get_all_ratings_of_a_product,
+    get_certain_rating,
+    get_products_to_dict,
+    get_reviews_of_a_product,
+    get_users,
+    remove_rating,
+    remove_review,
+    update_user,
+)
 
 
 app = Flask(__name__)
@@ -10,13 +30,7 @@ db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/myd
 
 
 
-test_users = get_users(db_Session)
-print(test_users)
 products = get_products_to_dict(db_Session)
-print(products)
-test_ratings = get_ratings(db_Session)
-print(test_ratings)
-print(get_all_reviews(db_Session))
 
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
     
@@ -230,7 +244,6 @@ def save_review():
 @app.route('/delete_review', methods=['POST'])
 def delete_review():
     data = request.get_json()
-    print(data)
     reviewId = int(data['reviewId'])
 
     success = remove_review(db_Session, reviewId)

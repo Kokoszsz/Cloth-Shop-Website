@@ -172,7 +172,6 @@ def create_review(Session, product_id, user_id, review_content):
             session.flush()
         except IntegrityError:
             session.rollback()
-            print("User already created review for this product")
             return False
         return review_object
     
