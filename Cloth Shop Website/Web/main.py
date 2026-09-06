@@ -119,13 +119,13 @@ def create_account():
         password = request.form['password']
 
         users = get_users(db_Session)
-        ids = [user.id for user in users ]
-        id = max(ids)+1 ## this should be changed
 
-        error = check_if_error(users, id, username, email, password)
+        error = check_if_error(users, None, username, email, password)
 
         if error is None:
-            user = create_user(db_Session, id, username, password, email)
+            user = create_user(db_Session, username, password, email)
+            if user is None:
+                return render_template('create_account.html', error = 'Already such an User')
             session['user'] = user.to_dict()
             return redirect(url_for('account'))
 
@@ -198,14 +198,7 @@ def save_rating():
     if not 1 <= rating_data <= 5:
         return jsonify({'message': 'Rating must be between 1 and 5 (inclusive)'}), 400
     user_id = session['user']['id']
-    ratings = get_ratings(db_Session)
-    id = ratings[-1].id + 1 
-    ids = [rating.id for rating in ratings]
-    try:
-        id = max(ids) + 1
-    except:
-        id = 1
-    create_rating(db_Session, id, product_id_data, user_id, rating_data)
+    create_rating(db_Session, product_id_data, user_id, rating_data)
 
     return jsonify({'message': 'Rating saved successfully'})
 
@@ -227,13 +220,7 @@ def save_review():
     review_content = str(data['content'])
     product_id_data = int(data['productId'])
     user_id = session['user']['id']
-    reviews = get_all_reviews(db_Session)
-    ids = [review.id for review in reviews]
-    try:
-        id = max(ids) + 1
-    except:
-        id = 1
-    review_object = create_review(db_Session, id, product_id_data, user_id, review_content)
+    review_object = create_review(db_Session, product_id_data, user_id, review_content)
     if review_object:
         object_id = review_object.id
         return jsonify({'message': 'Review saved successfully', 'id': object_id})

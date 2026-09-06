@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, DateTime
+from sqlalchemy import Column, String, Integer, Float, DateTime, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates
 import datetime
@@ -8,6 +8,10 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "accounts"
+    __table_args__ = (
+        Index('uq_accounts_name', 'name', unique=True),
+        Index('uq_accounts_email', 'email', unique=True),
+    )
 
     id = Column('id', Integer, primary_key = True)
     name = Column('name', String)
@@ -18,7 +22,7 @@ class User(Base):
     country = Column('country', String)
     city = Column('city', String)
 
-    def __init__(self, id, name, password, email, surname="", phone="", country="", city=""):
+    def __init__(self, name, password, email, surname="", phone="", country="", city="", id=None):
         self.id = id
         self.name = name
         self.set_password(password)
@@ -81,13 +85,16 @@ class Product(Base):
 
 class Rating(Base):
     __tablename__ = "ratings"
+    __table_args__ = (
+        Index('uq_ratings_product_user', 'product_id', 'user_id', unique=True),
+    )
 
     id = Column('id', Integer, primary_key=True)
     product_id = Column('product_id', Integer)
     user_id = Column('user_id', Integer)
     rating_points = Column('rating_points', Float)
 
-    def __init__(self, id, product_id, user_id, rating_points) -> None:
+    def __init__(self, product_id, user_id, rating_points, id=None) -> None:
         self.id = id
         self.product_id = product_id
         self.user_id = user_id
@@ -106,6 +113,9 @@ class Rating(Base):
 
 class Review(Base):
     __tablename__ = "reviews"
+    __table_args__ = (
+        Index('uq_reviews_product_user', 'product_id', 'user_id', unique=True),
+    )
 
     id = Column('id', Integer, primary_key=True)
     product_id = Column('product_id', Integer)
@@ -113,7 +123,7 @@ class Review(Base):
     content = Column('content', String)
     date = Column('date', DateTime, default=datetime.datetime.utcnow)
 
-    def __init__(self, id, product_id, user_id, content) -> None:
+    def __init__(self, product_id, user_id, content, id=None) -> None:
         self.id = id
         self.product_id = product_id
         self.user_id = user_id

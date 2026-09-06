@@ -47,7 +47,7 @@ def test_create_user(Session):
     user_email = "john@example.com"
 
     # Create user
-    user = create_user(Session, user_id, user_name, user_password, user_email)
+    user = create_user(Session, user_name, user_password, user_email)
 
     # Check if user was created correctly
     assert user.id == user_id
@@ -139,7 +139,7 @@ def test_get_ratings(Session):
 
     # Add a rating  
     session = Session()
-    rating = Rating(1, 3, 4, 2.1)
+    rating = Rating(3, 4, 2.1, id=1)
     session.merge(rating)
     session.commit()
     session.close()
@@ -156,7 +156,7 @@ def test_get_ratings(Session):
 
 def test_create_rating(Session):
     rating1 = (1, 3, 1, 3.5) 
-    rating_result = create_rating(Session, rating1[0], rating1[1], rating1[2], rating1[3])
+    rating_result = create_rating(Session, rating1[1], rating1[2], rating1[3])
     assert rating_result == 'Could not find this product or this user'
 
 
@@ -167,15 +167,15 @@ def test_create_rating(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     rating1 = (1, 1, 1, 2.5) 
-    rating_result = create_rating(Session, rating1[0], rating1[1], rating1[2], rating1[3])
-    obj_rating_correct = Rating(*rating1)
-    assert rating_result.id == obj_rating_correct.id
+    rating_result = create_rating(Session, rating1[1], rating1[2], rating1[3])
+    obj_rating_correct = Rating(*rating1[1:], id=rating1[0])
+    assert rating_result.id is not None
     assert rating_result.product_id == obj_rating_correct.product_id
     assert rating_result.user_id == obj_rating_correct.user_id
     assert rating_result.rating_points == obj_rating_correct.rating_points
@@ -184,7 +184,7 @@ def test_get_certain_rating(Session):
 
     # Add a rating  
     session = Session()
-    rating = Rating(1, 2, 1, 2.0)
+    rating = Rating(2, 1, 2.0, id=1)
     session.merge(rating)
     session.commit()
     session.close()
@@ -203,21 +203,16 @@ def test_remove_rating(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     # Add a rating  
-    session = Session()
-    product = Rating(1, 1, 1, 3) 
-    session.merge(product)
-    session.commit()
-    session.close()
+    create_rating(Session, 1, 1, 3)
 
-    remove_rating(Session, 1, 1)
-    results = get_ratings(Session)
-    assert results == []
+    assert remove_rating(Session, 1, 1) is True
+    assert get_certain_rating(Session, 1, 1) is None
 
 def test_create_review(Session):
 
@@ -229,17 +224,17 @@ def test_create_review(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     review = (1, 1, 1, 'great product') 
-    review_object = create_review(Session, review[0], review[1], review[2], review[3])
+    review_object = create_review(Session, review[1], review[2], review[3])
 
 
-    obj_review_correct = Review(*review)
-    assert review_object.id == obj_review_correct.id
+    obj_review_correct = Review(*review[1:], id=review[0])
+    assert review_object.id is not None
     assert review_object.product_id == obj_review_correct.product_id
     assert review_object.user_id == obj_review_correct.user_id
     assert review_object.content == obj_review_correct.content
@@ -254,17 +249,17 @@ def test_create_review(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     review = (1, 1, 1, 'great product') 
-    review_object = create_review(Session, review[0], review[1], review[2], review[3])
+    review_object = create_review(Session, review[1], review[2], review[3])
 
 
-    obj_review_correct = Review(*review)
-    assert review_object.id == obj_review_correct.id
+    obj_review_correct = Review(*review[1:], id=review[0])
+    assert review_object.id is not None
     assert review_object.product_id == obj_review_correct.product_id
     assert review_object.user_id == obj_review_correct.user_id
     assert review_object.content == obj_review_correct.content
@@ -286,7 +281,7 @@ def test_get_reviews_of_a_product(Session):
 
     session = Session()
     for review in reviews:
-        session.merge(Review(*review))
+        session.merge(Review(*review[1:], id=review[0]))
     session.commit()
 
     product_reviews = get_reviews_of_a_product(Session, 1)
@@ -309,7 +304,7 @@ def test_get_all_reviews(Session):
 
     session = Session()
     for review in reviews:
-        session.merge(Review(*review))
+        session.merge(Review(*review[1:], id=review[0]))
     session.commit()
 
     all_reviews = get_all_reviews(Session)
@@ -320,7 +315,7 @@ def test_get_all_reviews(Session):
 def test_remove_review(Session):
     # Add a review
     session = Session()
-    review = Review(1, 1, 1, 'good review')
+    review = Review(1, 1, 'good review', id=1)
     session.merge(review)
     session.commit()
     session.close()
