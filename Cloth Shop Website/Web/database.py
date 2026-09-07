@@ -200,9 +200,9 @@ def get_all_reviews(Session):
 
 
 
-def remove_review(Session, review_id):
+def remove_review(Session, review_id, user_id):
     session = Session()
-    review = session.query(Review).filter_by(id=review_id).first()
+    review = session.query(Review).filter_by(id=review_id, user_id=user_id).first()
 
     if review:
         session.delete(review)

@@ -335,7 +335,8 @@ def test_remove_review(Session):
 
     # Remove the review
     review_id = 1
-    result = remove_review(Session, review_id)
+    user_id = 1
+    result = remove_review(Session, review_id, user_id)
     assert result is True
 
     # Check if the review is removed

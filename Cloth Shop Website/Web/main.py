@@ -243,10 +243,14 @@ def save_review():
 
 @app.route('/delete_review', methods=['POST'])
 def delete_review():
+    if not 'user' in session:
+         return jsonify({'message': 'user not logged in'})
+    else:
+        user_id = session['user']['id']
     data = request.get_json()
     reviewId = int(data['reviewId'])
 
-    success = remove_review(db_Session, reviewId)
+    success = remove_review(db_Session, reviewId, user_id)
     return jsonify({'success': success})
 
 
