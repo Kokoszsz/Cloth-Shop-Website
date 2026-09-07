@@ -13,8 +13,17 @@ from database import (
     update_user,
 )
 from models import User, Product, Rating, Review
+import pytest
 from unittest.mock import patch
-from utils import filter_products, check_login, check_if_error, get_product_by_url, get_genders_and_kinds
+from exceptions import ProductNotFound, UserNotFound
+from utils import (
+    ValidationError,
+    authenticate,
+    filter_products,
+    get_genders_and_kinds,
+    get_product_by_url,
+    validate_account,
+)
 from flask import session
 
 def test_connection_home(client):
@@ -115,7 +124,8 @@ def test_update_user(Session):
     assert db_user1.email == "newemail@example.com"
 
     # Update user 3 (doesn't exist)
-    update_user(Session, 3, "New User", "newpassword", "newemail@example.com", users)
+    with pytest.raises(UserNotFound):
+        update_user(Session, 3, "New User", "newpassword", "newemail@example.com", users)
 
     # Check that user list is still the same
     assert len(users) == 1
@@ -169,8 +179,8 @@ def test_get_ratings(Session):
 
 def test_create_rating(Session):
     rating1 = (1, 3, 1, 3.5) 
-    rating_result = create_rating(Session, rating1[1], rating1[2], rating1[3])
-    assert rating_result == 'Could not find this product or this user'
+    with pytest.raises(ProductNotFound):
+        create_rating(Session, rating1[1], rating1[2], rating1[3])
 
 
     # Add a product  
@@ -395,7 +405,7 @@ def test_filter_products():
     expected_output = []
     assert filtered_products == expected_output
 
-def test_check_login():
+def test_authenticate():
     # Create test users
     users = [
         User(id=1, name="john", password="test1", email="john@example.com"),
@@ -404,24 +414,24 @@ def test_check_login():
     ]
 
     # Test case: Correct username and password
-    result, user = check_login('john', 'test1', users)
-    assert result == 'good'
+    user, error = authenticate('john', 'test1', users)
+    assert error is None
     assert user.id == 1
     assert user.name == "john"
     assert user.check_password("test1")
     assert user.email == "john@example.com"
 
     # Test case: Correct username, wrong password
-    result, user = check_login('emma', 'wrong_password', users)
-    assert result == 'Wrong Password'
+    user, error = authenticate('emma', 'wrong_password', users)
+    assert error == ValidationError('password', 'Wrong Password')
     assert user is None
 
     # Test case: Wrong username
-    result, user = check_login('unknown_user', 'test3', users)
-    assert result == 'Wrong Username'
+    user, error = authenticate('unknown_user', 'test3', users)
+    assert error == ValidationError('username', 'Wrong Username')
     assert user is None
 
-def test_check_if_error():
+def test_validate_account():
     # Create test users
     users = [
         User(id=1, name="john", password="password1", email="john@example.com"),
@@ -429,36 +439,36 @@ def test_check_if_error():
     ]
 
     # Test case 1: Valid inputs, no errors expected
-    result = check_if_error(users, 3, 'Alice', 'alice@example.com', 'password3')
-    assert result is None
+    result = validate_account(users, 3, 'Alice', 'alice@example.com', 'password3')
+    assert result == []
 
     # Test case 2: Empty username, expect 'No Username' error
-    result = check_if_error(users, 3, '', 'alice@example.com', 'password3')
-    assert result == 'No Username provided'
+    result = validate_account(users, 3, '', 'alice@example.com', 'password3')
+    assert result == [ValidationError('username', 'No Username provided')]
 
     # Test case 3: Existing username, expect 'Already such a User' error
-    result = check_if_error(users, 3, 'john', 'alice@example.com', 'password3')
-    assert result == 'Already such an User'
+    result = validate_account(users, 3, 'john', 'alice@example.com', 'password3')
+    assert result == [ValidationError('username', 'Already such an User')]
 
     # Test case 4: Empty email, expect 'No E-mail' error
-    result = check_if_error(users, 3, 'Alice', '', 'password3')
-    assert result == 'No E-mail provided'
+    result = validate_account(users, 3, 'Alice', '', 'password3')
+    assert result == [ValidationError('email', 'No E-mail provided')]
 
     # Test case 5: Existing email, expect 'Already such an E-mail' error
-    result = check_if_error(users, 3, 'Alice', 'john@example.com', 'password3')
-    assert result == 'Already such an E-mail'
+    result = validate_account(users, 3, 'Alice', 'john@example.com', 'password3')
+    assert result == [ValidationError('email', 'Already such an E-mail')]
 
     # Test case 6: Empty password, expect 'No password' error
-    result = check_if_error(users, 3, 'Alice', 'alice@example.com', '123')
-    assert result == 'Password must consist of at lest 8 characters'
+    result = validate_account(users, 3, 'Alice', 'alice@example.com', '123')
+    assert result == [ValidationError('password', 'Password must consist of at least 8 characters')]
 
     # Test case 7: Space in username, expect 'Username can not have spaces' error
-    result = check_if_error(users, 3, 'Ali ce', 'alice@example.com', 'password3')
-    assert result == 'Username can not have spaces'
+    result = validate_account(users, 3, 'Ali ce', 'alice@example.com', 'password3')
+    assert result == [ValidationError('username', 'Username can not have spaces')]
 
     # Test case 8: Space in password, expect 'Password can not have spaces' error
-    result = check_if_error(users, 3, 'Alice', 'alice@example.com', 'pass word3')
-    assert result == 'Password can not have spaces'
+    result = validate_account(users, 3, 'Alice', 'alice@example.com', 'pass word3')
+    assert result == [ValidationError('password', 'Password can not have spaces')]
 
 
 def test_get_product_by_url():

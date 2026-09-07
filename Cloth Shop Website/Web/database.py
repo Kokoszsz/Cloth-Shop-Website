@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 from datetime import datetime
 from models import User, Product, Rating, Review ,Base
+from exceptions import DuplicateReview, DuplicateUser, ProductNotFound, UserNotFound
 
 SessionFactory = sessionmaker[Session]
 ProductDict = dict[str, Any]
@@ -41,15 +42,15 @@ def session_scope(Session: SessionFactory) -> Iterator[Session]:
         session.close()
 
 
-def create_user(Session: SessionFactory, name: str, password: str, email: str) -> User | None:
+def create_user(Session: SessionFactory, name: str, password: str, email: str) -> User:
     with session_scope(Session) as session:
         user = User(name=name, password=password, email=email)
         session.add(user)
         try:
             session.flush()
-        except IntegrityError:
+        except IntegrityError as exc:
             session.rollback()
-            return None
+            raise DuplicateUser(name, email) from exc
     return user
 
 def update_user(
@@ -63,10 +64,10 @@ def update_user(
     phone_number: str = "",
     country: str = "",
     city: str = "",
-) -> User | None:
+) -> User:
     user = next((user for user in users if user.id == id), None)
     if user is None:
-        return None
+        raise UserNotFound(id)
 
     user.name = name
     user.set_password(password)
@@ -114,10 +115,12 @@ def create_rating(
     product_id: int,
     user_id: int,
     new_rating_points: float,
-) -> Rating | str:
+) -> Rating:
     with session_scope(Session) as session:
-        if not session.get(User, user_id) or not session.get(Product, product_id):
-            return 'Could not find this product or this user'
+        if not session.get(User, user_id):
+            raise UserNotFound(user_id)
+        if not session.get(Product, product_id):
+            raise ProductNotFound(product_id)
 
         rating_obj = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
         if rating_obj is None:
@@ -164,18 +167,20 @@ def create_review(
     product_id: int,
     user_id: int,
     review_content: str,
-) -> Review | None | bool:
+) -> Review:
     with session_scope(Session) as session:
-        if not session.get(User, user_id) or not session.get(Product, product_id):
-            return None
+        if not session.get(User, user_id):
+            raise UserNotFound(user_id)
+        if not session.get(Product, product_id):
+            raise ProductNotFound(product_id)
 
         review_object = Review(product_id=product_id, user_id=user_id, content=review_content)
         session.add(review_object)
         try:
             session.flush()
-        except IntegrityError:
+        except IntegrityError as exc:
             session.rollback()
-            return False
+            raise DuplicateReview(product_id, user_id) from exc
         return review_object
     
 def format_review_dates(reviews: list[Review]) -> list[Review]:

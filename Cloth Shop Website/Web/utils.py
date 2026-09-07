@@ -1,8 +1,17 @@
+from dataclasses import dataclass
 from typing import Any, Iterable
 
 from models import User
 
 ProductDict = dict[str, Any]
+
+MINIMUM_PASSWORD_LENGTH = 8
+
+
+@dataclass(frozen=True)
+class ValidationError:
+    field: str
+    message: str
 
 
 def filter_products(
@@ -20,44 +29,52 @@ def filter_products(
                     filtered_products.append(product)
     return filtered_products
 
-def check_login(username: str, password: str, users: list[User]) -> tuple[str, User | None]:
+def authenticate(
+    username: str,
+    password: str,
+    users: list[User],
+) -> tuple[User | None, ValidationError | None]:
     for user in users:
-        if user.name == username:  
-            if user.check_password(password): 
-                return 'good', user
-            else:
-                return 'Wrong Password', None
-    else:
-        return 'Wrong Username', None
+        if user.name == username:
+            if user.check_password(password):
+                return user, None
+            return None, ValidationError('password', 'Wrong Password')
+    return None, ValidationError('username', 'Wrong Username')
     
-def check_if_error(
+def validate_account(
     users: list[User],
     id: int | None,
     username: str,
     email: str,
     password: str,
-) -> str | None:
-    if ' ' in username:
-        return 'Username can not have spaces'
+) -> list[ValidationError]:
+    errors = []
+
+    if username == '':
+        errors.append(ValidationError('username', 'No Username provided'))
+    elif ' ' in username:
+        errors.append(ValidationError('username', 'Username can not have spaces'))
+    elif any(user.name == username and user.id != id for user in users):
+        errors.append(ValidationError('username', 'Already such an User'))
+
+    if email == '':
+        errors.append(ValidationError('email', 'No E-mail provided'))
+    elif any(user.email == email and user.id != id for user in users):
+        errors.append(ValidationError('email', 'Already such an E-mail'))
+
     if ' ' in password:
-        return 'Password can not have spaces'
-    if username != '':
-        if email != '':
-            if all(user.name != username or user.id == id for user in users):
-                if all(user.email != email or user.id == id for user in users):
-                    if len(password) < 8:
-                        return 'Password must consist of at lest 8 characters'
-                    else:
-                        return None
-                else:
-                    return 'Already such an E-mail'
-            else:
-                return 'Already such an User'
-        else:
-            return 'No E-mail provided'
-    else:
-        return 'No Username provided'
-    
+        errors.append(ValidationError('password', 'Password can not have spaces'))
+    elif len(password) < MINIMUM_PASSWORD_LENGTH:
+        errors.append(
+            ValidationError(
+                'password',
+                f'Password must consist of at least {MINIMUM_PASSWORD_LENGTH} characters',
+            )
+        )
+
+    return errors
+
+
 def get_product_by_url(products: list[ProductDict], product_url: str) -> ProductDict | None:
     for product in products:
         if product['url'] == product_url:

@@ -1,13 +1,15 @@
 from flask import Flask, Response, render_template, redirect, url_for, jsonify, request, session
 from flask.typing import ResponseReturnValue
 from config import get_config
+from exceptions import DuplicateReview, DuplicateUser, ProductNotFound, ShopError, UserNotFound
 from utils import (
-    check_if_error,
-    check_login,
+    ValidationError,
+    authenticate,
     filter_products,
     get_genders_and_kinds,
     get_product_by_url,
     get_username_by_id_filter,
+    validate_account,
 )
 from database import (
     create_database_Session,
@@ -34,6 +36,21 @@ db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/myd
 products = get_products_to_dict(db_Session)
 
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
+
+
+def messages_by_field(errors: list[ValidationError]) -> dict[str, str]:
+    return {error.field: error.message for error in errors}
+
+
+@app.errorhandler(DuplicateReview)
+def handle_duplicate_review(error: DuplicateReview) -> ResponseReturnValue:
+    return jsonify({'message': 'You have already reviewed this product'}), 409
+
+
+@app.errorhandler(ProductNotFound)
+@app.errorhandler(UserNotFound)
+def handle_missing_record(error: ShopError) -> ResponseReturnValue:
+    return jsonify({'message': str(error)}), 404
     
 @app.template_filter('nl2br')
 def nl2br_filter(s: str) -> str:
@@ -73,7 +90,7 @@ def my_route() -> ResponseReturnValue:
 
 @app.route('/account', methods = ['POST', 'GET'])
 def account() -> ResponseReturnValue:
-    error = None
+    errors: list[ValidationError] = []
 
     if 'user' not in session:
         return redirect(url_for('login'))
@@ -91,19 +108,17 @@ def account() -> ResponseReturnValue:
 
             users = get_users(db_Session)
 
-            error = check_if_error(users, id, username, email, password)
-            if error is None:
-
+            errors = validate_account(users, id, username, email, password)
+            if not errors:
                 user = update_user(db_Session, id, username, password, email, users, surname, phone_number, country, city)
-                if user is not None:
-                    session['user'] = user.to_dict()
+                session['user'] = user.to_dict()
 
         user_info = session['user']
-        return render_template('account.html', user_info = user_info, error = error)
+        return render_template('account.html', user_info = user_info, errors = messages_by_field(errors))
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login() -> ResponseReturnValue:
-    potential_error = None
+    error = None
     if request.method == 'POST':
 
         if request.form['action'] == "Create account":
@@ -113,20 +128,19 @@ def login() -> ResponseReturnValue:
         password = request.form['password']
 
         users = get_users(db_Session)
-        potential_error, user_info = check_login(username, password, users)
+        user_info, error = authenticate(username, password, users)
 
-
-        if potential_error == 'good':
+        if user_info is not None:
             session['user'] = user_info.to_dict()
             return redirect(url_for('account'))
 
-    return render_template('login.html', error = potential_error)
+    return render_template('login.html', error = error.message if error else None)
 
 
 @app.route('/create_account', methods = ['POST', 'GET'])
 def create_account() -> ResponseReturnValue:
 
-    error = None
+    errors: list[ValidationError] = []
 
     if request.method == 'POST':
         username = request.form['username']
@@ -135,19 +149,18 @@ def create_account() -> ResponseReturnValue:
 
         users = get_users(db_Session)
 
-        error = check_if_error(users, None, username, email, password)
+        errors = validate_account(users, None, username, email, password)
 
-        if error is None:
-            user = create_user(db_Session, username, password, email)
-            if user is None:
-                return render_template('create_account.html', error = 'Already such an User')
-            session['user'] = user.to_dict()
-            return redirect(url_for('account'))
+        if not errors:
+            try:
+                user = create_user(db_Session, username, password, email)
+            except DuplicateUser:
+                errors = [ValidationError('username', 'Already such an User')]
+            else:
+                session['user'] = user.to_dict()
+                return redirect(url_for('account'))
 
-        else:
-            return render_template('create_account.html', error = error)
-
-    return render_template('create_account.html', error = error)
+    return render_template('create_account.html', errors = messages_by_field(errors))
 
 @app.route('/basket', methods = ['GET'])
 def basket() -> ResponseReturnValue:
@@ -236,11 +249,7 @@ def save_review() -> ResponseReturnValue:
     product_id_data = int(data['productId'])
     user_id = session['user']['id']
     review_object = create_review(db_Session, product_id_data, user_id, review_content)
-    if review_object:
-        object_id = review_object.id
-        return jsonify({'message': 'Review saved successfully', 'id': object_id})
-    else:
-        return jsonify({'message': 'error'})
+    return jsonify({'message': 'Review saved successfully', 'id': review_object.id})
 
 @app.route('/delete_review', methods=['POST'])
 def delete_review() -> ResponseReturnValue:
