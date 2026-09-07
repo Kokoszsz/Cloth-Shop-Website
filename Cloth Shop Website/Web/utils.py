@@ -10,7 +10,7 @@ def filter_products(products, min_value, max_value, genders, kinds):
 def check_login(username, password, users):
     for user in users:
         if user.name == username:  
-            if user.password == password: 
+            if user.check_password(password): 
                 return 'good', user
             else:
                 return 'Wrong Password', None

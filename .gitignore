@@ -1,9 +1,24 @@
+# Virtual environments
+.venv/
+venv/
+env/
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Tooling / editor
+.vscode/settings.json
+.playwright-mcp/
+
+# Logs & scratch
 geckodriver.log
-Python/Chess/tempCodeRunnerFile.py
 Cloth Shop Website/Web/tempCodeRunnerFile.py
 Python/Chess/tempCodeRunnerFile.py
-Python/Chess/tempCodeRunnerFile.py
-.vscode/settings.json
 Python programs/Chess/tempCodeRunnerFile.py
-__pycache__/
+
+# Local working notes
+NOTES-*.md

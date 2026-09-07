@@ -1,4 +1,17 @@
-from database import *
+from database import (
+    create_rating,
+    create_review,
+    create_user,
+    get_all_reviews,
+    get_certain_rating,
+    get_products_to_dict,
+    get_ratings,
+    get_reviews_of_a_product,
+    get_users,
+    remove_rating,
+    remove_review,
+    update_user,
+)
 from models import User, Product, Rating, Review
 from unittest.mock import patch
 from utils import filter_products, check_login, check_if_error, get_product_by_url, get_genders_and_kinds
@@ -47,12 +60,13 @@ def test_create_user(Session):
     user_email = "john@example.com"
 
     # Create user
-    user = create_user(Session, user_id, user_name, user_password, user_email)
+    user = create_user(Session, user_name, user_password, user_email)
 
     # Check if user was created correctly
     assert user.id == user_id
     assert user.name == user_name
-    assert user.password == user_password
+    assert user.check_password(user_password)
+    assert user.password_hash != user_password  # stored value must not be the plaintext
     assert user.email == user_email
 
     # Check if newly created user is in database
@@ -60,7 +74,8 @@ def test_create_user(Session):
     db_user = session.query(User).filter_by(id=user_id).first()
     assert db_user != None
     assert db_user.name == user_name
-    assert db_user.password == user_password
+    assert db_user.check_password(user_password)
+    assert db_user.password_hash != user_password
     assert db_user.email == user_email
     session.close()
 
@@ -72,7 +87,7 @@ def test_get_users(Session):
     # Make sure data of this user is correct
     assert users[0].id == 1
     assert users[0].name == "John"
-    assert users[0].password == "password"
+    assert users[0].check_password("password")
     assert users[0].email == "john@example.com"
 
     
@@ -88,7 +103,7 @@ def test_update_user(Session):
 
     # Check if user was properly updated
     assert user.name == "New Name"
-    assert user.password == "newpassword"
+    assert user.check_password("newpassword")
     assert user.email == "newemail@example.com"
 
     # Retrieve user 1 from database and check attributes
@@ -96,7 +111,7 @@ def test_update_user(Session):
     db_user1 = session.query(User).filter_by(id=1).first()
     session.close()
     assert db_user1.name == "New Name"
-    assert db_user1.password == "newpassword"
+    assert db_user1.check_password("newpassword")
     assert db_user1.email == "newemail@example.com"
 
     # Update user 3 (doesn't exist)
@@ -137,7 +152,7 @@ def test_get_ratings(Session):
 
     # Add a rating  
     session = Session()
-    rating = Rating(1, 3, 4, 2.1)
+    rating = Rating(3, 4, 2.1, id=1)
     session.merge(rating)
     session.commit()
     session.close()
@@ -154,7 +169,7 @@ def test_get_ratings(Session):
 
 def test_create_rating(Session):
     rating1 = (1, 3, 1, 3.5) 
-    rating_result = create_rating(Session, rating1[0], rating1[1], rating1[2], rating1[3])
+    rating_result = create_rating(Session, rating1[1], rating1[2], rating1[3])
     assert rating_result == 'Could not find this product or this user'
 
 
@@ -165,15 +180,15 @@ def test_create_rating(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     rating1 = (1, 1, 1, 2.5) 
-    rating_result = create_rating(Session, rating1[0], rating1[1], rating1[2], rating1[3])
-    obj_rating_correct = Rating(*rating1)
-    assert rating_result.id == obj_rating_correct.id
+    rating_result = create_rating(Session, rating1[1], rating1[2], rating1[3])
+    obj_rating_correct = Rating(*rating1[1:], id=rating1[0])
+    assert rating_result.id is not None
     assert rating_result.product_id == obj_rating_correct.product_id
     assert rating_result.user_id == obj_rating_correct.user_id
     assert rating_result.rating_points == obj_rating_correct.rating_points
@@ -182,7 +197,7 @@ def test_get_certain_rating(Session):
 
     # Add a rating  
     session = Session()
-    rating = Rating(1, 2, 1, 2.0)
+    rating = Rating(2, 1, 2.0, id=1)
     session.merge(rating)
     session.commit()
     session.close()
@@ -201,21 +216,16 @@ def test_remove_rating(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     # Add a rating  
-    session = Session()
-    product = Rating(1, 1, 1, 3) 
-    session.merge(product)
-    session.commit()
-    session.close()
+    create_rating(Session, 1, 1, 3)
 
-    remove_rating(Session, 1, 1)
-    results = get_ratings(Session)
-    assert results == []
+    assert remove_rating(Session, 1, 1) is True
+    assert get_certain_rating(Session, 1, 1) is None
 
 def test_create_review(Session):
 
@@ -227,17 +237,17 @@ def test_create_review(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     review = (1, 1, 1, 'great product') 
-    review_object = create_review(Session, review[0], review[1], review[2], review[3])
+    review_object = create_review(Session, review[1], review[2], review[3])
 
 
-    obj_review_correct = Review(*review)
-    assert review_object.id == obj_review_correct.id
+    obj_review_correct = Review(*review[1:], id=review[0])
+    assert review_object.id is not None
     assert review_object.product_id == obj_review_correct.product_id
     assert review_object.user_id == obj_review_correct.user_id
     assert review_object.content == obj_review_correct.content
@@ -252,17 +262,17 @@ def test_create_review(Session):
     session.commit()
 
     # Add a user
-    user = User(1, 'test123', '123', 'test@mail')
+    user = User('test123', '123', 'test@mail', id=1)
     session.merge(user)
     session.commit()
     session.close()
 
     review = (1, 1, 1, 'great product') 
-    review_object = create_review(Session, review[0], review[1], review[2], review[3])
+    review_object = create_review(Session, review[1], review[2], review[3])
 
 
-    obj_review_correct = Review(*review)
-    assert review_object.id == obj_review_correct.id
+    obj_review_correct = Review(*review[1:], id=review[0])
+    assert review_object.id is not None
     assert review_object.product_id == obj_review_correct.product_id
     assert review_object.user_id == obj_review_correct.user_id
     assert review_object.content == obj_review_correct.content
@@ -284,7 +294,7 @@ def test_get_reviews_of_a_product(Session):
 
     session = Session()
     for review in reviews:
-        session.merge(Review(*review))
+        session.merge(Review(*review[1:], id=review[0]))
     session.commit()
 
     product_reviews = get_reviews_of_a_product(Session, 1)
@@ -307,7 +317,7 @@ def test_get_all_reviews(Session):
 
     session = Session()
     for review in reviews:
-        session.merge(Review(*review))
+        session.merge(Review(*review[1:], id=review[0]))
     session.commit()
 
     all_reviews = get_all_reviews(Session)
@@ -318,14 +328,15 @@ def test_get_all_reviews(Session):
 def test_remove_review(Session):
     # Add a review
     session = Session()
-    review = Review(1, 1, 1, 'good review')
+    review = Review(1, 1, 'good review', id=1)
     session.merge(review)
     session.commit()
     session.close()
 
     # Remove the review
     review_id = 1
-    result = remove_review(Session, review_id)
+    user_id = 1
+    result = remove_review(Session, review_id, user_id)
     assert result is True
 
     # Check if the review is removed
@@ -397,7 +408,7 @@ def test_check_login():
     assert result == 'good'
     assert user.id == 1
     assert user.name == "john"
-    assert user.password == "test1"
+    assert user.check_password("test1")
     assert user.email == "john@example.com"
 
     # Test case: Correct username, wrong password
@@ -506,11 +517,20 @@ def test_get_genders_and_kinds():
     assert kinds6 == []
 
 # Define users 
-@patch('main.send_email')
-def test_create_account_error(mock_send_email, client):
+@patch('main.create_user')
+@patch('main.get_users')
+def test_create_account_success(mock_get_users, mock_create_user, client):
 
-    # Mock the send_email function and set the return value
-    mock_send_email.return_value = 000000
+    # Keep the real database out of it - the route now writes on success
+    mock_get_users.return_value = [
+        User(id=1, name="john", password="test1", email="john@example.com"),
+    ]
+    mock_create_user.return_value = User(
+        id=2,
+        name='test_create_account',
+        password='test_create_account',
+        email='test_create_account@example.com',
+    )
 
     # Send data
     response = client.post('/create_account', data={
@@ -518,8 +538,38 @@ def test_create_account_error(mock_send_email, client):
         'email': 'test_create_account@example.com',
         'password': 'test_create_account'
     })
-    # Render Template status code
+
+    # The account is created straight away and the user is logged in
     assert response.status_code == 302
+    assert response.headers['Location'].endswith('/account')
+    mock_create_user.assert_called_once()
+
+
+@patch('main.create_user')
+@patch('main.get_users')
+def test_create_account_keeps_credentials_out_of_the_session(mock_get_users, mock_create_user, client):
+
+    mock_get_users.return_value = [
+        User(id=1, name="john", password="test1", email="john@example.com"),
+    ]
+    mock_create_user.return_value = User(
+        id=2,
+        name='cookie_check',
+        password='sup3rsecretpassword',
+        email='cookie_check@example.com',
+    )
+
+    client.post('/create_account', data={
+        'username': 'cookie_check',
+        'email': 'cookie_check@example.com',
+        'password': 'sup3rsecretpassword'
+    })
+
+    # The session cookie is signed, not encrypted - nothing secret may go in it
+    with client.session_transaction() as flask_session:
+        assert 'new_user' not in flask_session
+        assert 'sup3rsecretpassword' not in str(dict(flask_session))
+        assert 'password' not in flask_session['user']
 
 # Mock the get_users function to return some existing users
 @patch('main.get_users')

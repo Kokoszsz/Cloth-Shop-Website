@@ -33,7 +33,7 @@ def insert_data_to_database(Session):
 
 
     for user in users_data:
-        user_obj = User(*user)
+        user_obj = User(*user[1:], id=user[0])
         session.add(user_obj)
 
     for product in products_data:
@@ -41,7 +41,7 @@ def insert_data_to_database(Session):
         session.add(product_obj)
 
     for rating in rating_data:
-        product_obj = Rating(*rating)
+        product_obj = Rating(*rating[1:], id=rating[0])
         session.add(product_obj)
 
 

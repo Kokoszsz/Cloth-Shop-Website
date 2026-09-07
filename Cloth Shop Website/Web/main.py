@@ -1,23 +1,36 @@
 from flask import Flask, render_template, redirect, url_for, jsonify, request, session
-import os
-from utils import *
-from database import *
-from send_email import send_email
+from config import get_config
+from utils import (
+    check_if_error,
+    check_login,
+    filter_products,
+    get_genders_and_kinds,
+    get_product_by_url,
+    get_username_by_id_filter,
+)
+from database import (
+    create_database_Session,
+    create_rating,
+    create_review,
+    create_user,
+    get_all_ratings_of_a_product,
+    get_certain_rating,
+    get_products_to_dict,
+    get_reviews_of_a_product,
+    get_users,
+    remove_rating,
+    remove_review,
+    update_user,
+)
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY_CLOTH_SHOP', 'DefaultSecretKeyTesting123456789')
+app.config.from_object(get_config())
 db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
 
 
-test_users = get_users(db_Session)
-print(test_users)
 products = get_products_to_dict(db_Session)
-print(products)
-test_ratings = get_ratings(db_Session)
-print(test_ratings)
-print(get_all_reviews(db_Session))
 
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
     
@@ -120,67 +133,20 @@ def create_account():
         password = request.form['password']
 
         users = get_users(db_Session)
-        ids = [user.id for user in users ]
-        id = max(ids)+1 ## this should be changed
 
-        error = check_if_error(users, id, username, email, password)
+        error = check_if_error(users, None, username, email, password)
 
         if error is None:
+            user = create_user(db_Session, username, password, email)
+            if user is None:
+                return render_template('create_account.html', error = 'Already such an User')
+            session['user'] = user.to_dict()
+            return redirect(url_for('account'))
 
-            verification_code = send_email('account registration verification', email)
-            
-            session['new_user'] = {'id': id, 'username': username, 'password': password, 'email': email, 'verification code': verification_code}
-
-            # this will be changed to appear after user provided valid code
-            return redirect(url_for('create_account_verification'))
-        
         else:
             return render_template('create_account.html', error = error)
 
     return render_template('create_account.html', error = error)
-
-@app.route('/create_account_verification', methods = ['POST', 'GET'])
-def create_account_verification():
-
-
-    if request.method == 'POST':
-        if 'confirm' in request.form and request.form['confirm'] == "Confirm":
-            if session['new_user'] is not None:
-                id = session['new_user']['id']
-                username = session['new_user']['username']
-                password = session['new_user']['password']
-                email = session['new_user']['email']
-                verification_code = session['new_user']['verification code']
-
-                if verification_code == request.form['verification-code']:
-                
-                    session.pop('new_user', None)
-                    user = create_user(db_Session, id, username, password, email)
-                    session['user'] = user.to_dict()
-
-                else:
-                    ## wrong code
-                    return render_template('create_account_verification.html')
-
-
-            ## Check if code provided by user is valid
-            return redirect(url_for('account'))
-        
-        elif 'resend' in request.form and request.form['resend'] == "Send again":
-            email = session['new_user']['email']
-            verification_code = send_email('account registration verification', email)
-            session['new_user']['verification code'] = verification_code
-
-    # Check if the request is redirected from the create_account route
-    referrer = request.referrer
-    if referrer is None or '/create_account' not in referrer:
-        # If the referrer is not from the create_account route, redirect to a different page
-        return redirect(url_for('home'))
-
-    # Rest of the code...
-
-    # Render the verification template
-    return render_template('create_account_verification.html')
 
 @app.route('/basket', methods = ['GET'])
 def basket():
@@ -243,15 +209,10 @@ def save_rating():
     data = request.get_json()
     rating_data = float(data['rating'])
     product_id_data = int(data['productId'])
+    if not 1 <= rating_data <= 5:
+        return jsonify({'message': 'Rating must be between 1 and 5 (inclusive)'}), 400
     user_id = session['user']['id']
-    ratings = get_ratings(db_Session)
-    id = ratings[-1].id + 1 
-    ids = [rating.id for rating in ratings]
-    try:
-        id = max(ids) + 1
-    except:
-        id = 1
-    create_rating(db_Session, id, product_id_data, user_id, rating_data)
+    create_rating(db_Session, product_id_data, user_id, rating_data)
 
     return jsonify({'message': 'Rating saved successfully'})
 
@@ -273,13 +234,7 @@ def save_review():
     review_content = str(data['content'])
     product_id_data = int(data['productId'])
     user_id = session['user']['id']
-    reviews = get_all_reviews(db_Session)
-    ids = [review.id for review in reviews]
-    try:
-        id = max(ids) + 1
-    except:
-        id = 1
-    review_object = create_review(db_Session, id, product_id_data, user_id, review_content)
+    review_object = create_review(db_Session, product_id_data, user_id, review_content)
     if review_object:
         object_id = review_object.id
         return jsonify({'message': 'Review saved successfully', 'id': object_id})
@@ -288,11 +243,14 @@ def save_review():
 
 @app.route('/delete_review', methods=['POST'])
 def delete_review():
+    if not 'user' in session:
+         return jsonify({'message': 'user not logged in'})
+    else:
+        user_id = session['user']['id']
     data = request.get_json()
-    print(data)
     reviewId = int(data['reviewId'])
 
-    success = remove_review(db_Session, reviewId)
+    success = remove_review(db_Session, reviewId, user_id)
     return jsonify({'success': success})
 
 
@@ -332,5 +290,5 @@ def add_header(response):
 
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', debug=True)
+    app.run(host=app.config['HOST'], port=app.config['PORT'], debug=app.config['DEBUG'])
 
