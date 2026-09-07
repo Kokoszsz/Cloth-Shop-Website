@@ -1,4 +1,17 @@
-def filter_products(products, min_value, max_value, genders, kinds):
+from typing import Any, Iterable
+
+from models import User
+
+ProductDict = dict[str, Any]
+
+
+def filter_products(
+    products: list[ProductDict],
+    min_value: float,
+    max_value: float,
+    genders: list[str],
+    kinds: list[str],
+) -> list[ProductDict]:
     filtered_products = []
     for product in products:
         if product['cost'] > min_value and product['cost'] < max_value or max_value == 0:
@@ -7,7 +20,7 @@ def filter_products(products, min_value, max_value, genders, kinds):
                     filtered_products.append(product)
     return filtered_products
 
-def check_login(username, password, users):
+def check_login(username: str, password: str, users: list[User]) -> tuple[str, User | None]:
     for user in users:
         if user.name == username:  
             if user.check_password(password): 
@@ -17,7 +30,13 @@ def check_login(username, password, users):
     else:
         return 'Wrong Username', None
     
-def check_if_error(users, id, username, email, password):
+def check_if_error(
+    users: list[User],
+    id: int | None,
+    username: str,
+    email: str,
+    password: str,
+) -> str | None:
     if ' ' in username:
         return 'Username can not have spaces'
     if ' ' in password:
@@ -39,13 +58,13 @@ def check_if_error(users, id, username, email, password):
     else:
         return 'No Username provided'
     
-def get_product_by_url(products, product_url):
+def get_product_by_url(products: list[ProductDict], product_url: str) -> ProductDict | None:
     for product in products:
         if product['url'] == product_url:
             return product
     return None
 
-def get_genders_and_kinds(request):
+def get_genders_and_kinds(request: Iterable[str]) -> tuple[list[str], list[str]]:
     genders = []
     kinds = []
     if 'male' in request:
@@ -63,7 +82,7 @@ def get_genders_and_kinds(request):
 
 
 
-def get_username_by_id_filter(users, user_id):
+def get_username_by_id_filter(users: list[User], user_id: int) -> str:
     for user in users:
         if user.id == user_id:
             return user.name

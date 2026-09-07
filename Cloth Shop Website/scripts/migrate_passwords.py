@@ -20,11 +20,11 @@ DEFAULT_DB = "Databases/mydb.db"
 KNOWN_HASH_PREFIXES = ("pbkdf2:", "scrypt:", "argon2")
 
 
-def looks_hashed(value):
+def looks_hashed(value: str | None) -> bool:
     return bool(value) and value.startswith(KNOWN_HASH_PREFIXES)
 
 
-def migrate(db_path):
+def migrate(db_path: str) -> None:
     connection = sqlite3.connect(db_path)
     try:
         rows = connection.execute("SELECT id, name, password FROM accounts").fetchall()

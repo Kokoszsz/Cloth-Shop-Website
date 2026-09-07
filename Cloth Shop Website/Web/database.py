@@ -1,9 +1,13 @@
 from contextlib import contextmanager
+from typing import Any, Iterator
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 from datetime import datetime
 from models import User, Product, Rating, Review ,Base
+
+SessionFactory = sessionmaker[Session]
+ProductDict = dict[str, Any]
 
 
 UNIQUE_INDEXES = (
@@ -14,7 +18,7 @@ UNIQUE_INDEXES = (
 )
 
 
-def create_database_Session(url):
+def create_database_Session(url: str) -> SessionFactory:
     engine = create_engine(url, echo=True)
     Base.metadata.create_all(bind=engine)
     with engine.begin() as connection:
@@ -25,7 +29,7 @@ def create_database_Session(url):
 
 
 @contextmanager
-def session_scope(Session):
+def session_scope(Session: SessionFactory) -> Iterator[Session]:
     session = Session()
     try:
         yield session
@@ -37,7 +41,7 @@ def session_scope(Session):
         session.close()
 
 
-def create_user(Session, name, password, email):
+def create_user(Session: SessionFactory, name: str, password: str, email: str) -> User | None:
     with session_scope(Session) as session:
         user = User(name=name, password=password, email=email)
         session.add(user)
@@ -48,7 +52,18 @@ def create_user(Session, name, password, email):
             return None
     return user
 
-def update_user(Session, id, name, password, email, users, surname="", phone_number="", country="", city=""):
+def update_user(
+    Session: SessionFactory,
+    id: int,
+    name: str,
+    password: str,
+    email: str,
+    users: list[User],
+    surname: str = "",
+    phone_number: str = "",
+    country: str = "",
+    city: str = "",
+) -> User | None:
     session = Session()
     user = next((user for user in users if user.id == id), None)
     if user is not None:
@@ -65,14 +80,14 @@ def update_user(Session, id, name, password, email, users, surname="", phone_num
     return user
 
 
-def get_users(Session):
+def get_users(Session: SessionFactory) -> list[User]:
     session = Session()
     users = session.query(User).all()
     session.close()
     return users
 
 
-def get_user(Session, user_id):
+def get_user(Session: SessionFactory, user_id: int) -> User | None:
     session = Session()
     user = session.query(User).filter(User.id == user_id).first()
     session.close()
@@ -80,7 +95,7 @@ def get_user(Session, user_id):
     
 
 
-def get_products_to_dict(Session):
+def get_products_to_dict(Session: SessionFactory) -> list[ProductDict]:
     session = Session()
     results = session.query(Product).all()
     products = [{'id': r.id, 'name': r.name, 'cost': r.cost, 'cloth_cathegory': r.cloth_cathegory,
@@ -88,7 +103,7 @@ def get_products_to_dict(Session):
     session.close()
     return products
 
-def get_product(Session, product_id):
+def get_product(Session: SessionFactory, product_id: int) -> Product | None:
     session = Session()
     result = session.query(Product).filter(Product.id == product_id).first()
     session.close()
@@ -99,7 +114,7 @@ def get_product(Session, product_id):
         return None
 
 
-def modify_rating(session, rating_obj, rating_points):
+def modify_rating(session: Session, rating_obj: Rating, rating_points: float) -> Rating:
     rating_obj.rating_points = rating_points
     session.merge(rating_obj)
     session.commit()
@@ -107,7 +122,12 @@ def modify_rating(session, rating_obj, rating_points):
     return rating_obj
 
 
-def create_rating(Session, product_id, user_id, new_rating_points):
+def create_rating(
+    Session: SessionFactory,
+    product_id: int,
+    user_id: int,
+    new_rating_points: float,
+) -> Rating | str:
     with session_scope(Session) as session:
         if not session.get(User, user_id) or not session.get(Product, product_id):
             return 'Could not find this product or this user'
@@ -128,25 +148,25 @@ def create_rating(Session, product_id, user_id, new_rating_points):
         return rating_obj
 
 
-def get_ratings(Session):
+def get_ratings(Session: SessionFactory) -> list[Rating]:
     session = Session()
     results = session.query(Rating).all()
     session.close()
     return results
 
-def get_certain_rating(Session, product_id, user_id):
+def get_certain_rating(Session: SessionFactory, product_id: int, user_id: int) -> Rating | None:
     session = Session()
     rating = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
     session.close()
     return rating
 
-def get_all_ratings_of_a_product(Session, product_id):
+def get_all_ratings_of_a_product(Session: SessionFactory, product_id: int) -> tuple[list[Rating], int]:
     session = Session()
     ratings = session.query(Rating).filter_by(product_id=product_id).all()
     session.close()
     return ratings, len(ratings)
 
-def remove_rating(Session, product_id, user_id):
+def remove_rating(Session: SessionFactory, product_id: int, user_id: int) -> bool:
     session = Session()
     rating = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
 
@@ -161,7 +181,12 @@ def remove_rating(Session, product_id, user_id):
     
     
 
-def create_review(Session, product_id, user_id, review_content):
+def create_review(
+    Session: SessionFactory,
+    product_id: int,
+    user_id: int,
+    review_content: str,
+) -> Review | None | bool:
     with session_scope(Session) as session:
         if not session.get(User, user_id) or not session.get(Product, product_id):
             return None
@@ -175,7 +200,7 @@ def create_review(Session, product_id, user_id, review_content):
             return False
         return review_object
     
-def format_review_dates(reviews):
+def format_review_dates(reviews: list[Review]) -> list[Review]:
     
     for review in reviews:
         date_object = datetime.strptime(str(review.date), '%Y-%m-%d %H:%M:%S.%f')
@@ -185,14 +210,14 @@ def format_review_dates(reviews):
     
     return reviews
     
-def get_reviews_of_a_product(Session, product_id):
+def get_reviews_of_a_product(Session: SessionFactory, product_id: int) -> list[Review]:
     session = Session()
     reviews = session.query(Review).filter_by(product_id=product_id).all()
     session.close()
     reviews = format_review_dates(reviews)
     return reviews
 
-def get_all_reviews(Session):
+def get_all_reviews(Session: SessionFactory) -> list[Review]:
     session = Session()
     reviews = session.query(Review).all()
     session.close()
@@ -200,7 +225,7 @@ def get_all_reviews(Session):
 
 
 
-def remove_review(Session, review_id, user_id):
+def remove_review(Session: SessionFactory, review_id: int, user_id: int) -> bool:
     session = Session()
     review = session.query(Review).filter_by(id=review_id, user_id=user_id).first()
 
