@@ -1,5 +1,6 @@
+from typing import Any
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session as SQLSession, sessionmaker
 from models import User, Product, Rating, Base
 import json
 
@@ -12,7 +13,7 @@ Session = sessionmaker(bind=engine)
 
 
 # Function to load data from a JSON file
-def load_data_from_json(filename):
+def load_data_from_json(filename: str) -> dict[str, Any] | None:
     try:
         with open(filename, 'r') as json_file:
             data = json.load(json_file)
@@ -21,7 +22,7 @@ def load_data_from_json(filename):
         return None
     
 
-def insert_data_to_database(Session):
+def insert_data_to_database(Session: sessionmaker[SQLSession]) -> None:
     session = Session()
 
 

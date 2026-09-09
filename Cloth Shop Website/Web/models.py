@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import Column, String, Integer, Float, DateTime, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates
@@ -22,7 +24,17 @@ class User(Base):
     country = Column('country', String)
     city = Column('city', String)
 
-    def __init__(self, name, password, email, surname="", phone="", country="", city="", id=None):
+    def __init__(
+        self,
+        name: str,
+        password: str,
+        email: str,
+        surname: str = "",
+        phone: str = "",
+        country: str = "",
+        city: str = "",
+        id: int | None = None,
+    ) -> None:
         self.id = id
         self.name = name
         self.set_password(password)
@@ -32,17 +44,17 @@ class User(Base):
         self.country = country
         self.city = city
 
-    def set_password(self, password):
+    def set_password(self, password: str) -> None:
         """Hash and store the given plaintext password."""
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
         """Return True if the given plaintext password matches the stored hash."""
         if not self.password_hash:
             return False
         return check_password_hash(self.password_hash, password)
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return {
             'id': self.id,
             'name': self.name,
@@ -53,7 +65,7 @@ class User(Base):
             'city': self.city
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"({self.id}), ({self.name}), ({self.email}), ({self.surname})"
         
     
@@ -67,7 +79,15 @@ class Product(Base):
     gender = Column('gender', String)
     image = Column('image', String)
 
-    def __init__(self, id, name, cost, cloth_cathegory, gender, image):
+    def __init__(
+        self,
+        id: int,
+        name: str,
+        cost: float,
+        cloth_cathegory: str,
+        gender: str,
+        image: str,
+    ) -> None:
         self.id = id
         self.name= name
         self.cost = cost
@@ -76,10 +96,10 @@ class Product(Base):
         self.image = image
         self.url = self.to_url()
 
-    def to_url(self):
+    def to_url(self) -> str:
         return self.name.replace(' ', '-')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"({self.id})"
     
 
@@ -94,20 +114,26 @@ class Rating(Base):
     user_id = Column('user_id', Integer)
     rating_points = Column('rating_points', Float)
 
-    def __init__(self, product_id, user_id, rating_points, id=None) -> None:
+    def __init__(
+        self,
+        product_id: int,
+        user_id: int,
+        rating_points: float,
+        id: int | None = None,
+    ) -> None:
         self.id = id
         self.product_id = product_id
         self.user_id = user_id
         self.rating_points = rating_points
 
     @validates('rating_points')
-    def validate_rating(self, key, value):
+    def validate_rating(self, key: str, value: float) -> float:
         if not 1 <= value <= 5:
             raise ValueError("Rating must be between 1 and 5 (inclusive)")
         return value
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), rating points ({self.rating_points})"
     
 
@@ -123,13 +149,19 @@ class Review(Base):
     content = Column('content', String)
     date = Column('date', DateTime, default=datetime.datetime.utcnow)
 
-    def __init__(self, product_id, user_id, content, id=None) -> None:
+    def __init__(
+        self,
+        product_id: int,
+        user_id: int,
+        content: str,
+        id: int | None = None,
+    ) -> None:
         self.id = id
         self.product_id = product_id
         self.user_id = user_id
         self.content = content
  
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return {
             'id': self.id,
             'product_id': self.product_id,
@@ -139,5 +171,5 @@ class Review(Base):
         }
         
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), review content ({self.content}), review date ({self.date})"
