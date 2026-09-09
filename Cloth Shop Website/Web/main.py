@@ -1,12 +1,15 @@
-from flask import Flask, render_template, redirect, url_for, jsonify, request, session
+from flask import Flask, Response, render_template, redirect, url_for, jsonify, request, session
+from flask.typing import ResponseReturnValue
 from config import get_config
+from exceptions import DuplicateReview, DuplicateUser, ProductNotFound, ShopError, UserNotFound
 from utils import (
-    check_if_error,
-    check_login,
+    ValidationError,
+    authenticate,
     filter_products,
     get_genders_and_kinds,
     get_product_by_url,
     get_username_by_id_filter,
+    validate_account,
 )
 from database import (
     create_database_Session,
@@ -33,22 +36,37 @@ db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/myd
 products = get_products_to_dict(db_Session)
 
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
+
+
+def messages_by_field(errors: list[ValidationError]) -> dict[str, str]:
+    return {error.field: error.message for error in errors}
+
+
+@app.errorhandler(DuplicateReview)
+def handle_duplicate_review(error: DuplicateReview) -> ResponseReturnValue:
+    return jsonify({'message': 'You have already reviewed this product'}), 409
+
+
+@app.errorhandler(ProductNotFound)
+@app.errorhandler(UserNotFound)
+def handle_missing_record(error: ShopError) -> ResponseReturnValue:
+    return jsonify({'message': str(error)}), 404
     
 @app.template_filter('nl2br')
-def nl2br_filter(s):
+def nl2br_filter(s: str) -> str:
     return s.replace('\n', '<br>')
 
 @app.route('/')
-def home():
+def home() -> ResponseReturnValue:
     return render_template('home.html')
 
 @app.route('/cloth')
-def cloth():
+def cloth() -> ResponseReturnValue:
     product_data_json = jsonify(products)
     return render_template('cloth.html', products = products, products_json = product_data_json)
 
 @app.route('/filtered-products', methods=['POST'])
-def get_filtered_products():
+def get_filtered_products() -> ResponseReturnValue:
     min_value = float(request.form['minvalue'])
     max_value = float(request.form['maxvalue'])
 
@@ -63,7 +81,7 @@ def get_filtered_products():
     return jsonify({'products': filtered_products})
 
 @app.route("/add-to-basket", methods=["POST"])
-def my_route():
+def my_route() -> ResponseReturnValue:
     product_ID = int(request.json["product_ID"])
 
     session['basket'].append(product_ID)
@@ -71,8 +89,8 @@ def my_route():
     return "Success"
 
 @app.route('/account', methods = ['POST', 'GET'])
-def account():
-    error = None
+def account() -> ResponseReturnValue:
+    errors: list[ValidationError] = []
 
     if 'user' not in session:
         return redirect(url_for('login'))
@@ -90,19 +108,17 @@ def account():
 
             users = get_users(db_Session)
 
-            error = check_if_error(users, id, username, email, password)
-            if error is None:
-
+            errors = validate_account(users, id, username, email, password)
+            if not errors:
                 user = update_user(db_Session, id, username, password, email, users, surname, phone_number, country, city)
-                if user is not None:
-                    session['user'] = user.to_dict()
+                session['user'] = user.to_dict()
 
         user_info = session['user']
-        return render_template('account.html', user_info = user_info, error = error)
+        return render_template('account.html', user_info = user_info, errors = messages_by_field(errors))
 
 @app.route('/login', methods = ['POST', 'GET'])
-def login():
-    potential_error = None
+def login() -> ResponseReturnValue:
+    error = None
     if request.method == 'POST':
 
         if request.form['action'] == "Create account":
@@ -112,20 +128,19 @@ def login():
         password = request.form['password']
 
         users = get_users(db_Session)
-        potential_error, user_info = check_login(username, password, users)
+        user_info, error = authenticate(username, password, users)
 
-
-        if potential_error == 'good':
+        if user_info is not None:
             session['user'] = user_info.to_dict()
             return redirect(url_for('account'))
 
-    return render_template('login.html', error = potential_error)
+    return render_template('login.html', error = error.message if error else None)
 
 
 @app.route('/create_account', methods = ['POST', 'GET'])
-def create_account():
+def create_account() -> ResponseReturnValue:
 
-    error = None
+    errors: list[ValidationError] = []
 
     if request.method == 'POST':
         username = request.form['username']
@@ -134,29 +149,28 @@ def create_account():
 
         users = get_users(db_Session)
 
-        error = check_if_error(users, None, username, email, password)
+        errors = validate_account(users, None, username, email, password)
 
-        if error is None:
-            user = create_user(db_Session, username, password, email)
-            if user is None:
-                return render_template('create_account.html', error = 'Already such an User')
-            session['user'] = user.to_dict()
-            return redirect(url_for('account'))
+        if not errors:
+            try:
+                user = create_user(db_Session, username, password, email)
+            except DuplicateUser:
+                errors = [ValidationError('username', 'Already such an User')]
+            else:
+                session['user'] = user.to_dict()
+                return redirect(url_for('account'))
 
-        else:
-            return render_template('create_account.html', error = error)
-
-    return render_template('create_account.html', error = error)
+    return render_template('create_account.html', errors = messages_by_field(errors))
 
 @app.route('/basket', methods = ['GET'])
-def basket():
+def basket() -> ResponseReturnValue:
     filtered_products = [product for product in products if product['id'] in session['basket']]
     total_cost = sum(product['cost'] for product in filtered_products)
     total_cost = round(total_cost, 2)
     return render_template('basket.html', products = filtered_products, total_cost = total_cost)
 
 @app.route('/basket/<int:product_id>', methods=['DELETE'])
-def delete_product(product_id):
+def delete_product(product_id: int) -> ResponseReturnValue:
     if 'basket' in session:
         basket = session['basket']
         if product_id in basket:
@@ -169,7 +183,7 @@ def delete_product(product_id):
     return jsonify({'success': False, 'message': 'Product not found in the basket'})
 
 @app.route('/checkout')
-def checkout():
+def checkout() -> ResponseReturnValue:
     if session['basket']:
         if 'user' in session:
             user_info = session['user']
@@ -179,7 +193,7 @@ def checkout():
 
 
 @app.route('/cloth/product_detail/<product_url>')
-def product_detail(product_url):
+def product_detail(product_url: str) -> ResponseReturnValue:
 
 
     product_dict = get_product_by_url(products, product_url)
@@ -205,7 +219,7 @@ def product_detail(product_url):
         return render_template('product_not_found.html')
     
 @app.route('/save_rating', methods=['POST'])
-def save_rating():
+def save_rating() -> ResponseReturnValue:
     data = request.get_json()
     rating_data = float(data['rating'])
     product_id_data = int(data['productId'])
@@ -217,7 +231,7 @@ def save_rating():
     return jsonify({'message': 'Rating saved successfully'})
 
 @app.route('/reset_rating', methods=['POST'])
-def reset_rating():
+def reset_rating() -> ResponseReturnValue:
     data = request.get_json()
     product_id_data = int(data['productId'])
     user_id = session['user']['id']
@@ -227,7 +241,7 @@ def reset_rating():
 
 
 @app.route('/save_review', methods=['POST'])
-def save_review():
+def save_review() -> ResponseReturnValue:
     if not 'user' in session:
          return jsonify({'message': 'user not logged in'})
     data = request.get_json()
@@ -235,14 +249,10 @@ def save_review():
     product_id_data = int(data['productId'])
     user_id = session['user']['id']
     review_object = create_review(db_Session, product_id_data, user_id, review_content)
-    if review_object:
-        object_id = review_object.id
-        return jsonify({'message': 'Review saved successfully', 'id': object_id})
-    else:
-        return jsonify({'message': 'error'})
+    return jsonify({'message': 'Review saved successfully', 'id': review_object.id})
 
 @app.route('/delete_review', methods=['POST'])
-def delete_review():
+def delete_review() -> ResponseReturnValue:
     if not 'user' in session:
          return jsonify({'message': 'user not logged in'})
     else:
@@ -256,7 +266,7 @@ def delete_review():
 
 
 @app.route('/logout')
-def logout():
+def logout() -> ResponseReturnValue | None:
     if 'user' in session:
         session.pop('user', None)
         session['basket'] = []
@@ -266,7 +276,7 @@ def logout():
 
 
 @app.before_request
-def before_request():
+def before_request() -> ResponseReturnValue | None:
     if 'user' in session and request.endpoint in ['login']:
         return redirect(url_for('home'))
     if 'user' in session and request.endpoint in ['create_account']:
@@ -279,7 +289,7 @@ def before_request():
 
 ## User will be unable to go back to a previously visited page and remaining logged in after logging out
 @app.after_request
-def add_header(response):
+def add_header(response: Response) -> Response:
     response.cache_control.no_cache = True
     response.cache_control.no_store = True
     response.cache_control.must_revalidate = True

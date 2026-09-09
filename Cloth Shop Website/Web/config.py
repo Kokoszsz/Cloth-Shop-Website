@@ -5,7 +5,7 @@ import secrets
 SECRET_KEY_VARIABLES = ('SECRET_KEY', 'SECRET_KEY_CLOTH_SHOP')
 
 
-def secret_key_from_environment():
+def secret_key_from_environment() -> str | None:
     for variable in SECRET_KEY_VARIABLES:
         key = os.environ.get(variable)
         if key:
@@ -24,7 +24,7 @@ class Config:
     HOST = '127.0.0.1'
     PORT = 5000
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.SECRET_KEY = secret_key_from_environment() or secrets.token_hex(32)
 
 
@@ -41,7 +41,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     HOST = '0.0.0.0'
 
-    def __init__(self):
+    def __init__(self) -> None:
         key = secret_key_from_environment()
         if not key:
             raise RuntimeError(
@@ -63,7 +63,7 @@ CONFIGURATIONS = {
 DEFAULT_ENVIRONMENT = 'development'
 
 
-def get_config(environment=None):
+def get_config(environment: str | None = None) -> Config:
     name = (environment or os.environ.get('APP_ENV') or DEFAULT_ENVIRONMENT).strip().lower()
     try:
         configuration = CONFIGURATIONS[name]

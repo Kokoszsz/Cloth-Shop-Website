@@ -7,7 +7,7 @@ salted.
 import pytest
 
 from models import User
-from utils import check_login
+from utils import ValidationError, authenticate
 
 
 PLAINTEXT = "correct horse battery"
@@ -83,15 +83,15 @@ def test_repr_exposes_no_credential(user):
     assert PLAINTEXT not in repr(user)
 
 
-def test_check_login_verifies_against_the_hash():
+def test_authenticate_verifies_against_the_hash():
     users = [
         User(id=1, name="john", password="test1", email="john@example.com"),
         User(id=2, name="emma", password="test2", email="emma@example.com"),
     ]
 
-    result, matched = check_login("john", "test1", users)
-    assert result == "good"
+    matched, error = authenticate("john", "test1", users)
+    assert error is None
     assert matched.id == 1
 
-    assert check_login("john", "test2", users)[0] == "Wrong Password"
-    assert check_login("nobody", "test1", users)[0] == "Wrong Username"
+    assert authenticate("john", "test2", users)[1] == ValidationError("password", "Wrong Password")
+    assert authenticate("nobody", "test1", users)[1] == ValidationError("username", "Wrong Username")
