@@ -1,3 +1,4 @@
 Flask==3.1.2
 pytest==7.4.3
 SQLAlchemy==2.0.45
+Werkzeug==3.1.4
