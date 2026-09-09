@@ -1,55 +1,41 @@
-from selenium import webdriver
+import pytest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-driver = webdriver.Firefox()
-
-driver.get("http://localhost:5000")
-driver.maximize_window()
-
-username = 'test'
-password = '123'
-
-element = driver.find_element(By.XPATH, '/html/body/div[2]/div/ul/div/div/a[1]/i')
-element.click()
-
-myElem = WebDriverWait(driver, 3).until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="login"]')))
-
-login_field = driver.find_element(By.XPATH, '//*[@id="login"]')
-login_field.send_keys(username)
-
-password_field = driver.find_element(By.XPATH, '//*[@id="password"]')
-password_field.send_keys(password)
-
-login_button = driver.find_element(By.XPATH, '/html/body/div[3]/form/p[3]/input[2]')
-login_button.click()
+pytestmark = pytest.mark.browser
 
 
+def test_logout_removes_the_username_from_the_menu(driver, wait, log_in):
+    log_in()
+    wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'welcome-username')))
 
-try:
-    welcome_text = driver.find_element(By.XPATH, '/html/body/div[2]/div/ul/div/li')
-    print('User logged in')
-    if username in welcome_text.text:
-        print('Correct user is displayed')
-    else:
-        print('Wrong user is displayed')
+    driver.find_element(By.CSS_SELECTOR, 'a[href="/logout"]').click()
 
-    try:
-        logout_button = driver.find_element(By.XPATH, '/html/body/div[2]/div/ul/div/div/a[3]/i')
-        logout_button.click()
-    except:
-        print('Logout button not found')
+    wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, 'welcome-username')))
 
-    try:
-        welcome_text = driver.find_element(By.XPATH, '/html/body/div[2]/div/ul/div/li')
-        print('User is still logged in')
-    except:
-        print('User was successfully been logged out')
-
-except:
-    print('User was not able to log in')
+    assert not driver.find_elements(By.CLASS_NAME, 'welcome-username')
+    assert not driver.find_elements(By.CSS_SELECTOR, 'a[href="/logout"]')
 
 
+def test_logout_returns_to_the_home_page(driver, wait, base_url, log_in):
+    log_in()
+    wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'welcome-username')))
+
+    driver.find_element(By.CSS_SELECTOR, 'a[href="/logout"]').click()
+
+    wait.until(EC.url_to_be(f'{base_url}/'))
+
+    assert driver.title == 'Kokosz Cloth Shop'
 
 
+def test_the_account_page_is_protected_again_after_logout(driver, wait, base_url, log_in):
+    log_in()
+    wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'welcome-username')))
+    driver.find_element(By.CSS_SELECTOR, 'a[href="/logout"]').click()
+    wait.until(EC.url_to_be(f'{base_url}/'))
+
+    driver.get(f'{base_url}/account')
+
+    wait.until(EC.url_to_be(f'{base_url}/login'))
+
+    assert driver.find_element(By.ID, 'login').is_displayed()

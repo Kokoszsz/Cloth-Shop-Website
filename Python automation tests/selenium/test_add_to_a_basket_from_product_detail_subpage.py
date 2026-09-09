@@ -1,52 +1,56 @@
-from selenium import webdriver
+import pytest
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+
+pytestmark = pytest.mark.browser
+
+ADDED_MESSAGE = 'Product added to basket successfully!'
 
 
-driver = webdriver.Firefox()
-
-driver.get("http://localhost:5000")
-
-cloth_subpage = driver.find_element(By.XPATH, '/html/body/div[2]/div/ul/li[2]/a')
-cloth_subpage.click()
-
-for x in range(1,10):
-
-    try:
-
-        product_detail_subpage = driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[{0}]/div/div/a'.format(x))
-        product_detail_subpage.click()
-
-        cloth_name = driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/h1'.format(x))
-        cloth_name = cloth_name.text
-
-        add_product = driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/a'.format(x))
-        add_product.click()
-
-        ok = driver.find_element(By.XPATH, '/html/body/div[4]/div/a')
-        ok.click()
-
-        basket = driver.find_element(By.XPATH, '/html/body/div[2]/ul/div/div/a[2]')
-        basket.click()
-
-        if x == 1:
-            basket_name = driver.find_element(By.XPATH, '/html/body/div[4]/div/div/div[1]/h3')
-            basket_name = basket_name.text
-        else:
-            basket_name = driver.find_element(By.XPATH, '/html/body/div[4]/div/div[{0}]/div[1]/h3'.format(x))
-            basket_name = basket_name.text
-
-        print(basket_name)
-        cloth_subpage = driver.find_element(By.XPATH, '/html/body/div[2]/ul/li[2]/a')
-        cloth_subpage.click()
-
-        if cloth_name == basket_name:
-            print('%s. OK' % x)
-        else:
-            print('%s. Names do not mach ' % x)
-
-    except:
-        print('%s. ERROR, element not found' % x)
+def open_first_product_detail(driver, wait, base_url):
+    driver.get(f'{base_url}/cloth')
+    card = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.product-item')))
+    name = card.find_element(By.CSS_SELECTOR, 'h2').text
+    card.find_element(By.CSS_SELECTOR, '.product-link').click()
+    wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'product-name')))
+    return name
 
 
+def add_to_basket(driver, wait):
+    details = driver.find_element(By.CLASS_NAME, 'product-details')
+    ActionChains(driver).move_to_element(details).perform()
+    wait.until(EC.invisibility_of_element_located((By.ID, 'myresult')))
+    driver.find_element(By.CSS_SELECTOR, '.add-to-basket').click()
+    return wait.until(EC.visibility_of_element_located((By.ID, 'myModal')))
 
 
+def test_the_detail_page_shows_the_product_from_the_card(driver, wait, base_url):
+    name = open_first_product_detail(driver, wait, base_url)
+
+    assert driver.find_element(By.CLASS_NAME, 'product-name').text == name
+
+
+def test_the_detail_page_url_matches_the_product(driver, wait, base_url):
+    name = open_first_product_detail(driver, wait, base_url)
+
+    assert driver.current_url.startswith(f'{base_url}/cloth/product_detail/')
+    assert name.replace(' ', '-') in driver.current_url
+
+
+def test_adding_from_the_detail_page_shows_the_confirmation_message(driver, wait, base_url):
+    open_first_product_detail(driver, wait, base_url)
+
+    modal = add_to_basket(driver, wait)
+
+    assert ADDED_MESSAGE in modal.text
+
+
+def test_adding_from_the_detail_page_fills_the_basket(driver, wait, base_url, basket_contents):
+    name = open_first_product_detail(driver, wait, base_url)
+
+    modal = add_to_basket(driver, wait)
+    modal.find_element(By.LINK_TEXT, 'OK').click()
+    wait.until(EC.invisibility_of_element_located((By.ID, 'myModal')))
+
+    assert basket_contents(until=[name]) == [name]
