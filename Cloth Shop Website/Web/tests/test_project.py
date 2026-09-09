@@ -15,7 +15,7 @@ from database import (
 from models import User, Product, Rating, Review
 import pytest
 from unittest.mock import patch
-from exceptions import ProductNotFound, UserNotFound
+from exceptions import DuplicateReview, ProductNotFound, UserNotFound
 from utils import (
     ValidationError,
     authenticate,
@@ -598,24 +598,75 @@ def test_create_account_errorr(mock_get_users, client):
 
     assert response.status_code == 200
 
-    
+
+LOGGED_IN_USER = {
+    'id': 1,
+    'name': 'john',
+    'email': 'john@example.com',
+    'surname': '',
+    'phone': '',
+    'country': '',
+    'city': '',
+}
 
 
+@patch('main.create_review')
+def test_save_review_reports_a_duplicate_as_a_conflict(mock_create_review, client):
+    mock_create_review.side_effect = DuplicateReview(1, 1)
+
+    with client.session_transaction() as flask_session:
+        flask_session['user'] = LOGGED_IN_USER
+
+    response = client.post('/save_review', json={'content': 'again', 'productId': 1})
+
+    assert response.status_code == 409
+    assert 'already reviewed' in response.get_json()['message']
 
 
+@patch('main.create_rating')
+def test_save_rating_reports_a_missing_product_as_not_found(mock_create_rating, client):
+    mock_create_rating.side_effect = ProductNotFound(99)
+
+    with client.session_transaction() as flask_session:
+        flask_session['user'] = LOGGED_IN_USER
+
+    response = client.post('/save_rating', json={'rating': 4, 'productId': 99})
+
+    assert response.status_code == 404
 
 
+@patch('main.get_users')
+def test_account_page_reports_every_invalid_field_at_once(mock_get_users, client):
+    mock_get_users.return_value = []
+
+    with client.session_transaction() as flask_session:
+        flask_session['user'] = LOGGED_IN_USER
+
+    response = client.post('/account', data={
+        'username': 'a b',
+        'email': '',
+        'password': '123',
+        'surname': '',
+        'phone': '',
+        'country': '',
+        'city': '',
+    })
+    body = response.get_data(as_text=True)
+
+    assert 'Username can not have spaces' in body
+    assert 'No E-mail provided' in body
+    assert 'at least 8 characters' in body
 
 
+@patch('main.get_users')
+def test_create_account_shows_the_password_error(mock_get_users, client):
+    mock_get_users.return_value = []
 
+    response = client.post('/create_account', data={
+        'username': 'alice',
+        'email': 'alice@example.com',
+        'password': '123',
+    })
 
-
-
-
-
-
-
-
-
-
-
+    assert response.status_code == 200
+    assert 'at least 8 characters' in response.get_data(as_text=True)
