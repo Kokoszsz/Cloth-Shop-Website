@@ -29,7 +29,9 @@ from database import (
 
 app = Flask(__name__)
 app.config.from_object(get_config())
-db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
+db_Session = create_database_Session(
+    'sqlite:///Cloth Shop Website/Databases/mydb.db', echo=app.config['SQLALCHEMY_ECHO']
+)
 
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
 

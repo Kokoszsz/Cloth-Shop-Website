@@ -19,8 +19,8 @@ UNIQUE_INDEXES = (
 )
 
 
-def create_database_Session(url: str) -> SessionFactory:
-    engine = create_engine(url, echo=True)
+def create_database_Session(url: str, echo: bool = False) -> SessionFactory:
+    engine = create_engine(url, echo=echo)
     Base.metadata.create_all(bind=engine)
     with engine.begin() as connection:
         for statement in UNIQUE_INDEXES:

@@ -1,6 +1,7 @@
 import pytest
 
 import config
+import main
 
 
 @pytest.fixture
@@ -70,6 +71,18 @@ def test_running_app_applies_the_cookie_flags(test_app):
     assert test_app.config['SESSION_COOKIE_SAMESITE'] == 'Lax'
     assert test_app.config['DEBUG'] is False
     assert test_app.config['TESTING'] is True
+
+
+def test_sql_echo_is_off_in_every_environment(clean_environment, monkeypatch):
+    monkeypatch.setenv('SECRET_KEY', 'a-real-secret')
+    assert config.DevelopmentConfig().SQLALCHEMY_ECHO is False
+    assert config.TestingConfig().SQLALCHEMY_ECHO is False
+    assert config.ProductionConfig().SQLALCHEMY_ECHO is False
+
+
+def test_running_app_does_not_echo_sql(test_app):
+    assert test_app.config['SQLALCHEMY_ECHO'] is False
+    assert main.db_Session.kw['bind'].echo is False
 
 
 def test_session_cookie_is_sent_with_its_flags(client):
