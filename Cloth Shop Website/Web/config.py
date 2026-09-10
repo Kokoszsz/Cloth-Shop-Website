@@ -21,6 +21,7 @@ class Config:
     DEBUG = False
     TESTING = False
 
+    DATABASE_URL = 'sqlite:///Cloth Shop Website/Databases/mydb.db'
     SQLALCHEMY_ECHO = False
 
     HOST = '127.0.0.1'
@@ -38,6 +39,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SESSION_COOKIE_SECURE = False
+    DATABASE_URL = 'sqlite://'
 
 
 class ProductionConfig(Config):

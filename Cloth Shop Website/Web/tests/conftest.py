@@ -1,12 +1,7 @@
 
-import os
-
 import pytest
 
-# main configures the app at import time, so this must come first
-os.environ.setdefault('APP_ENV', 'testing')
-
-from main import app
+from main import create_app
 from database import create_database_Session
 
 
@@ -19,10 +14,10 @@ def Session():
 
 @pytest.fixture
 def test_app():
-  test_app = app
+  test_app = create_app('testing')
   yield test_app
 
 @pytest.fixture
 def client(test_app):
   return test_app.test_client()
-  
+

@@ -1,14 +1,12 @@
 import pytest
 
-import main
 from database import session_scope
 from models import Product
 
 
 @pytest.fixture
-def app_database(Session, monkeypatch):
-    monkeypatch.setattr(main, 'db_Session', Session)
-    return Session
+def app_database(test_app):
+    return test_app.extensions['db_Session']
 
 
 def add_product(Session, name):

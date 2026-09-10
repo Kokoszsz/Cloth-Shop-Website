@@ -1,7 +1,6 @@
 import pytest
 
 import config
-import main
 
 
 @pytest.fixture
@@ -82,7 +81,7 @@ def test_sql_echo_is_off_in_every_environment(clean_environment, monkeypatch):
 
 def test_running_app_does_not_echo_sql(test_app):
     assert test_app.config['SQLALCHEMY_ECHO'] is False
-    assert main.db_Session.kw['bind'].echo is False
+    assert test_app.extensions['db_Session'].kw['bind'].echo is False
 
 
 def test_session_cookie_is_sent_with_its_flags(client):

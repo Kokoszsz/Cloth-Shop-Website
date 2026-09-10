@@ -501,8 +501,8 @@ def test_get_genders_and_kinds():
     assert kinds6 == []
 
 # Define users 
-@patch('main.create_user')
-@patch('main.get_users')
+@patch('blueprints.auth.create_user')
+@patch('blueprints.auth.get_users')
 def test_create_account_success(mock_get_users, mock_create_user, client):
 
     # Keep the real database out of it - the route now writes on success
@@ -529,8 +529,8 @@ def test_create_account_success(mock_get_users, mock_create_user, client):
     mock_create_user.assert_called_once()
 
 
-@patch('main.create_user')
-@patch('main.get_users')
+@patch('blueprints.auth.create_user')
+@patch('blueprints.auth.get_users')
 def test_create_account_keeps_credentials_out_of_the_session(mock_get_users, mock_create_user, client):
 
     mock_get_users.return_value = [
@@ -556,7 +556,7 @@ def test_create_account_keeps_credentials_out_of_the_session(mock_get_users, moc
         assert 'password' not in flask_session['user']
 
 # Mock the get_users function to return some existing users
-@patch('main.get_users')
+@patch('blueprints.auth.get_users')
 def test_create_account_errorr(mock_get_users, client):
     # Mock the get_users function to return some existing users
     mock_get_users.return_value = [
@@ -584,7 +584,7 @@ LOGGED_IN_USER = {
 }
 
 
-@patch('main.create_review')
+@patch('blueprints.reviews.create_review')
 def test_save_review_reports_a_duplicate_as_a_conflict(mock_create_review, client):
     mock_create_review.side_effect = DuplicateReview(1, 1)
 
@@ -597,7 +597,7 @@ def test_save_review_reports_a_duplicate_as_a_conflict(mock_create_review, clien
     assert 'already reviewed' in response.get_json()['message']
 
 
-@patch('main.create_rating')
+@patch('blueprints.reviews.create_rating')
 def test_save_rating_reports_a_missing_product_as_not_found(mock_create_rating, client):
     mock_create_rating.side_effect = ProductNotFound(99)
 
@@ -609,7 +609,7 @@ def test_save_rating_reports_a_missing_product_as_not_found(mock_create_rating, 
     assert response.status_code == 404
 
 
-@patch('main.get_users')
+@patch('blueprints.auth.get_users')
 def test_account_page_reports_every_invalid_field_at_once(mock_get_users, client):
     mock_get_users.return_value = []
 
@@ -632,7 +632,7 @@ def test_account_page_reports_every_invalid_field_at_once(mock_get_users, client
     assert 'at least 8 characters' in body
 
 
-@patch('main.get_users')
+@patch('blueprints.auth.get_users')
 def test_create_account_shows_the_password_error(mock_get_users, client):
     mock_get_users.return_value = []
 
