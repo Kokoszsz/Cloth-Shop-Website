@@ -16,4 +16,4 @@ For more infromation go to [Python selenium tests](./automation-tests)
 
 Manual test cases designed to test certain features of a website from a project [Cloth Shop Website](./cloth-shop)
 Created in jira and then exported in .csv file
-For more infromation go to [Manual tests](./Manual%20tests)
+For more infromation go to [Manual tests](./manual-tests)
