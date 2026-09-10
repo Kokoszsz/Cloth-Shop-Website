@@ -6,7 +6,7 @@ import json
 
 
 
-engine = create_engine("sqlite:///Cloth Shop Website/Databases/mydb.db", echo=True)
+engine = create_engine("sqlite:///cloth-shop/Databases/mydb.db", echo=True)
 Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)
@@ -26,7 +26,7 @@ def insert_data_to_database(Session: sessionmaker[SQLSession]) -> None:
     session = Session()
 
 
-    loaded_data = load_data_from_json('Cloth Shop Website/Databases/json/data.json')
+    loaded_data = load_data_from_json('cloth-shop/Databases/json/data.json')
     if loaded_data:
         users_data = loaded_data.get("users", [])
         products_data = loaded_data.get("products", [])

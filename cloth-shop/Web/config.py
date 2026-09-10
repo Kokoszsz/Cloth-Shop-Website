@@ -21,7 +21,7 @@ class Config:
     DEBUG = False
     TESTING = False
 
-    DATABASE_URL = 'sqlite:///Cloth Shop Website/Databases/mydb.db'
+    DATABASE_URL = 'sqlite:///cloth-shop/Databases/mydb.db'
     SQLALCHEMY_ECHO = False
 
     HOST = '127.0.0.1'
