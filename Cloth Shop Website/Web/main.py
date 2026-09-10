@@ -31,10 +31,6 @@ app = Flask(__name__)
 app.config.from_object(get_config())
 db_Session = create_database_Session('sqlite:///Cloth Shop Website/Databases/mydb.db')
 
-
-
-products = get_products_to_dict(db_Session)
-
 app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
 
 
@@ -62,6 +58,7 @@ def home() -> ResponseReturnValue:
 
 @app.route('/cloth')
 def cloth() -> ResponseReturnValue:
+    products = get_products_to_dict(db_Session)
     product_data_json = jsonify(products)
     return render_template('cloth.html', products = products, products_json = product_data_json)
 
@@ -76,6 +73,7 @@ def get_filtered_products() -> ResponseReturnValue:
 
     genders, kinds = get_genders_and_kinds(request.form)
 
+    products = get_products_to_dict(db_Session)
     filtered_products = filter_products(products, min_value, max_value, genders, kinds)
 
     return jsonify({'products': filtered_products})
@@ -164,6 +162,7 @@ def create_account() -> ResponseReturnValue:
 
 @app.route('/basket', methods = ['GET'])
 def basket() -> ResponseReturnValue:
+    products = get_products_to_dict(db_Session)
     filtered_products = [product for product in products if product['id'] in session['basket']]
     total_cost = sum(product['cost'] for product in filtered_products)
     total_cost = round(total_cost, 2)
@@ -176,6 +175,7 @@ def delete_product(product_id: int) -> ResponseReturnValue:
         if product_id in basket:
             basket.remove(product_id)
             session.modified = True
+            products = get_products_to_dict(db_Session)
             filtered_products = [product for product in products if product['id'] in session['basket']]
             total_cost = sum([product['cost'] for product in filtered_products])
             total_cost = round(total_cost, 2)
@@ -196,6 +196,7 @@ def checkout() -> ResponseReturnValue:
 def product_detail(product_url: str) -> ResponseReturnValue:
 
 
+    products = get_products_to_dict(db_Session)
     product_dict = get_product_by_url(products, product_url)
     initial_rating = None
     initial_reviews = None
