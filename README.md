@@ -10,7 +10,7 @@ For more information go to [Cloth Shop Website](./cloth-shop)
 
 Automation tests created in python using selenium framework. 
 Tests are designed to test certain features of a website from a project [Cloth Shop Website](./cloth-shop)
-For more infromation go to [Python selenium tests](./Python%20selenium%20tests)
+For more infromation go to [Python selenium tests](./automation-tests)
 
 ### Manual tests ###
 
