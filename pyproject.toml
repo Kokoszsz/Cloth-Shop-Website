@@ -1,9 +1,6 @@
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = [
-    "tests",
-    "Cloth Shop Website/Web/tests",
-]
+testpaths = ["Cloth Shop Website/Web/tests"]
 addopts = "--strict-markers"
 markers = [
     "browser: drives a real browser against a running app on http://localhost:5000; opt in with -m browser",

@@ -24,7 +24,6 @@ from utils import (
     get_product_by_url,
     validate_account,
 )
-from flask import session
 
 def test_connection_home(client):
     response = client.get('/')
@@ -236,31 +235,6 @@ def test_remove_rating(Session):
 
     assert remove_rating(Session, 1, 1) is True
     assert get_certain_rating(Session, 1, 1) is None
-
-def test_create_review(Session):
-
-
-    # Add a product  
-    session = Session()
-    product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
-    session.merge(product)
-    session.commit()
-
-    # Add a user
-    user = User('test123', '123', 'test@mail', id=1)
-    session.merge(user)
-    session.commit()
-    session.close()
-
-    review = (1, 1, 1, 'great product') 
-    review_object = create_review(Session, review[1], review[2], review[3])
-
-
-    obj_review_correct = Review(*review[1:], id=review[0])
-    assert review_object.id is not None
-    assert review_object.product_id == obj_review_correct.product_id
-    assert review_object.user_id == obj_review_correct.user_id
-    assert review_object.content == obj_review_correct.content
 
 def test_create_review(Session):
 
