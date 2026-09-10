@@ -47,7 +47,14 @@ def product_detail(product_url: str) -> ResponseReturnValue:
             rating_average = sum([rating.rating_points for rating in all_ratings])/num_of_ratings
         else:
             rating_average = 0
-        return render_template('product_detail.html', product=product_dict, initial_rating=initial_rating, initial_reviews=initial_reviews, users=users, rating=rating_average)
+        return render_template(
+            'product_detail.html',
+            product=product_dict,
+            initial_rating=initial_rating,
+            initial_reviews=initial_reviews,
+            users=users,
+            rating=rating_average,
+        )
     else:
         # If product is None, return a custom error message or redirect to a different page
         return render_template('product_not_found.html')

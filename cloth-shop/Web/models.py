@@ -1,10 +1,10 @@
+import datetime
 from typing import Any
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Index
+from sqlalchemy import Column, DateTime, Float, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates
-import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 Base = declarative_base()
 
@@ -67,8 +67,8 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"({self.id}), ({self.name}), ({self.email}), ({self.surname})"
-        
-    
+
+
 class Product(Base):
     __tablename__ = "products"
 
@@ -101,7 +101,7 @@ class Product(Base):
 
     def __repr__(self) -> str:
         return f"({self.id})"
-    
+
 
 class Rating(Base):
     __tablename__ = "ratings"
@@ -134,8 +134,11 @@ class Rating(Base):
 
 
     def __repr__(self) -> str:
-        return f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), rating points ({self.rating_points})"
-    
+        return (
+            f"id ({self.id}), product id({self.product_id}), "
+            f"user id({self.user_id}), rating points ({self.rating_points})"
+        )
+
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -160,7 +163,7 @@ class Review(Base):
         self.product_id = product_id
         self.user_id = user_id
         self.content = content
- 
+
     def to_dict(self) -> dict[str, Any]:
         return {
             'id': self.id,
@@ -169,7 +172,10 @@ class Review(Base):
             'content': self.content,
             'date': self.date
         }
-        
+
 
     def __repr__(self) -> str:
-        return f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), review content ({self.content}), review date ({self.date})"
+        return (
+            f"id ({self.id}), product id({self.product_id}), user id({self.user_id}), "
+            f"review content ({self.content}), review date ({self.date})"
+        )

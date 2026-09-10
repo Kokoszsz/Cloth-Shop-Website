@@ -9,7 +9,6 @@ import pytest
 from models import User
 from utils import ValidationError, authenticate
 
-
 PLAINTEXT = "correct horse battery"
 
 
@@ -94,4 +93,6 @@ def test_authenticate_verifies_against_the_hash():
     assert matched.id == 1
 
     assert authenticate("john", "test2", users)[1] == ValidationError("password", "Wrong Password")
-    assert authenticate("nobody", "test1", users)[1] == ValidationError("username", "Wrong Username")
+    assert authenticate("nobody", "test1", users)[1] == ValidationError(
+        "username", "Wrong Username"
+    )

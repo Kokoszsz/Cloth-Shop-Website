@@ -1,5 +1,6 @@
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any
 
 from models import User
 
@@ -40,7 +41,7 @@ def authenticate(
                 return user, None
             return None, ValidationError('password', 'Wrong Password')
     return None, ValidationError('username', 'Wrong Username')
-    
+
 def validate_account(
     users: list[User],
     id: int | None,
@@ -87,7 +88,7 @@ def get_genders_and_kinds(request: Iterable[str]) -> tuple[list[str], list[str]]
     if 'male' in request:
         genders.append('male')
     if 'female' in request:
-        genders.append('female')    
+        genders.append('female')
     if 't-shirt' in request:
         kinds.append('t-shirt')
     if 'jeans' in request:
@@ -103,6 +104,5 @@ def get_username_by_id_filter(users: list[User], user_id: int) -> str:
     for user in users:
         if user.id == user_id:
             return user.name
-    return 'Unknown' 
+    return 'Unknown'
 
-    

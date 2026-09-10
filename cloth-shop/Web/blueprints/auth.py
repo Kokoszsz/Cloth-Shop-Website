@@ -35,11 +35,16 @@ def account() -> ResponseReturnValue:
 
             errors = validate_account(users, id, username, email, password)
             if not errors:
-                user = update_user(db_Session(), id, username, password, email, users, surname, phone_number, country, city)
+                user = update_user(
+                    db_Session(), id, username, password, email, users,
+                    surname, phone_number, country, city,
+                )
                 session['user'] = user.to_dict()
 
         user_info = session['user']
-        return render_template('account.html', user_info = user_info, errors = messages_by_field(errors))
+        return render_template(
+            'account.html', user_info = user_info, errors = messages_by_field(errors)
+        )
 
 @bp.route('/login', methods = ['POST', 'GET'])
 def login() -> ResponseReturnValue:

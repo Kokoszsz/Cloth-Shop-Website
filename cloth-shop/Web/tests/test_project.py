@@ -1,3 +1,7 @@
+from unittest.mock import patch
+
+import pytest
+
 from database import (
     create_rating,
     create_review,
@@ -12,10 +16,8 @@ from database import (
     remove_review,
     update_user,
 )
-from models import User, Product, Rating, Review
-import pytest
-from unittest.mock import patch
 from exceptions import ProductNotFound, UserNotFound
+from models import Product, Rating, Review, User
 from utils import (
     ValidationError,
     authenticate,
@@ -24,6 +26,7 @@ from utils import (
     get_product_by_url,
     validate_account,
 )
+
 
 def test_connection_home(client):
     response = client.get('/')
@@ -35,7 +38,7 @@ def test_connection_cloth(client):
 
 
 def test_connection_basket( client):
-    
+
     response = client.get('/basket')
     assert response.status_code == 200
 
@@ -80,7 +83,7 @@ def test_create_user(Session):
     # Check if newly created user is in database
     session = Session()
     db_user = session.query(User).filter_by(id=user_id).first()
-    assert db_user != None
+    assert db_user is not None
     assert db_user.name == user_name
     assert db_user.check_password(user_password)
     assert db_user.password_hash != user_password
@@ -98,7 +101,7 @@ def test_get_users(Session):
     assert users[0].check_password("password")
     assert users[0].email == "john@example.com"
 
-    
+
 
 def test_update_user(Session):
     # Create test users
@@ -134,7 +137,7 @@ def test_get_products_to_dict(Session):
     product = get_products_to_dict(Session)
     assert product == []
 
-    # Add a product  
+    # Add a product
     session = Session()
     product = Product(1, 'product test', 20, 'jeans', 'male', 'image')
     session.merge(product)
@@ -159,7 +162,7 @@ def test_get_ratings(Session):
     ratings = get_ratings(Session)
     assert ratings == []
 
-    # Add a rating  
+    # Add a rating
     session = Session()
     rating = Rating(3, 4, 2.1, id=1)
     session.merge(rating)
@@ -177,12 +180,12 @@ def test_get_ratings(Session):
     assert ratings[0].rating_points == 2.1
 
 def test_create_rating(Session):
-    rating1 = (1, 3, 1, 3.5) 
+    rating1 = (1, 3, 1, 3.5)
     with pytest.raises(ProductNotFound):
         create_rating(Session, rating1[1], rating1[2], rating1[3])
 
 
-    # Add a product  
+    # Add a product
     session = Session()
     product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
     session.merge(product)
@@ -194,7 +197,7 @@ def test_create_rating(Session):
     session.commit()
     session.close()
 
-    rating1 = (1, 1, 1, 2.5) 
+    rating1 = (1, 1, 1, 2.5)
     rating_result = create_rating(Session, rating1[1], rating1[2], rating1[3])
     obj_rating_correct = Rating(*rating1[1:], id=rating1[0])
     assert rating_result.id is not None
@@ -204,7 +207,7 @@ def test_create_rating(Session):
 
 def test_get_certain_rating(Session):
 
-    # Add a rating  
+    # Add a rating
     session = Session()
     rating = Rating(2, 1, 2.0, id=1)
     session.merge(rating)
@@ -218,7 +221,7 @@ def test_get_certain_rating(Session):
     assert rating_obj.rating_points == rating.rating_points
 
 def test_remove_rating(Session):
-    # Add a product  
+    # Add a product
     session = Session()
     product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
     session.merge(product)
@@ -230,7 +233,7 @@ def test_remove_rating(Session):
     session.commit()
     session.close()
 
-    # Add a rating  
+    # Add a rating
     create_rating(Session, 1, 1, 3)
 
     assert remove_rating(Session, 1, 1) is True
@@ -239,7 +242,7 @@ def test_remove_rating(Session):
 def test_create_review(Session):
 
 
-    # Add a product  
+    # Add a product
     session = Session()
     product = Product(1, 'product_test', 20, 'jeans', 'male', 'image')
     session.merge(product)
@@ -251,7 +254,7 @@ def test_create_review(Session):
     session.commit()
     session.close()
 
-    review = (1, 1, 1, 'great product') 
+    review = (1, 1, 1, 'great product')
     review_object = create_review(Session, review[1], review[2], review[3])
 
 
@@ -337,9 +340,12 @@ def test_remove_review(Session):
 def test_filter_products():
     # Define test data
     products = [
-        {'id': 1, 'name': 'cloth1', 'cost_to_show': '10', 'cost': 10, 'cloth_cathegory': 'Shirt', 'gender': 'Male', 'image': 'test'},
-        {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test'},
-        {'id': 3, 'name': 'cloth3', 'cost_to_show': '30', 'cost': 30, 'cloth_cathegory': 'Shoes', 'gender': 'Male', 'image': 'test'},
+        {'id': 1, 'name': 'cloth1', 'cost_to_show': '10', 'cost': 10,
+         'cloth_cathegory': 'Shirt', 'gender': 'Male', 'image': 'test'},
+        {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20,
+         'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test'},
+        {'id': 3, 'name': 'cloth3', 'cost_to_show': '30', 'cost': 30,
+         'cloth_cathegory': 'Shoes', 'gender': 'Male', 'image': 'test'},
     ]
     min_value = 15
     max_value = 25
@@ -350,7 +356,10 @@ def test_filter_products():
     filtered_products = filter_products(products, min_value, max_value, genders, kinds)
 
     # Assert the expected output
-    expected_output = [{'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test'}]
+    expected_output = [
+        {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20,
+         'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test'},
+    ]
     assert filtered_products == expected_output
 
     # Define test data
@@ -448,14 +457,20 @@ def test_validate_account():
 def test_get_product_by_url():
     # Define test data
     products = [
-        {'id': 1, 'name': 'cloth1', 'cost_to_show': '10', 'cost': 10, 'cloth_cathegory': 'Shirt', 'gender': 'Male', 'image': 'test', 'url': 'cloth1'},
-        {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test', 'url': 'cloth2'},
-        {'id': 3, 'name': 'cloth3', 'cost_to_show': '30', 'cost': 30, 'cloth_cathegory': 'Shoes', 'gender': 'Male', 'image': 'test', 'url': 'cloth3'},
+        {'id': 1, 'name': 'cloth1', 'cost_to_show': '10', 'cost': 10,
+         'cloth_cathegory': 'Shirt', 'gender': 'Male', 'image': 'test', 'url': 'cloth1'},
+        {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20,
+         'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test', 'url': 'cloth2'},
+        {'id': 3, 'name': 'cloth3', 'cost_to_show': '30', 'cost': 30,
+         'cloth_cathegory': 'Shoes', 'gender': 'Male', 'image': 'test', 'url': 'cloth3'},
     ]
 
     # Test case 1: Valid product ID, expect product to be returned
     result = get_product_by_url(products, 'cloth2')
-    assert result == {'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20, 'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test', 'url': 'cloth2'}
+    assert result == {
+        'id': 2, 'name': 'cloth2', 'cost_to_show': '20', 'cost': 20,
+        'cloth_cathegory': 'Pants', 'gender': 'Female', 'image': 'test', 'url': 'cloth2',
+    }
 
     # Test case 2: Invalid product ID, expect None to be returned
     result = get_product_by_url(products, 'cloth4')
@@ -469,7 +484,7 @@ def test_get_genders_and_kinds():
     request4 = []
     request5 = ['jeans', 'shirt']
     request6 = ['male', 'female']
-    
+
     # Test first request
     genders1, kinds1 = get_genders_and_kinds(request1)
     assert genders1 == ['male']
@@ -500,7 +515,7 @@ def test_get_genders_and_kinds():
     assert genders6 == ['male', 'female']
     assert kinds6 == []
 
-# Define users 
+# Define users
 @patch('blueprints.auth.create_user')
 @patch('blueprints.auth.get_users')
 def test_create_account_success(mock_get_users, mock_create_user, client):
@@ -531,7 +546,9 @@ def test_create_account_success(mock_get_users, mock_create_user, client):
 
 @patch('blueprints.auth.create_user')
 @patch('blueprints.auth.get_users')
-def test_create_account_keeps_credentials_out_of_the_session(mock_get_users, mock_create_user, client):
+def test_create_account_keeps_credentials_out_of_the_session(
+    mock_get_users, mock_create_user, client
+):
 
     mock_get_users.return_value = [
         User(id=1, name="john", password="test1", email="john@example.com"),

@@ -23,14 +23,16 @@ def before_request() -> ResponseReturnValue | None:
         return redirect(url_for('catalogue.home'))
     if 'user' in session and request.endpoint in ['auth.create_account']:
         return redirect(url_for('catalogue.home'))
-    ## if you are logged in and you try to go back to login page you will get redirected to home page
+    ## if you are logged in and you try to go back to login page
+    ## you will get redirected to home page
 
     if 'basket' not in session:
         session['basket'] = []
     ## sets empty basket
 
 
-## User will be unable to go back to a previously visited page and remaining logged in after logging out
+## User will be unable to go back to a previously visited page
+## and remaining logged in after logging out
 def add_header(response: Response) -> Response:
     response.cache_control.no_cache = True
     response.cache_control.no_store = True

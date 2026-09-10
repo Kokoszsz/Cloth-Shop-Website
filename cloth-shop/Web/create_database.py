@@ -1,10 +1,11 @@
-from typing import Any
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session as SQLSession, sessionmaker
-from models import User, Product, Rating, Base
 import json
+from typing import Any
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session as SQLSession
+from sqlalchemy.orm import sessionmaker
 
+from models import Base, Product, Rating, User
 
 engine = create_engine("sqlite:///cloth-shop/Databases/mydb.db", echo=True)
 Base.metadata.create_all(bind=engine)
@@ -15,12 +16,12 @@ Session = sessionmaker(bind=engine)
 # Function to load data from a JSON file
 def load_data_from_json(filename: str) -> dict[str, Any] | None:
     try:
-        with open(filename, 'r') as json_file:
+        with open(filename) as json_file:
             data = json.load(json_file)
         return data
     except FileNotFoundError:
         return None
-    
+
 
 def insert_data_to_database(Session: sessionmaker[SQLSession]) -> None:
     session = Session()

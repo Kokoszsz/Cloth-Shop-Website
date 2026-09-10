@@ -1,8 +1,8 @@
 
 import pytest
 
-from main import create_app
 from database import create_database_Session
+from main import create_app
 
 
 @pytest.fixture(scope='module')

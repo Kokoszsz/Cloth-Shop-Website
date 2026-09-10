@@ -1,11 +1,14 @@
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Iterator
+from datetime import datetime
+from typing import Any
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
-from datetime import datetime
-from models import User, Product, Rating, Review ,Base
+
 from exceptions import DuplicateReview, DuplicateUser, ProductNotFound, UserNotFound
+from models import Base, Product, Rating, Review, User
 
 SessionFactory = sessionmaker[Session]
 ProductDict = dict[str, Any]
@@ -89,7 +92,7 @@ def get_users(Session: SessionFactory) -> list[User]:
 def get_user(Session: SessionFactory, user_id: int) -> User | None:
     with session_scope(Session) as session:
         return session.query(User).filter(User.id == user_id).first()
-    
+
 
 
 def get_products_to_dict(Session: SessionFactory) -> list[ProductDict]:
@@ -124,14 +127,18 @@ def create_rating(
 
         rating_obj = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
         if rating_obj is None:
-            rating_obj = Rating(product_id=product_id, user_id=user_id, rating_points=new_rating_points)
+            rating_obj = Rating(
+                product_id=product_id, user_id=user_id, rating_points=new_rating_points
+            )
             session.add(rating_obj)
             try:
                 session.flush()
                 return rating_obj
             except IntegrityError:
                 session.rollback()
-                rating_obj = session.query(Rating).filter_by(product_id=product_id, user_id=user_id).one()
+                rating_obj = (
+                    session.query(Rating).filter_by(product_id=product_id, user_id=user_id).one()
+                )
 
         rating_obj.rating_points = new_rating_points
         session.flush()
@@ -146,7 +153,9 @@ def get_certain_rating(Session: SessionFactory, product_id: int, user_id: int) -
     with session_scope(Session) as session:
         return session.query(Rating).filter_by(product_id=product_id, user_id=user_id).first()
 
-def get_all_ratings_of_a_product(Session: SessionFactory, product_id: int) -> tuple[list[Rating], int]:
+def get_all_ratings_of_a_product(
+    Session: SessionFactory, product_id: int
+) -> tuple[list[Rating], int]:
     with session_scope(Session) as session:
         ratings = session.query(Rating).filter_by(product_id=product_id).all()
         return ratings, len(ratings)
@@ -159,8 +168,8 @@ def remove_rating(Session: SessionFactory, product_id: int, user_id: int) -> boo
 
         session.delete(rating)
         return True
-    
-    
+
+
 
 def create_review(
     Session: SessionFactory,
@@ -182,17 +191,17 @@ def create_review(
             session.rollback()
             raise DuplicateReview(product_id, user_id) from exc
         return review_object
-    
+
 def format_review_dates(reviews: list[Review]) -> list[Review]:
-    
+
     for review in reviews:
         date_object = datetime.strptime(str(review.date), '%Y-%m-%d %H:%M:%S.%f')
         formatted_date = date_object.strftime('%Y-%m-%d %H:%M')
-        
+
         review.date = formatted_date
-    
+
     return reviews
-    
+
 def get_reviews_of_a_product(Session: SessionFactory, product_id: int) -> list[Review]:
     with session_scope(Session) as session:
         reviews = session.query(Review).filter_by(product_id=product_id).all()
@@ -213,11 +222,11 @@ def remove_review(Session: SessionFactory, review_id: int, user_id: int) -> bool
         session.delete(review)
         return True
 
-    
 
 
 
 
 
-    
+
+
 
