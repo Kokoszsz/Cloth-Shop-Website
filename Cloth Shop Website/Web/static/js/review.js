@@ -21,22 +21,20 @@ async function submitReview() {
     }
 
     try {
-        const response = await fetch('/save_review', {
+        const response = await fetch(`/api/v1/products/${productId}/reviews`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ content, productId: productId}),
+            body: JSON.stringify({ content }),
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            if (data.message == 'Review saved successfully') {
-                displayReview(content, data.id);
-            }
+        const data = await response.json();
+        if (response.status === 201) {
+            displayReview(content, data.id);
         } 
         else {
-            console.error('Failed to submit review');
+            showError(data.error.message);
         }
     } 
     catch (error) {
@@ -65,20 +63,13 @@ async function removeReview(buttonElement) {
     const reviewId = reviewContainer.getAttribute('data-review-id');
     //console.log(reviewId)
     try {
-        const response = await fetch('/delete_review', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ reviewId }),
+        const response = await fetch(`/api/v1/reviews/${reviewId}`, {
+            method: 'DELETE',
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                if (reviewContainer) {
-                    reviewsContainer.removeChild(reviewContainer);
-                }
+        if (response.status === 204) {
+            if (reviewContainer) {
+                reviewsContainer.removeChild(reviewContainer);
             }
         } else {
             console.error('Failed to remove review');

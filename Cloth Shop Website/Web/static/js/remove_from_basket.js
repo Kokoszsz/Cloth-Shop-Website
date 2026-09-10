@@ -3,18 +3,15 @@ document.addEventListener('DOMContentLoaded', function() {
     item.addEventListener('click', event => {
       const productId = item.getAttribute('id')
       const xhr = new XMLHttpRequest();
-      xhr.open('DELETE', `/basket/${productId}`, true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.open('DELETE', `/api/v1/basket/items/${productId}`, true);
       xhr.onload = () => {
+        const response = JSON.parse(xhr.responseText);
         if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
-          if (response.success) {
-            const basketItem = document.getElementById(`basket-item-${productId}`);
-            basketItem.parentNode.removeChild(basketItem);
-            document.querySelector('.total-cost').textContent = response.totalCost;
-          } else {
-            alert(response.message);
-          }
+          const basketItem = document.getElementById(`basket-item-${productId}`);
+          basketItem.parentNode.removeChild(basketItem);
+          document.querySelector('.total-cost').textContent = response.total_cost;
+        } else {
+          alert(response.error.message);
         }
       };
       xhr.send();

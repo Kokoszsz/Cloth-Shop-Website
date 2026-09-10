@@ -2,12 +2,28 @@ document.querySelector('.filter form').addEventListener('submit', function(e) {
     e.preventDefault();
   
     var form = e.target;
-    var data = new FormData(form);
+    var params = new URLSearchParams();
+    if (form.elements.minvalue.value !== '') {
+        params.append('min_price', form.elements.minvalue.value);
+    }
+    if (form.elements.maxvalue.value !== '') {
+        params.append('max_price', form.elements.maxvalue.value);
+    }
+    ['male', 'female'].forEach(function(gender) {
+        if (form.elements[gender].checked) {
+            params.append('gender', gender);
+        }
+    });
+    ['t-shirt', 'jeans', 'shirt'].forEach(function(category) {
+        if (form.elements[category].checked) {
+            params.append('category', category);
+        }
+    });
   
-    fetch('/filtered-products', {
-        method: 'POST',
-        body: data
-    }).then(function(response) {
+    fetch('/api/v1/products?' + params.toString()).then(function(response) {
+        if (!response.ok) {
+            throw new Error('Filtering failed with status ' + response.status);
+        }
         return response.json();
     }).then(function(data) {
         var productGrid = document.getElementById('product-grid');
@@ -69,6 +85,8 @@ document.querySelector('.filter form').addEventListener('submit', function(e) {
   
             productGrid.appendChild(productItem);
         });
+    }).catch(function(error) {
+        console.error(error);
     });
   });
   

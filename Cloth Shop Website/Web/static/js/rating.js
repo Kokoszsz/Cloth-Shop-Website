@@ -4,22 +4,20 @@ const resetBtn = document.getElementById('reset-btn');
 
 stars.forEach((star) =>
 star.addEventListener('click', () => {
-  const rating = star.value;
+  const rating = Number(star.value);
   const productId = star.closest('.rating').dataset.productId; // Retrieve the product ID from the data attribute
 
-  // Create a data object to send as JSON
-  const data = { rating: rating, productId: productId };
-
-  // Send the rating and product ID to Flask app 
-  fetch('/save_rating', {
-    method: 'POST',
+  fetch(`/api/v1/products/${productId}/rating`, {
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ rating: rating }),
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`status ${response.status}`);
+      }
       console.log('User rated: ' + rating + ' for product ID: ' + productId);
     })
     .catch((error) => {
@@ -30,20 +28,20 @@ star.addEventListener('click', () => {
 
 if (resetBtn) {
   resetBtn.addEventListener('click', () => {
-      
+
       stars.forEach((star) => (star.checked = false));
-      
+
       const productId = resetBtn.closest('.rating').dataset.productId;
-      const data = {productId: productId};
-      // Send the rating and product ID to Flask app
-      fetch('/reset_rating', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
+      fetch(`/api/v1/products/${productId}/rating`, {
+          method: 'DELETE',
       })
-      .then((response) => response.json())
-      console.log('Rating reset.');
+      .then((response) => {
+          if (response.status === 204) {
+              console.log('Rating reset.');
+          }
+      })
+      .catch((error) => {
+          console.error('Error resetting rating:', error);
+      });
   });
 }

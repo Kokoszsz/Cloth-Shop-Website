@@ -15,7 +15,7 @@ from database import (
 from models import User, Product, Rating, Review
 import pytest
 from unittest.mock import patch
-from exceptions import DuplicateReview, ProductNotFound, UserNotFound
+from exceptions import ProductNotFound, UserNotFound
 from utils import (
     ValidationError,
     authenticate,
@@ -582,31 +582,6 @@ LOGGED_IN_USER = {
     'country': '',
     'city': '',
 }
-
-
-@patch('blueprints.reviews.create_review')
-def test_save_review_reports_a_duplicate_as_a_conflict(mock_create_review, client):
-    mock_create_review.side_effect = DuplicateReview(1, 1)
-
-    with client.session_transaction() as flask_session:
-        flask_session['user'] = LOGGED_IN_USER
-
-    response = client.post('/save_review', json={'content': 'again', 'productId': 1})
-
-    assert response.status_code == 409
-    assert 'already reviewed' in response.get_json()['message']
-
-
-@patch('blueprints.reviews.create_rating')
-def test_save_rating_reports_a_missing_product_as_not_found(mock_create_rating, client):
-    mock_create_rating.side_effect = ProductNotFound(99)
-
-    with client.session_transaction() as flask_session:
-        flask_session['user'] = LOGGED_IN_USER
-
-    response = client.post('/save_rating', json={'rating': 4, 'productId': 99})
-
-    assert response.status_code == 404
 
 
 @patch('blueprints.auth.get_users')

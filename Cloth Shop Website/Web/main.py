@@ -1,17 +1,13 @@
 from flask import Flask, Response, jsonify, redirect, request, session, url_for
 from flask.typing import ResponseReturnValue
 
-from blueprints import auth, basket, catalogue, reviews
+from blueprints import api, auth, basket, catalogue
 from config import get_config
 from database import create_database_Session
-from exceptions import DuplicateReview, ProductNotFound, ShopError, UserNotFound
+from exceptions import ProductNotFound, ShopError, UserNotFound
 from utils import get_username_by_id_filter
 
-BLUEPRINTS = (auth.bp, catalogue.bp, basket.bp, reviews.bp)
-
-
-def handle_duplicate_review(error: DuplicateReview) -> ResponseReturnValue:
-    return jsonify({'message': 'You have already reviewed this product'}), 409
+BLUEPRINTS = (auth.bp, catalogue.bp, basket.bp, api.bp)
 
 
 def handle_missing_record(error: ShopError) -> ResponseReturnValue:
@@ -55,7 +51,6 @@ def create_app(config_name: str | None = None) -> Flask:
     app.jinja_env.filters['get_username_by_id'] = get_username_by_id_filter
     app.add_template_filter(nl2br_filter, 'nl2br')
 
-    app.register_error_handler(DuplicateReview, handle_duplicate_review)
     app.register_error_handler(ProductNotFound, handle_missing_record)
     app.register_error_handler(UserNotFound, handle_missing_record)
 
