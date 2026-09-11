@@ -9,6 +9,9 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 .ipynb_checkpoints/
+.coverage
+coverage.xml
+test-results/
 
 # Tooling / editor
 .vscode/settings.json
@@ -16,7 +19,7 @@ __pycache__/
 
 # Logs & scratch
 geckodriver.log
-Cloth Shop Website/Web/tempCodeRunnerFile.py
+cloth-shop/Web/tempCodeRunnerFile.py
 Python/Chess/tempCodeRunnerFile.py
 Python programs/Chess/tempCodeRunnerFile.py
 
