@@ -4,6 +4,8 @@ EXPECTED_ROUTES = {
     ('/', 'GET'),
     ('/account', 'GET'),
     ('/account', 'POST'),
+    ('/api/docs', 'GET'),
+    ('/api/openapi.json', 'GET'),
     ('/api/v1/basket/items', 'POST'),
     ('/api/v1/basket/items/<int:product_id>', 'DELETE'),
     ('/api/v1/products', 'GET'),

@@ -27,6 +27,14 @@ class Config:
     HOST = '127.0.0.1'
     PORT = 5000
 
+    API_TITLE = 'Cloth Shop API'
+    API_VERSION = 'v1'
+    OPENAPI_VERSION = '3.0.3'
+    OPENAPI_URL_PREFIX = '/api'
+    OPENAPI_JSON_PATH = 'openapi.json'
+    OPENAPI_SWAGGER_UI_PATH = '/docs'
+    OPENAPI_SWAGGER_UI_URL = 'https://cdn.jsdelivr.net/npm/swagger-ui-dist/'
+
     def __init__(self) -> None:
         self.SECRET_KEY = secret_key_from_environment() or secrets.token_hex(32)
 

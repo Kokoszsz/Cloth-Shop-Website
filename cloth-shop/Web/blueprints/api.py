@@ -2,10 +2,22 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
-from flask import Blueprint, jsonify, request, session
+from flask import jsonify, request, session
 from flask.typing import ResponseReturnValue
+from flask_smorest import Blueprint
+from werkzeug.exceptions import HTTPException
 
 from blueprints import db_Session
+from blueprints.schemas import (
+    ApiErrorSchema,
+    BasketItemSchema,
+    BasketSchema,
+    ProductListSchema,
+    RatingResultSchema,
+    RatingSchema,
+    ReviewResultSchema,
+    ReviewSchema,
+)
 from database import (
     create_rating,
     create_review,
@@ -38,6 +50,16 @@ def handle_invalid_input(exc: InvalidInput) -> ResponseReturnValue:
     return error(400, exc.code, exc.message)
 
 
+@bp.errorhandler(400)
+def handle_failed_validation(exc: HTTPException) -> ResponseReturnValue:
+    problems = getattr(exc, 'data', {}).get('messages', {}).get('json', {})
+    if not problems or not isinstance(request.get_json(silent=True), dict):
+        return error(400, 'invalid_body', 'Send a JSON object')
+
+    field, messages = next(iter(problems.items()))
+    return error(400, f'invalid_{field}', messages[0])
+
+
 @bp.errorhandler(ProductNotFound)
 def handle_missing_product(exc: ProductNotFound) -> ResponseReturnValue:
     return error(404, 'product_not_found', str(exc))
@@ -63,21 +85,6 @@ def login_required(view: View) -> View:
     return wrapper
 
 
-def json_body() -> dict[str, Any]:
-    body = request.get_json(silent=True)
-    if not isinstance(body, dict):
-        raise InvalidInput('invalid_body', 'Send a JSON object')
-    return body
-
-
-def is_whole_number(value: Any) -> bool:
-    return isinstance(value, int) and not isinstance(value, bool)
-
-
-def is_number(value: Any) -> bool:
-    return isinstance(value, (int, float)) and not isinstance(value, bool)
-
-
 def price_argument(name: str) -> float:
     try:
         return float(request.args.get(name, '0'))
@@ -89,11 +96,14 @@ def basket_response(status: int) -> ResponseReturnValue:
     products = get_products_to_dict(db_Session())
     items = [product for product in products if product['id'] in session['basket']]
     total_cost = round(sum(item['cost'] for item in items), 2)
-    return jsonify({'items': items, 'total_cost': total_cost}), status
+    return {'items': items, 'total_cost': total_cost}, status
 
 
 @bp.get('/products')
+@bp.response(200, ProductListSchema)
+@bp.alt_response(400, schema=ApiErrorSchema)
 def list_products() -> ResponseReturnValue:
+    """List products, optionally filtered by price, gender and category."""
     min_price = price_argument('min_price')
     max_price = price_argument('max_price')
     if min_price >= max_price:
@@ -105,14 +115,16 @@ def list_products() -> ResponseReturnValue:
 
     products = get_products_to_dict(db_Session())
     matching = filter_products(products, min_price, max_price, genders, categories)
-    return jsonify({'products': matching})
+    return {'products': matching}
 
 
 @bp.post('/basket/items')
-def add_basket_item() -> ResponseReturnValue:
-    product_id = json_body().get('product_id')
-    if not is_whole_number(product_id):
-        raise InvalidInput('invalid_product_id', 'product_id must be a whole number')
+@bp.arguments(BasketItemSchema, error_status_code=400)
+@bp.response(201, BasketSchema)
+@bp.alt_response(404, schema=ApiErrorSchema)
+def add_basket_item(body: dict[str, Any]) -> ResponseReturnValue:
+    """Add a product to the basket and return the whole basket."""
+    product_id = body['product_id']
     if get_product(db_Session(), product_id) is None:
         raise ProductNotFound(product_id)
 
@@ -122,7 +134,10 @@ def add_basket_item() -> ResponseReturnValue:
 
 
 @bp.delete('/basket/items/<int:product_id>')
+@bp.response(200, BasketSchema)
+@bp.alt_response(404, schema=ApiErrorSchema)
 def remove_basket_item(product_id: int) -> ResponseReturnValue:
+    """Remove a product from the basket and return the whole basket."""
     if product_id not in session['basket']:
         return error(404, 'not_in_basket', 'This product is not in the basket')
 
@@ -133,18 +148,24 @@ def remove_basket_item(product_id: int) -> ResponseReturnValue:
 
 @bp.put('/products/<int:product_id>/rating')
 @login_required
-def set_rating(product_id: int) -> ResponseReturnValue:
-    rating = json_body().get('rating')
-    if not is_number(rating) or not 1 <= rating <= 5:
-        raise InvalidInput('invalid_rating', 'rating must be a number from 1 to 5')
-
+@bp.arguments(RatingSchema, error_status_code=400)
+@bp.response(200, RatingResultSchema)
+@bp.alt_response(401, schema=ApiErrorSchema)
+@bp.alt_response(404, schema=ApiErrorSchema)
+def set_rating(body: dict[str, Any], product_id: int) -> ResponseReturnValue:
+    """Set the logged-in user's rating for a product, replacing any earlier one."""
+    rating = body['rating']
     create_rating(db_Session(), product_id, session['user']['id'], rating)
-    return jsonify({'rating': rating})
+    return {'rating': rating}
 
 
 @bp.delete('/products/<int:product_id>/rating')
 @login_required
+@bp.response(204)
+@bp.alt_response(401, schema=ApiErrorSchema)
+@bp.alt_response(404, schema=ApiErrorSchema)
 def delete_rating(product_id: int) -> ResponseReturnValue:
+    """Remove the logged-in user's rating for a product."""
     if not remove_rating(db_Session(), product_id, session['user']['id']):
         return error(404, 'rating_not_found', 'You have not rated this product')
     return '', 204
@@ -152,18 +173,25 @@ def delete_rating(product_id: int) -> ResponseReturnValue:
 
 @bp.post('/products/<int:product_id>/reviews')
 @login_required
-def add_review(product_id: int) -> ResponseReturnValue:
-    content = json_body().get('content')
-    if not isinstance(content, str):
-        raise InvalidInput('invalid_content', 'content must be text')
-
+@bp.arguments(ReviewSchema, error_status_code=400)
+@bp.response(201, ReviewResultSchema)
+@bp.alt_response(401, schema=ApiErrorSchema)
+@bp.alt_response(404, schema=ApiErrorSchema)
+@bp.alt_response(409, schema=ApiErrorSchema)
+def add_review(body: dict[str, Any], product_id: int) -> ResponseReturnValue:
+    """Post the logged-in user's review of a product."""
+    content = body['content']
     review = create_review(db_Session(), product_id, session['user']['id'], content)
-    return jsonify({'id': review.id, 'content': review.content}), 201
+    return {'id': review.id, 'content': review.content}
 
 
 @bp.delete('/reviews/<int:review_id>')
 @login_required
+@bp.response(204)
+@bp.alt_response(401, schema=ApiErrorSchema)
+@bp.alt_response(404, schema=ApiErrorSchema)
 def delete_review(review_id: int) -> ResponseReturnValue:
+    """Delete one of the logged-in user's own reviews."""
     if not remove_review(db_Session(), review_id, session['user']['id']):
         return error(404, 'review_not_found', 'Review not found')
     return '', 204
