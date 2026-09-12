@@ -38,6 +38,18 @@ class ProductSchema(Schema):
     url = fields.String()
 
 
+class ReviewDetailSchema(Schema):
+    id = fields.Integer()
+    user_id = fields.Integer()
+    content = fields.String()
+    date = fields.String()
+
+
+class ProductDetailSchema(ProductSchema):
+    rating_average = fields.Float()
+    reviews = fields.List(fields.Nested(ReviewDetailSchema))
+
+
 class ProductListSchema(Schema):
     products = fields.List(fields.Nested(ProductSchema))
 

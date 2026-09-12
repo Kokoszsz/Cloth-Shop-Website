@@ -12,6 +12,7 @@ from blueprints.schemas import (
     ApiErrorSchema,
     BasketItemSchema,
     BasketSchema,
+    ProductDetailSchema,
     ProductListSchema,
     RatingResultSchema,
     RatingSchema,
@@ -21,13 +22,15 @@ from blueprints.schemas import (
 from database import (
     create_rating,
     create_review,
+    get_all_ratings_of_a_product,
     get_product,
     get_products_to_dict,
+    get_reviews_of_a_product,
     remove_rating,
     remove_review,
 )
 from exceptions import DuplicateReview, ProductNotFound, UserNotFound
-from utils import filter_products, get_genders_and_kinds
+from utils import average_rating, filter_products, get_genders_and_kinds
 
 bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -116,6 +119,29 @@ def list_products() -> ResponseReturnValue:
     products = get_products_to_dict(db_Session())
     matching = filter_products(products, min_price, max_price, genders, categories)
     return {'products': matching}
+
+
+@bp.get('/products/<int:product_id>')
+@bp.response(200, ProductDetailSchema)
+@bp.alt_response(404, schema=ApiErrorSchema)
+def get_product_detail(product_id: int) -> ResponseReturnValue:
+    """Return one product with its average rating and its reviews."""
+    product = get_product(db_Session(), product_id)
+    if product is None:
+        raise ProductNotFound(product_id)
+
+    ratings, _ = get_all_ratings_of_a_product(db_Session(), product_id)
+    return {
+        'id': product.id,
+        'name': product.name,
+        'cost': product.cost,
+        'cloth_cathegory': product.cloth_cathegory,
+        'gender': product.gender,
+        'image': product.image,
+        'url': product.to_url(),
+        'rating_average': average_rating(ratings),
+        'reviews': get_reviews_of_a_product(db_Session(), product_id),
+    }
 
 
 @bp.post('/basket/items')

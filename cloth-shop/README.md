@@ -13,6 +13,7 @@ The project is built using Python, Flask, and HTML/CSS with addition of JS. The 
 2. SQLAlchemy: a Python SQL toolkit that provides a set of high-level API for interacting with relational databases.
 3. Pytest: a testing framework for Python that helps you write and run tests
 4. Selenium: a web application testing framework that allows you to automate browser interactions
+5. flask-smorest: validates the JSON endpoints against schemas and builds their OpenAPI document
 
 ### Installation and Usage ###
 To install and run the project, follow these steps:
@@ -28,6 +29,30 @@ You can log in on a web using those accounts:
 2. Username: test123, Password: test123
 
 ! Email feature is not working properly. While the code has been established, it is important to note that a dedicated email address for sending user messages is currently unavailable because of lack of proper email adress that could send messages.
+
+### API ###
+
+The JSON endpoints live under `/api/v1`. They describe themselves: the OpenAPI document is
+served at http://localhost:5000/api/openapi.json, and a browsable version of it at
+http://localhost:5000/api/docs.
+
+The request and reply shapes in that document are the same schemas the app validates and
+serialises with, so the document cannot drift away from what the code actually accepts and
+returns.
+
+Two things are worth knowing:
+
+1. Products are addressed by their integer id, for example `/api/v1/products/3`. An earlier
+plan used the name-based URL the product page uses, `/cloth/product_detail/Blue-Jeans`, but
+that name is the only thing the slug is built from: two products called the same thing share
+one URL, and renaming a product breaks every link to it. The page keeps its readable URL and
+the API uses ids throughout.
+2. The `/api/docs` page loads Swagger UI from a CDN, so it needs internet access. The OpenAPI
+document itself is served by the app and works offline.
+
+Every failure replies with the same shape, `{"error": {"code", "message"}}`, and a real status
+code: 400 for a request the API cannot accept, 401 when you are not logged in, 404 for
+something that is not there, 409 for a review that already exists.
 
 ### Documentation ###
 For more information about project go to [Cloth Shop Website Project Documents](./Documents)

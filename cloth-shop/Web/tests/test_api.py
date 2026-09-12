@@ -1,6 +1,7 @@
 import pytest
 
 from database import (
+    create_rating,
     create_review,
     create_user,
     get_all_ratings_of_a_product,
@@ -71,6 +72,38 @@ def test_products_reject_a_price_that_is_not_a_number(client):
 
     assert response.status_code == 400
     assert error_code(response) == 'invalid_price'
+
+
+def test_one_product_is_returned_with_its_average_rating_and_reviews(client, db, user, product):
+    mary = create_user(db, 'mary', 'long-enough-password', 'mary@example.com')
+    create_rating(db, product.id, user.id, 5)
+    create_rating(db, product.id, mary.id, 4)
+    create_review(db, product.id, user.id, 'Great fit')
+
+    response = client.get(f'/api/v1/products/{product.id}')
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body['name'] == 'Blue Jeans'
+    assert body['url'] == 'Blue-Jeans'
+    assert body['rating_average'] == 4.5
+    assert [review['content'] for review in body['reviews']] == ['Great fit']
+
+
+def test_an_unrated_product_has_an_average_of_zero_and_no_reviews(client, product):
+    response = client.get(f'/api/v1/products/{product.id}')
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body['rating_average'] == 0
+    assert body['reviews'] == []
+
+
+def test_fetching_a_product_that_does_not_exist_is_not_found(client):
+    response = client.get('/api/v1/products/999')
+
+    assert response.status_code == 404
+    assert error_code(response) == 'product_not_found'
 
 
 def test_adding_a_product_returns_the_basket(client, product):
