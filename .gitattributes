@@ -3,6 +3,10 @@
 # shows the whole file as changed.
 * text=auto
 
+# Shell scripts copied into a Linux container must keep LF endings, or the
+# kernel reads the CR as part of the interpreter path and refuses to run them.
+*.sh      text eol=lf
+
 # Treat these as binary so git never rewrites their bytes.
 *.db      binary
 *.docx    binary

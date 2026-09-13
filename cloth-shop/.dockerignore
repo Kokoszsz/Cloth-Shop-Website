@@ -1,0 +1,30 @@
+.git
+.gitignore
+.claude
+
+.venv
+venv
+env
+
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.ruff_cache
+.coverage
+coverage.xml
+test-results/
+
+# The database is a runtime artefact and lives in a volume, never in the image.
+Databases/mydb.db
+
+# Not needed to serve the site.
+Web/tests/
+scripts/
+Documents/
+README.md
+NOTES-*.md
+
+.env
+Dockerfile
+.dockerignore
+docker-compose.yml
