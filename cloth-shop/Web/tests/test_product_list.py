@@ -1,6 +1,6 @@
 import pytest
 
-from database import session_scope
+from database import create_rating, create_user, session_scope
 from models import Product
 
 
@@ -14,6 +14,26 @@ def add_product(Session, name):
         product = Product(None, name, 49.99, 'jackets', 'female', 'coat.png')
         session.add(product)
     return product
+
+
+def test_product_page_shows_the_average_of_every_rating(app_database, client):
+    product = add_product(app_database, 'Late Arrival Hat')
+    john = create_user(app_database, 'john', 'long-enough-password', 'john@example.com')
+    mary = create_user(app_database, 'mary', 'long-enough-password', 'mary@example.com')
+    create_rating(app_database, product.id, john.id, 5)
+    create_rating(app_database, product.id, mary.id, 4)
+
+    response = client.get(f'/cloth/product_detail/{product.url}')
+
+    assert b'Total Rating 4.5</div>' in response.data
+
+
+def test_product_page_shows_zero_when_nobody_has_rated(app_database, client):
+    product = add_product(app_database, 'Late Arrival Belt')
+
+    response = client.get(f'/cloth/product_detail/{product.url}')
+
+    assert b'Total Rating 0</div>' in response.data
 
 
 def test_cloth_page_lists_a_product_added_after_startup(app_database, client):

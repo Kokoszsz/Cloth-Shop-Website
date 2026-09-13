@@ -1,0 +1,26 @@
+services:
+  web:
+    build: .
+    image: cloth-shop:latest
+    ports:
+      - "5000:5000"
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      # Deliberately no default: production refuses to start without it, which
+      # is the behaviour we want to see rather than paper over.
+      SECRET_KEY: ${SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////data/mydb.db}
+    volumes:
+      - cloth-shop-data:/data
+    healthcheck:
+      # /cloth reads from the database, so a broken volume fails the check.
+      # python is already in the image; curl is not.
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/cloth')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  cloth-shop-data:

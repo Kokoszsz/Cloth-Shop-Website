@@ -1,17 +1,28 @@
 from flask import Flask, Response, jsonify, redirect, request, session, url_for
 from flask.typing import ResponseReturnValue
+from flask_smorest import Api
+from werkzeug.exceptions import HTTPException
 
 from blueprints import api, auth, basket, catalogue
+from blueprints.schemas import ApiErrorSchema
 from config import get_config
 from database import create_database_Session
 from exceptions import ProductNotFound, ShopError, UserNotFound
 from utils import get_username_by_id_filter
 
-BLUEPRINTS = (auth.bp, catalogue.bp, basket.bp, api.bp)
+BLUEPRINTS = (auth.bp, catalogue.bp, basket.bp)
+
+
+class ShopApi(Api):
+    ERROR_SCHEMA = ApiErrorSchema
 
 
 def handle_missing_record(error: ShopError) -> ResponseReturnValue:
     return jsonify({'message': str(error)}), 404
+
+
+def use_flasks_own_error_page(error: HTTPException) -> HTTPException:
+    return error
 
 
 def nl2br_filter(s: str) -> str:
@@ -61,6 +72,9 @@ def create_app(config_name: str | None = None) -> Flask:
 
     for blueprint in BLUEPRINTS:
         app.register_blueprint(blueprint)
+
+    ShopApi(app).register_blueprint(api.bp)
+    app.register_error_handler(HTTPException, use_flasks_own_error_page)
 
     return app
 

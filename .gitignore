@@ -23,5 +23,8 @@ cloth-shop/Web/tempCodeRunnerFile.py
 Python/Chess/tempCodeRunnerFile.py
 Python programs/Chess/tempCodeRunnerFile.py
 
+# Local environment files (see cloth-shop/.env.example)
+.env
+
 # Local working notes
 NOTES-*.md

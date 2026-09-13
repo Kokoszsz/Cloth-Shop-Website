@@ -9,7 +9,7 @@ from database import (
     get_reviews_of_a_product,
     get_users,
 )
-from utils import get_product_by_url
+from utils import average_rating, get_product_by_url
 
 bp = Blueprint('catalogue', __name__)
 
@@ -42,18 +42,14 @@ def product_detail(product_url: str) -> ResponseReturnValue:
         if rating_obj:
             initial_rating = rating_obj.rating_points
     if product_dict is not None:
-        all_ratings, num_of_ratings = get_all_ratings_of_a_product(db_Session(), product_dict['id'])
-        if num_of_ratings:
-            rating_average = sum([rating.rating_points for rating in all_ratings])/num_of_ratings
-        else:
-            rating_average = 0
+        all_ratings, _ = get_all_ratings_of_a_product(db_Session(), product_dict['id'])
         return render_template(
             'product_detail.html',
             product=product_dict,
             initial_rating=initial_rating,
             initial_reviews=initial_reviews,
             users=users,
-            rating=rating_average,
+            rating=average_rating(all_ratings),
         )
     else:
         # If product is None, return a custom error message or redirect to a different page

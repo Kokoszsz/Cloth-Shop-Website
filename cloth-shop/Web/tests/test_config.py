@@ -5,7 +5,7 @@ import config
 
 @pytest.fixture
 def clean_environment(monkeypatch):
-    for variable in ('APP_ENV', 'SECRET_KEY', 'SECRET_KEY_CLOTH_SHOP'):
+    for variable in ('APP_ENV', 'SECRET_KEY', 'SECRET_KEY_CLOTH_SHOP', 'DATABASE_URL'):
         monkeypatch.delenv(variable, raising=False)
 
 
@@ -82,6 +82,35 @@ def test_sql_echo_is_off_in_every_environment(clean_environment, monkeypatch):
 def test_running_app_does_not_echo_sql(test_app):
     assert test_app.config['SQLALCHEMY_ECHO'] is False
     assert test_app.extensions['db_Session'].kw['bind'].echo is False
+
+
+def test_default_database_url_is_absolute_and_independent_of_the_working_directory(
+    clean_environment,
+):
+    url = config.DevelopmentConfig().DATABASE_URL
+    assert url == config.DEFAULT_DATABASE_URL
+    assert config.DEFAULT_DATABASE_PATH.is_absolute()
+    assert url.endswith('/Databases/mydb.db')
+
+
+def test_database_url_is_taken_from_the_environment(clean_environment, monkeypatch):
+    monkeypatch.setenv('DATABASE_URL', 'sqlite:////data/mydb.db')
+    assert config.DevelopmentConfig().DATABASE_URL == 'sqlite:////data/mydb.db'
+
+
+def test_production_database_url_is_taken_from_the_environment(clean_environment, monkeypatch):
+    monkeypatch.setenv('SECRET_KEY', 'a-real-secret')
+    monkeypatch.setenv('DATABASE_URL', 'sqlite:////data/mydb.db')
+    assert config.ProductionConfig().DATABASE_URL == 'sqlite:////data/mydb.db'
+
+
+def test_testing_ignores_the_database_url_from_the_environment(clean_environment, monkeypatch):
+    monkeypatch.setenv('DATABASE_URL', 'sqlite:////data/mydb.db')
+    assert config.TestingConfig().DATABASE_URL == config.IN_MEMORY_DATABASE_URL
+
+
+def test_running_app_uses_an_in_memory_database(test_app):
+    assert test_app.config['DATABASE_URL'] == config.IN_MEMORY_DATABASE_URL
 
 
 def test_session_cookie_is_sent_with_its_flags(client):

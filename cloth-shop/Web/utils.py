@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-from models import User
+from models import Rating, User
 
 ProductDict = dict[str, Any]
 
@@ -13,6 +13,13 @@ MINIMUM_PASSWORD_LENGTH = 8
 class ValidationError:
     field: str
     message: str
+
+
+def average_rating(ratings: Iterable[Rating]) -> float:
+    points = [rating.rating_points for rating in ratings]
+    if not points:
+        return 0
+    return sum(points) / len(points)
 
 
 def filter_products(
