@@ -54,6 +54,51 @@ Every failure replies with the same shape, `{"error": {"code", "message"}}`, and
 code: 400 for a request the API cannot accept, 401 when you are not logged in, 404 for
 something that is not there, 409 for a review that already exists.
 
+### Running with Docker ###
+
+The container is the supported way to run the site as it would be served in
+production: gunicorn rather than the Flask development server, and a non-root
+user inside the image.
+
+1. Copy `.env.example` to `.env` and set `SECRET_KEY`.
+2. Run `docker compose up --build` from this directory.
+3. Go to http://localhost:5000.
+
+`docker compose down` stops the site and keeps the data; `docker compose down -v`
+also deletes the database volume, so the next start seeds a fresh database.
+
+#### Where the database lives ####
+
+The database file is not part of the image. It lives in a named volume mounted
+at `/data`, so it survives `docker compose down` and any number of rebuilds.
+`DATABASE_URL` points at it (`sqlite:////data/mydb.db` - four slashes, because
+the path is absolute). Outside the container the same setting defaults to
+`Databases/mydb.db` next to this README.
+
+#### How the database gets seeded ####
+
+`docker-entrypoint.sh` runs `Web/create_database.py` on startup, but only when
+the database file does not exist yet. The alternative was to bake a seeded
+database into the image. Seeding at startup was chosen because a named volume
+hides whatever the image holds at that path, so baked-in data only ever arrives
+by the accident of Docker copying it into an empty volume on first run, and not
+at all with a bind mount. Seeding from the entrypoint keeps the image free of
+data, shows up in the container logs, and is the same shape as the migration
+step a real deployment would run.
+
+#### Notes ####
+
+- Without `SECRET_KEY` the container exits on startup with an explanatory error.
+  That is deliberate: production must not fall back to a throwaway key, because
+  every restart would then invalidate all sessions.
+- gunicorn runs two workers. SQLite serialises writes with a file lock, so more
+  workers buy contention rather than throughput. A deployment that needs more
+  belongs on a database server such as PostgreSQL.
+- Session cookies are marked `Secure` in production, meaning the browser only
+  returns them over HTTPS. Browsers treat `http://localhost` as trustworthy, so
+  logging in works locally, but reaching the same container over a plain-HTTP
+  LAN address will silently fail to keep you logged in.
+
 ### Documentation ###
 For more information about project go to [Cloth Shop Website Project Documents](./Documents)
 
