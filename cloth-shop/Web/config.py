@@ -1,8 +1,14 @@
 """Per-environment application settings, selected with APP_ENV."""
 import os
 import secrets
+from pathlib import Path
 
 SECRET_KEY_VARIABLES = ('SECRET_KEY', 'SECRET_KEY_CLOTH_SHOP')
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_DATABASE_PATH = PROJECT_ROOT / 'Databases' / 'mydb.db'
+DEFAULT_DATABASE_URL = f'sqlite:///{DEFAULT_DATABASE_PATH.as_posix()}'
+IN_MEMORY_DATABASE_URL = 'sqlite://'
 
 
 def secret_key_from_environment() -> str | None:
@@ -13,6 +19,10 @@ def secret_key_from_environment() -> str | None:
     return None
 
 
+def database_url_from_environment() -> str | None:
+    return os.environ.get('DATABASE_URL') or None
+
+
 class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
@@ -21,7 +31,6 @@ class Config:
     DEBUG = False
     TESTING = False
 
-    DATABASE_URL = 'sqlite:///cloth-shop/Databases/mydb.db'
     SQLALCHEMY_ECHO = False
 
     HOST = '127.0.0.1'
@@ -37,6 +46,7 @@ class Config:
 
     def __init__(self) -> None:
         self.SECRET_KEY = secret_key_from_environment() or secrets.token_hex(32)
+        self.DATABASE_URL = database_url_from_environment() or DEFAULT_DATABASE_URL
 
 
 class DevelopmentConfig(Config):
@@ -47,7 +57,10 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SESSION_COOKIE_SECURE = False
-    DATABASE_URL = 'sqlite://'
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.DATABASE_URL = IN_MEMORY_DATABASE_URL
 
 
 class ProductionConfig(Config):
@@ -63,6 +76,7 @@ class ProductionConfig(Config):
                 'It signs session cookies, so it must be secret and stable '
                 'across restarts.'
             )
+        super().__init__()
         self.SECRET_KEY = key
 
 
