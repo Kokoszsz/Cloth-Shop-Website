@@ -1,117 +1,203 @@
-##  Cloth Shop Website ##
+# Cloth Shop Website
 
+A small e-commerce site built with Flask: browse a catalogue, filter it, rate and
+review products, fill a basket and check out. It also exposes a documented JSON
+API over the same data.
 
-### Overwiew ###
-The Cloth Shop Website is an e-commerce platform where users can create an account, log in, browse products, and add them to their basket. 
-The main goal of the project is to develop web development skills and demonstrate a willingness to learn and improve. 
-The project also aims to showcase testing skills by creating test cases and reporting bugs through manual and automated testing.
+The project began as a learning exercise and has since been reworked into a
+demonstration of how the same code looks when security, testing and deployment
+are treated as requirements rather than afterthoughts. The sections below explain
+the decisions behind that, not just the result.
 
-### Technologies Used ###
+![The catalogue with a filter applied](../docs/screenshots/catalogue.png)
 
-The project is built using Python, Flask, and HTML/CSS with addition of JS. The following libraries and frameworks were used:
-1. Flask: a web application framework for Python
-2. SQLAlchemy: a Python SQL toolkit that provides a set of high-level API for interacting with relational databases.
-3. Pytest: a testing framework for Python that helps you write and run tests
-4. Selenium: a web application testing framework that allows you to automate browser interactions
-5. flask-smorest: validates the JSON endpoints against schemas and builds their OpenAPI document
+## Architecture
 
-### Installation and Usage ###
-To install and run the project, follow these steps:
+The app is built by a factory, `create_app`, so tests and production create
+independent instances from the same code with different settings. Routes live in
+four blueprints, every database session is opened through one context manager,
+and the API's request and reply shapes double as its OpenAPI document.
 
-1. Download the Python 3 installer package from the official website and install it, if not installed on your local machine.
-2. Clone the repository to your local machine.
-3. Install the required packages by running ```pip install -r requirements.txt``` in your terminal.
-4. Run the app by executing the main.py file.
-5. Go to http://localhost:5000 on your web browser to view the app.
+```mermaid
+flowchart TD
+    Browser["Browser / API client"]
+    Factory["create_app()<br/>main.py"]
+    Config["config.py<br/>Development / Testing / Production"]
 
-You can log in on a web using those accounts:
-1. Username: test, Password: 123
-2. Username: test123, Password: test123
+    Auth["auth<br/>login, account, logout"]
+    Catalogue["catalogue<br/>home, cloth, product detail"]
+    Basket["basket<br/>basket, checkout"]
+    Api["api<br/>/api/v1/*"]
 
-! Email feature is not working properly. While the code has been established, it is important to note that a dedicated email address for sending user messages is currently unavailable because of lack of proper email adress that could send messages.
+    Scope["session_scope()<br/>commit / rollback / close"]
+    Models["models.py<br/>User, Product, Rating, Review"]
+    DB[("SQLite")]
+    Docs["/api/openapi.json<br/>/api/docs"]
 
-### API ###
+    Browser --> Factory
+    Config --> Factory
+    Factory --> Auth & Catalogue & Basket & Api
+    Auth & Catalogue & Basket & Api --> Scope
+    Scope --> Models --> DB
+    Api -->|flask-smorest schemas| Docs
+```
 
-The JSON endpoints live under `/api/v1`. They describe themselves: the OpenAPI document is
-served at http://localhost:5000/api/openapi.json, and a browsable version of it at
+## Run it
+
+The image carries its own dependencies and seeds a database on first start, so
+this is the shortest path from clone to running shop:
+
+```bash
+cd cloth-shop
+cp .env.example .env          # then put a value in SECRET_KEY
+docker compose up --build
+```
+
+The shop is then on http://localhost:5000 and the API documentation on
 http://localhost:5000/api/docs.
 
-The request and reply shapes in that document are the same schemas the app validates and
-serialises with, so the document cannot drift away from what the code actually accepts and
-returns.
+### Running from source
+
+```bash
+pip install -r cloth-shop/requirements.txt
+python cloth-shop/Web/create_database.py     # first run only
+python cloth-shop/Web/main.py
+```
+
+Two accounts come from the seed data: `test` / `123` and `test123` / `test123`.
+Those passwords are plaintext only in `Databases/json/data.json`; the seeding
+script passes every one through `User.set_password`, so what reaches the database
+is a hash.
+
+## Configuration
+
+Settings come from the environment, and `config.py` picks a class based on
+`APP_ENV`. Nothing secret is committed — `.env` is ignored and `.env.example`
+records the shape.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `APP_ENV` | `development` | Which settings class to use: `development`, `testing` or `production` |
+| `SECRET_KEY` | random per start | Signs the session cookie. **Production refuses to start without it** |
+| `DATABASE_URL` | `sqlite:///Databases/mydb.db` | SQLAlchemy database URL |
+
+A random `SECRET_KEY` is convenient in development and wrong in production: it
+changes on every restart, which silently logs every user out. Production asks for
+one explicitly rather than papering over it.
+
+## API
+
+The JSON endpoints live under `/api/v1`. They describe themselves: the OpenAPI
+document is served at `/api/openapi.json` and a browsable version at `/api/docs`.
+
+![The API documentation](../docs/screenshots/api-docs.png)
+
+The request and reply shapes in that document are the same schemas the app
+validates and serialises with, so the document cannot drift away from what the
+code actually accepts and returns.
 
 Two things are worth knowing:
 
-1. Products are addressed by their integer id, for example `/api/v1/products/3`. An earlier
-plan used the name-based URL the product page uses, `/cloth/product_detail/Blue-Jeans`, but
-that name is the only thing the slug is built from: two products called the same thing share
-one URL, and renaming a product breaks every link to it. The page keeps its readable URL and
-the API uses ids throughout.
-2. The `/api/docs` page loads Swagger UI from a CDN, so it needs internet access. The OpenAPI
-document itself is served by the app and works offline.
+1. Products are addressed by integer id, for example `/api/v1/products/3`. An
+   earlier plan used the name-based URL the product page uses,
+   `/cloth/product_detail/Blue-Jeans`, but that slug is built from the name
+   alone: two products called the same thing would share one URL, and renaming a
+   product would break every link to it. The page keeps its readable URL and the
+   API uses ids throughout.
+2. The `/api/docs` page loads Swagger UI from a CDN, so it needs internet access.
+   The OpenAPI document itself is served by the app and works offline.
 
-Every failure replies with the same shape, `{"error": {"code", "message"}}`, and a real status
-code: 400 for a request the API cannot accept, 401 when you are not logged in, 404 for
-something that is not there, 409 for a review that already exists.
+Every failure replies with the same shape, `{"error": {"code", "message"}}`, and
+a real status code: 400 for a request the API cannot accept, 401 when you are not
+logged in, 404 for something that is not there, 409 for a review that already
+exists.
 
-### Running with Docker ###
+## Testing
 
-The container is the supported way to run the site as it would be served in
-production: gunicorn rather than the Flask development server, and a non-root
-user inside the image.
+Four layers, each answering a question the others cannot.
 
-1. Copy `.env.example` to `.env` and set `SECRET_KEY`.
-2. Run `docker compose up --build` from this directory.
-3. Go to http://localhost:5000.
+| Layer | What it covers | Run it | In CI |
+| --- | --- | --- | --- |
+| Unit and integration (105 tests) | Models, config, password handling, database failures, every API endpoint, the URL map | `pytest` | yes, with coverage |
+| Playwright journey (1 test) | One full path through a real browser: filter, add to basket, confirm | `pytest automation-tests/playwright` | yes |
+| Selenium (22 tests) | Login, logout, filters and basket flows in Firefox | `pytest automation-tests/selenium -m browser` | no, local only |
+| Manual (Jira export) | Exploratory cases and bug reports | see [manual-tests](../manual-tests) | no |
 
-`docker compose down` stops the site and keeps the data; `docker compose down -v`
-also deletes the database volume, so the next start seeds a fresh database.
+Coverage is 87%. The Selenium suite sits behind an opt-in `browser` marker
+because it needs Firefox and a shop already running on port 5000; CI runs the
+Playwright journey instead, which manages its own browser.
 
-#### Where the database lives ####
+Two of these layers exist in their current form because of specific mistakes,
+which is the more useful thing to know about them:
 
-The database file is not part of the image. It lives in a named volume mounted
-at `/data`, so it survives `docker compose down` and any number of rebuilds.
-`DATABASE_URL` points at it (`sqlite:////data/mydb.db` - four slashes, because
-the path is absolute). Outside the container the same setting defaults to
-`Databases/mydb.db` next to this README.
+- The Selenium suite originally asserted nothing and ran its steps at import
+  time, so it could not fail and therefore could not report anything. It was
+  rewritten into tests that can.
+- Every logout test logged in first, so nobody had tested logging out *without* a
+  session — the case where the view returned `None` and Flask answered 500. The
+  fix arrived with a test that fails against the old code.
 
-#### How the database gets seeded ####
+## Security
 
-`docker-entrypoint.sh` runs `Web/create_database.py` on startup, but only when
-the database file does not exist yet. The alternative was to bake a seeded
-database into the image. Seeding at startup was chosen because a named volume
-hides whatever the image holds at that path, so baked-in data only ever arrives
-by the accident of Docker copying it into an empty volume on first run, and not
-at all with a bind mount. Seeding from the entrypoint keeps the image free of
-data, shows up in the container logs, and is the same shape as the migration
-step a real deployment would run.
+The app originally stored passwords in plaintext. Fixing that was the start
+rather than the end; the decisions below are the ones worth explaining.
 
-#### Notes ####
+**Passwords are hashed, including the seeds.** `User.set_password` hashes with
+`werkzeug.security` and the column only ever holds the hash. A migration script
+for databases created before this change is in `scripts/`.
 
-- Without `SECRET_KEY` the container exits on startup with an explanatory error.
-  That is deliberate: production must not fall back to a throwaway key, because
-  every restart would then invalidate all sessions.
-- gunicorn runs two workers. SQLite serialises writes with a file lock, so more
-  workers buy contention rather than throughput. A deployment that needs more
-  belongs on a database server such as PostgreSQL.
-- Session cookies are marked `Secure` in production, meaning the browser only
-  returns them over HTTPS. Browsers treat `http://localhost` as trustworthy, so
-  logging in works locally, but reaching the same container over a plain-HTTP
-  LAN address will silently fail to keep you logged in.
+**Session cookies are hardened.** `HttpOnly` keeps them away from JavaScript,
+`SameSite=Lax` stops other sites sending them along with cross-site requests, and
+`Secure` restricts them to HTTPS. Development turns `Secure` off, because local
+HTTP would otherwise drop the cookie entirely.
 
-### Documentation ###
-For more information about project go to [Cloth Shop Website Project Documents](./Documents)
+**Three deliberate authentication cases, not one blanket rule.** A page that
+needs an account redirects to the login form, because a browser should be shown
+somewhere to go. An API action that needs an account returns `401` with the
+standard error body, because a client wants a status code, not an HTML page.
+Browsing, the basket and checkout stay open to guests on purpose — requiring an
+account to look at a shop loses sales.
 
-#### Cloth Shop Website Project Documentation #### 
+**Authorisation is checked, not assumed.** Deleting a review is scoped to the
+review's owner, so knowing another review's id is not enough to delete it.
 
-The Cloth Shop Website Project Documentation is a comprehensive document that provides detailed information about the Cloth Shop Website project. 
-It includes essential details such as the project's goals, objectives and an overview of the technology stack used for development. 
+**The database enforces its own rules.** Primary keys are assigned by the
+database rather than counted in Python; usernames, emails and
+one-rating-per-user-per-product are unique constraints; and the rating range is
+validated on assignment, so a bad value fails at the model rather than at the
+template.
 
-#### Jira Issues CSV ####
+**Failures are typed by layer.** The database layer raises `ProductNotFound`,
+`UserNotFound`, `DuplicateUser` or `DuplicateReview` instead of returning `None`
+or `False`, and each maps to one HTTP status in one place.
 
-The Jira Issues CSV file contains a comprehensive list of all current issues present in Jira as of the 27th of June 2023. These issues include tasks, test cases and other items related to the Cloth Shop Website project.
-The CSV file provides valuable information about each issue, including issue IDs, summaries, descriptions, priorities, and assignees. 
+**Nothing secret is in the repository.** `.env` is ignored, `.env.example` shows
+what to set, and the container runs as a non-root user with the database on a
+mounted volume.
 
+Two things were **removed rather than fixed**, which is worth stating plainly:
 
-### Status ###
-The project is currently under development, with ongoing improvements and updates planned for the future.
+- **Email verification was deleted.** The signup flow stored the password and the
+  verification code in a cookie, and there was no working sender. A broken
+  feature that leaks credentials is worse than no feature.
+- **CSRF tokens were not added.** With `SameSite=Lax` cookies, the cross-site
+  request those tokens defend against does not carry a session, so they would be
+  defence-in-depth on a door that is already shut. Worth adding if the cookie
+  policy ever loosens.
+
+## Screenshots
+
+| | |
+| --- | --- |
+| ![Home](../docs/screenshots/home.png) | ![Product detail with rating and reviews](../docs/screenshots/product-detail.png) |
+| ![Basket](../docs/screenshots/basket.png) | ![Checkout](../docs/screenshots/checkout.png) |
+
+They are generated rather than collected: `scripts/take_screenshots.py` drives a
+running shop with Playwright and rewrites the files, so they can be refreshed
+when the interface changes.
+
+## Documentation
+
+[Project documents](./Documents) holds the original project documentation — its
+goals, scope and technology choices — and the Jira issue export listing tasks,
+test cases and bugs raised against the shop.
