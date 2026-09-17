@@ -16,30 +16,40 @@ the decisions behind that, not just the result.
 The app is built by a factory, `create_app`, so tests and production create
 independent instances from the same code with different settings. Routes live in
 four blueprints, every database session is opened through one context manager,
-and the API's request and reply shapes double as its OpenAPI document.
+and the API's request and reply shapes double as its OpenAPI document. The two
+journeys below follow data all the way down to SQLite and back out again: a page
+read, and an API write that can fail.
 
 ```mermaid
-flowchart TD
-    Browser["Browser / API client"]
-    Factory["create_app()<br/>main.py"]
-    Config["config.py<br/>Development / Testing / Production"]
+sequenceDiagram
+    autonumber
+    participant Client as Browser / API client
+    participant Route as Blueprint route
+    participant Scope as session_scope()
+    participant DB as SQLite
 
-    Auth["auth<br/>login, account, logout"]
-    Catalogue["catalogue<br/>home, cloth, product detail"]
-    Basket["basket<br/>basket, checkout"]
-    Api["api<br/>/api/v1/*"]
+    Note over Client,DB: Reading a page — GET /cloth
+    Client->>Route: GET /cloth
+    Route->>Scope: get_products_to_dict()
+    Scope->>DB: SELECT products
+    DB-->>Scope: rows
+    Scope-->>Route: product dicts, session closed
+    Route-->>Client: rendered cloth.html
 
-    Scope["session_scope()<br/>commit / rollback / close"]
-    Models["models.py<br/>User, Product, Rating, Review"]
-    DB[("SQLite")]
-    Docs["/api/openapi.json<br/>/api/docs"]
-
-    Browser --> Factory
-    Config --> Factory
-    Factory --> Auth & Catalogue & Basket & Api
-    Auth & Catalogue & Basket & Api --> Scope
-    Scope --> Models --> DB
-    Api -->|flask-smorest schemas| Docs
+    Note over Client,DB: Writing data — POST /api/v1/products/1/reviews
+    Client->>Route: JSON body + session cookie
+    Route->>Route: login_required, then ReviewSchema validates the body
+    Route->>Scope: create_review()
+    Scope->>DB: INSERT review
+    alt the row is new
+        DB-->>Scope: new row
+        Scope-->>Route: Review, committed
+        Route-->>Client: 201 and the review as JSON
+    else a review by this user already exists
+        DB-->>Scope: IntegrityError on the unique index
+        Scope-->>Route: DuplicateReview, rolled back
+        Route-->>Client: 409 and an error body
+    end
 ```
 
 ## Run it
