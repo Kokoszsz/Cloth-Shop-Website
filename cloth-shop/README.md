@@ -198,6 +198,5 @@ when the interface changes.
 
 ## Documentation
 
-[Project documents](./Documents) holds the original project documentation — its
-goals, scope and technology choices — and the Jira issue export listing tasks,
-test cases and bugs raised against the shop.
+[Project documents](./Documents) holds the Jira issue export: the epics, tasks,
+test cases and bugs raised against the shop while it was built.
