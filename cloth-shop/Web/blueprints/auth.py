@@ -94,10 +94,8 @@ def create_account() -> ResponseReturnValue:
 
 
 @bp.route('/logout')
-def logout() -> ResponseReturnValue | None:
+def logout() -> ResponseReturnValue:
     if 'user' in session:
         session.pop('user', None)
         session['basket'] = []
-        return redirect(url_for('catalogue.home'))
-    else:
-        pass
+    return redirect(url_for('catalogue.home'))

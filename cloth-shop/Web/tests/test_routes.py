@@ -46,3 +46,22 @@ def test_logged_in_user_is_sent_home_from_the_sign_in_pages(client, path):
 
     assert response.status_code == 302
     assert response.headers['Location'] == '/'
+
+
+def test_logging_out_without_a_session_returns_to_the_home_page(client):
+    response = client.get('/logout')
+
+    assert response.status_code == 302
+    assert response.headers['Location'] == '/'
+
+
+def test_logging_out_forgets_the_user_and_returns_to_the_home_page(client):
+    with client.session_transaction() as flask_session:
+        flask_session['user'] = {'id': 1, 'name': 'john'}
+
+    response = client.get('/logout')
+
+    assert response.status_code == 302
+    assert response.headers['Location'] == '/'
+    with client.session_transaction() as flask_session:
+        assert 'user' not in flask_session
