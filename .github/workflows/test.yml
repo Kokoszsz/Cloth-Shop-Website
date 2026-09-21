@@ -68,26 +68,8 @@ jobs:
       - name: Install Chromium for Playwright
         run: python -m playwright install --with-deps chromium
 
-      - name: Start the app
-        env:
-          APP_ENV: development
-        run: |
-          python cloth-shop/Web/main.py > app.log 2>&1 &
-          for attempt in $(seq 1 30); do
-            if curl --silent --fail http://127.0.0.1:5000/ > /dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          cat app.log
-          exit 1
-
       - name: Run Playwright end-to-end tests
         run: python -m pytest automation-tests/playwright --browser chromium --tracing retain-on-failure
-
-      - name: Show app log
-        if: always()
-        run: cat app.log
 
       - name: Upload Playwright traces
         if: failure()

@@ -4,6 +4,15 @@ testpaths = ["cloth-shop/Web/tests"]
 addopts = "--strict-markers"
 markers = [
     "browser: drives a real browser against a running app on http://localhost:5000; opt in with -m browser",
+    "smoke: the few end-to-end scenarios that show the shop works at all",
+    "catalogue: end-to-end scenarios for browsing and filtering clothes",
+    "basket: end-to-end scenarios for adding to and removing from the basket",
+    "checkout: end-to-end scenarios for the checkout form",
+    "auth: end-to-end scenarios for registration, login and logout",
+    "account: end-to-end scenarios for editing account details",
+    "rating: end-to-end scenarios for star ratings",
+    "reviews: end-to-end scenarios for written reviews",
+    "security: end-to-end scenarios that check the shop resists an attack",
 ]
 
 [tool.ruff]
